@@ -2,10 +2,10 @@
   "name": "pubsubhubbub",
   "version": "1.0.0",
   "description": "Serverless aws-nodejs-typescript template",
-  "main": "serverless.ts",
+  "main": "serverless.ts~",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "test-get": "serverless invoke local -f get --path src\\functions\\get\\mock.json"
+    "test-get": "serverless invoke local -f get --path src/functions/get/mock.json"
   },
   "dependencies": {
     "@middy/core": "^1.5.0",

@@ -9,7 +9,8 @@ const serverlessConfiguration: AWS = {
     webpack: {
       webpackConfig: './webpack.config.js',
       includeModules: true
-    }
+    },
+    stage: '${opt:stage, self:provider.stage}'
   },
   plugins: ['serverless-webpack'],
   provider: {
@@ -24,7 +25,49 @@ const serverlessConfiguration: AWS = {
     },
     lambdaHashingVersion: '20201221',
   },
-  functions: { get }
+  functions: { get },
+  resources: {
+    Resources: {
+      channels: {
+        Type: 'AWS::DynamoDB::Table',
+        Properties: {
+          TableName: 'channels-${self:custom.stage}',
+          AttributeDefinitions: [{
+            AttributeName: 'id',
+            AttributeType: 'S'
+          }, {
+            AttributeName: 'expiresAt',
+            AttributeType: 'N'
+          }],
+          KeySchema: [{
+            AttributeName: 'id',
+            KeyType: 'HASH'
+          }, {
+            AttributeName: 'expiresAt',
+            KeyType: 'RANGE'
+          }],
+          ProvisionedThroughput: {
+            ReadCapacityUnits: 1,
+            WriteCapacityUnits: 1
+          },
+          GlobalSecondaryIndexes: [{
+            IndexName: 'expiresAt-idx',
+            KeySchema: [{
+              AttributeName: 'expiresAt',
+              KeyType: 'HASH'
+            }],
+            Projection: {
+              ProjectionType: 'ALL'
+            },
+            ProvisionedThroughput: {
+              ReadCapacityUnits: 1,
+              WriteCapacityUnits: 1
+            }
+          }]
+        }
+      }
+    }
+  }
 }
 
 module.exports = serverlessConfiguration;
