@@ -1,6 +1,6 @@
 {
   "queryStringParameters": {
-    "hub.topic": "https://www.youtube.com/xml/feeds/videos.xml%3Fchannel_id%3DUCAb1DeCXxhxP7QwC7wfd_UA",
+    "hub.topic": "https://www.youtube.com/xml/feeds/videos.xml?channel_id=UCAb1DeCXxhxP7QwC7wfd_UA",
     "hub.challenge":"4287976543326632930",
     "hub.mode":"subscribe",
     "hub.lease_seconds":"432000"

@@ -1,6 +1,4 @@
-import type {AWS} from '@serverless/typescript';
-
-const obj: AWS['functions'][''] = {
+const obj = {
   handler: 'src/functions/get/handler.main',
   events: [{
     http: {
