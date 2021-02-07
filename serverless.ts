@@ -29,6 +29,8 @@ const serverlessConfiguration: AWS = {
       // eslint-disable-next-line no-template-curly-in-string
       USERS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-users',
       // eslint-disable-next-line no-template-curly-in-string
+      SUBSCRIPTIONS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-subscriptions',
+      // eslint-disable-next-line no-template-curly-in-string
       GOOGLE_CLIENT_ID: '${env:GOOGLE_CLIENT_ID}',
       // eslint-disable-next-line no-template-curly-in-string
       GOOGLE_CLIENT_SECRET: '${env:GOOGLE_CLIENT_SECRET}',
@@ -44,7 +46,8 @@ const serverlessConfiguration: AWS = {
         'dynamodb:GetItem',
         'dynamodb:PutItem',
         'dynamodb:UpdateItem',
-        'dynamodb:DeleteItem'
+        'dynamodb:DeleteItem',
+        'dynamodb:BatchWriteItem'
       ],
       // eslint-disable-next-line no-template-curly-in-string
       Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/*'
@@ -103,9 +106,48 @@ const serverlessConfiguration: AWS = {
             KeyType: 'HASH'
           }],
           ProvisionedThroughput: {
+            ReadCapacityUnits: 2,
+            WriteCapacityUnits: 2
+          }
+        }
+      },
+      subscriptions: {
+        Type: 'AWS::DynamoDB::Table',
+        Properties: {
+          // eslint-disable-next-line no-template-curly-in-string
+          TableName: '${self:provider.environment.SUBSCRIPTIONS_TABLE_NAME}',
+          AttributeDefinitions: [{
+            AttributeName: 'channel',
+            AttributeType: 'S'
+          }, {
+            AttributeName: 'user',
+            AttributeType: 'S'
+          }],
+          KeySchema: [{
+            AttributeName: 'channel',
+            KeyType: 'HASH'
+          }, {
+            AttributeName: 'user',
+            KeyType: 'RANGE'
+          }],
+          ProvisionedThroughput: {
             ReadCapacityUnits: 1,
             WriteCapacityUnits: 1
-          }
+          },
+          GlobalSecondaryIndexes: [{
+            IndexName: 'user-idx',
+            KeySchema: [{
+              AttributeName: 'user',
+              KeyType: 'HASH'
+            }],
+            Projection: {
+              ProjectionType: 'ALL'
+            },
+            ProvisionedThroughput: {
+              ReadCapacityUnits: 1,
+              WriteCapacityUnits: 1
+            }
+          }]
         }
       }
     }

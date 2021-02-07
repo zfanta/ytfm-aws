@@ -4,7 +4,7 @@ import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/apiGateway'
 import { middyfy } from '@libs/lambda'
 import fetch from 'node-fetch'
 import { URLSearchParams } from 'url'
-import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb'
+import { DynamoDBClient, PutItemCommand, BatchWriteItemCommand, UpdateItemCommand } from '@aws-sdk/client-dynamodb'
 import * as qs from 'querystring'
 
 // TODO: https://accounts.google.com/o/oauth2/auth?client_id=969455847018-o333jdbaqlsaag1oiv7jq74rcep2sg8g.apps.googleusercontent.com&redirect_uri=https%3A%2F%2Fwww.ytfm.app%2Foauth2&response_type=code&scope=email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.readonly&approval_prompt=auto&access_type=offline
@@ -72,6 +72,78 @@ async function getEmail (accessToken: string): Promise<string> {
   return response.email
 }
 
+// TODO: use etag
+async function getSubscriptions (accessToken: string, pageToken?: string): Promise<string[]> {
+  const url = 'https://www.googleapis.com/youtube/v3/subscriptions'
+  const query = qs.stringify({
+    access_token: accessToken,
+    part: ['snippet'],
+    mine: true,
+    maxResults: 50,
+    order: 'alphabetical',
+    pageToken
+  })
+
+  const response: SubscriptionListResponse = await fetch(`${url}?${query}`).then(async response => await response.json())
+
+  const channels = response.items.map(item => item.snippet.resourceId.channelId)
+
+  if (response.nextPageToken === undefined) {
+    return channels
+  }
+
+  return [...channels, ...(await getSubscriptions(accessToken, response.nextPageToken))]
+}
+
+async function setSubscription (user: string, channels: string[]): Promise<void> {
+  if (process.env.SUBSCRIPTIONS_TABLE_NAME === undefined) throw new Error('SUBSCRIPTIONS_TABLE_NAME is undefined')
+  if (process.env.USERS_TABLE_NAME === undefined) throw new Error('USERS_TABLE_NAME is undefined')
+
+  let TableName = process.env.SUBSCRIPTIONS_TABLE_NAME
+
+  // 25 limit
+  const requests: PutRequests = []
+  for (let i = 0; i < channels.length; i += 25) {
+    requests.push(channels.slice(i, i + 25).map(channel => ({
+      PutRequest: {
+        Item: {
+          channel: { S: channel },
+          user: { S: user },
+          enabled: { BOOL: true }
+        }
+      }
+    })))
+  }
+
+  await Promise.all(requests.map(async request => {
+    const command = new BatchWriteItemCommand({
+      RequestItems: {
+        [TableName]: request
+      }
+    })
+
+    await client.send(command)
+  }))
+
+  // Set syncedAt
+  TableName = process.env.USERS_TABLE_NAME
+
+  const currentTime = new Date().valueOf()
+
+  const updateItemCommand = new UpdateItemCommand({
+    TableName,
+    Key: {
+      email: { S: user }
+    },
+    UpdateExpression: 'set syncedAt = :value',
+    ExpressionAttributeValues: {
+      ':value': { N: `${currentTime}` }
+    }
+  })
+
+  await client.send(updateItemCommand)
+}
+
 const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   const code = event.queryStringParameters?.code
 
@@ -95,6 +167,9 @@ const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
 
   await setGoogleToken(email, token)
 
+  const channels = await getSubscriptions(token.access_token)
+  await setSubscription(email, channels)
+
   return {
     statusCode: 303,
     headers: {
@@ -115,3 +190,62 @@ interface Token {
   'error'?: string
   'error_description'?: string
 }
+
+interface SubscriptionListResponse {
+  'kind': 'youtube#subscriptionListResponse'
+  'etag': string
+  'nextPageToken': string
+  'prevPageToken': string
+  'pageInfo': {
+    'totalResults': number
+    'resultsPerPage': number
+  }
+  'items': SubscriptionResponse[]
+}
+
+interface SubscriptionResponse {
+  'kind': 'youtube#subscription'
+  'etag': string
+  'id': string
+  'snippet': {
+    'publishedAt': string
+    'channelTitle': string
+    'title': string
+    'description': string
+    'resourceId': {
+      'kind': string
+      'channelId': string
+    }
+    'channelId': string
+    'thumbnails': Partial<Record<'default'|'medium'|'high', {
+      'url': string
+      'width': number
+      'height': number
+    }>>
+  }
+  'contentDetails': {
+    'totalItemCount': number
+    'newItemCount': number
+    'activityType': string
+  }
+  'subscriberSnippet': {
+    'title': string
+    'description': string
+    'channelId': string
+    'thumbnails': Partial<Record<'default'|'medium'|'high', {
+      'url': string
+      'width': number
+      'height': number
+    }>>
+  }
+}
+
+type PutRequests = Array<Array<{
+  PutRequest: {
+    Item: {
+      channel: { S: string }
+      user: { S: string }
+      enabled: { BOOL: true }
+    }
+  }
+}>>
