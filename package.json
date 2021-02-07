@@ -1,11 +1,11 @@
 {
-  "name": "pubsubhubbub",
+  "name": "ytfm",
   "version": "1.0.0",
   "description": "Serverless aws-nodejs-typescript template",
   "main": "serverless.ts~",
   "scripts": {
     "test": "eslint src --ext .ts",
-    "test:get": "serverless invoke local -f get --path src/functions/get/mock.json",
+    "run:get": "serverless invoke local -f get --path src/functions/get/mock.json",
     "deploy:dev": "serverless deploy --stage dev -v",
     "eslint": "eslint . --ext .ts",
     "eslint:fix": "eslint . --ext .ts --fix"

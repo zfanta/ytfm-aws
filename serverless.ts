@@ -3,7 +3,7 @@ import { get, oauth2 } from './src/functions'
 
 const serverlessConfiguration: AWS = {
   useDotenv: true,
-  service: 'pubsubhubbub',
+  service: 'ytfm',
   frameworkVersion: '2',
   custom: {
     webpack: {
