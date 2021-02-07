@@ -1,8 +1,8 @@
 import type { AWS } from '@serverless/typescript'
-
-import { get } from './src/functions'
+import { get, oauth2 } from './src/functions'
 
 const serverlessConfiguration: AWS = {
+  useDotenv: true,
   service: 'pubsubhubbub',
   frameworkVersion: '2',
   custom: {
@@ -25,7 +25,15 @@ const serverlessConfiguration: AWS = {
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       // eslint-disable-next-line no-template-curly-in-string
-      CHANNELS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-channels'
+      CHANNELS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-channels',
+      // eslint-disable-next-line no-template-curly-in-string
+      USERS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-users',
+      // eslint-disable-next-line no-template-curly-in-string
+      GOOGLE_CLIENT_ID: '${env:GOOGLE_CLIENT_ID}',
+      // eslint-disable-next-line no-template-curly-in-string
+      GOOGLE_CLIENT_SECRET: '${env:GOOGLE_CLIENT_SECRET}',
+      // eslint-disable-next-line no-template-curly-in-string
+      OAUTH2_REDIRECT_URL: 'https://${opt:stage, self:provider.stage}.ytfm.app/oauth2'
     },
     lambdaHashingVersion: '20201221',
     iamRoleStatements: [{
@@ -39,10 +47,10 @@ const serverlessConfiguration: AWS = {
         'dynamodb:DeleteItem'
       ],
       // eslint-disable-next-line no-template-curly-in-string
-      Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CHANNELS_TABLE_NAME}'
+      Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/*'
     }]
   },
-  functions: { get },
+  functions: { get, oauth2 },
   resources: {
     Resources: {
       channels: {
@@ -62,8 +70,8 @@ const serverlessConfiguration: AWS = {
             KeyType: 'HASH'
           }],
           ProvisionedThroughput: {
-            ReadCapacityUnits: 5,
-            WriteCapacityUnits: 5
+            ReadCapacityUnits: 1,
+            WriteCapacityUnits: 1
           },
           GlobalSecondaryIndexes: [{
             IndexName: 'expiresAt-idx',
@@ -75,10 +83,29 @@ const serverlessConfiguration: AWS = {
               ProjectionType: 'ALL'
             },
             ProvisionedThroughput: {
-              ReadCapacityUnits: 5,
-              WriteCapacityUnits: 5
+              ReadCapacityUnits: 1,
+              WriteCapacityUnits: 1
             }
           }]
+        }
+      },
+      users: {
+        Type: 'AWS::DynamoDB::Table',
+        Properties: {
+          // eslint-disable-next-line no-template-curly-in-string
+          TableName: '${self:provider.environment.USERS_TABLE_NAME}',
+          AttributeDefinitions: [{
+            AttributeName: 'email',
+            AttributeType: 'S'
+          }],
+          KeySchema: [{
+            AttributeName: 'email',
+            KeyType: 'HASH'
+          }],
+          ProvisionedThroughput: {
+            ReadCapacityUnits: 1,
+            WriteCapacityUnits: 1
+          }
         }
       }
     }
