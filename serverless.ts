@@ -59,6 +59,7 @@ const serverlessConfiguration: AWS = {
       channels: {
         Type: 'AWS::DynamoDB::Table',
         Properties: {
+          BillingMode: 'PAY_PER_REQUEST',
           // eslint-disable-next-line no-template-curly-in-string
           TableName: '${self:provider.environment.CHANNELS_TABLE_NAME}',
           AttributeDefinitions: [{
@@ -72,10 +73,6 @@ const serverlessConfiguration: AWS = {
             AttributeName: 'id',
             KeyType: 'HASH'
           }],
-          ProvisionedThroughput: {
-            ReadCapacityUnits: 1,
-            WriteCapacityUnits: 1
-          },
           GlobalSecondaryIndexes: [{
             IndexName: 'expiresAt-idx',
             KeySchema: [{
@@ -84,10 +81,6 @@ const serverlessConfiguration: AWS = {
             }],
             Projection: {
               ProjectionType: 'ALL'
-            },
-            ProvisionedThroughput: {
-              ReadCapacityUnits: 1,
-              WriteCapacityUnits: 1
             }
           }]
         }
@@ -95,6 +88,7 @@ const serverlessConfiguration: AWS = {
       users: {
         Type: 'AWS::DynamoDB::Table',
         Properties: {
+          BillingMode: 'PAY_PER_REQUEST',
           // eslint-disable-next-line no-template-curly-in-string
           TableName: '${self:provider.environment.USERS_TABLE_NAME}',
           AttributeDefinitions: [{
@@ -104,16 +98,13 @@ const serverlessConfiguration: AWS = {
           KeySchema: [{
             AttributeName: 'email',
             KeyType: 'HASH'
-          }],
-          ProvisionedThroughput: {
-            ReadCapacityUnits: 2,
-            WriteCapacityUnits: 2
-          }
+          }]
         }
       },
       subscriptions: {
         Type: 'AWS::DynamoDB::Table',
         Properties: {
+          BillingMode: 'PAY_PER_REQUEST',
           // eslint-disable-next-line no-template-curly-in-string
           TableName: '${self:provider.environment.SUBSCRIPTIONS_TABLE_NAME}',
           AttributeDefinitions: [{
@@ -130,10 +121,6 @@ const serverlessConfiguration: AWS = {
             AttributeName: 'user',
             KeyType: 'RANGE'
           }],
-          ProvisionedThroughput: {
-            ReadCapacityUnits: 1,
-            WriteCapacityUnits: 1
-          },
           GlobalSecondaryIndexes: [{
             IndexName: 'user-idx',
             KeySchema: [{
@@ -142,10 +129,6 @@ const serverlessConfiguration: AWS = {
             }],
             Projection: {
               ProjectionType: 'ALL'
-            },
-            ProvisionedThroughput: {
-              ReadCapacityUnits: 1,
-              WriteCapacityUnits: 1
             }
           }]
         }
