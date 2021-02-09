@@ -6,6 +6,7 @@ import fetch from 'node-fetch'
 import { URLSearchParams } from 'url'
 import { DynamoDBClient, PutItemCommand, BatchWriteItemCommand, UpdateItemCommand } from '@aws-sdk/client-dynamodb'
 import * as qs from 'querystring'
+import { SQSClient, SendMessageBatchCommand, SendMessageBatchRequestEntry, GetQueueUrlCommand } from '@aws-sdk/client-sqs'
 
 // TODO: https://accounts.google.com/o/oauth2/auth?client_id=969455847018-o333jdbaqlsaag1oiv7jq74rcep2sg8g.apps.googleusercontent.com&redirect_uri=https%3A%2F%2Fwww.ytfm.app%2Foauth2&response_type=code&scope=email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.readonly&approval_prompt=auto&access_type=offline
 
@@ -144,6 +145,56 @@ async function setSubscription (user: string, channels: string[]): Promise<void>
   await client.send(updateItemCommand)
 }
 
+async function sendToSQS (channelIds: string[]): Promise<void> {
+  console.log('Send to SQS =>')
+
+  if (process.env.PUBSUBHUBBUB_QUEUE_NAME === undefined) throw new Error('PUBSUBHUBBUB_QUEUE_NAME is undefined')
+
+  console.log('Number of channels:', channelIds.length)
+
+  // TODO: region hard coding
+  const sqs = new SQSClient({ region: 'us-east-1' })
+
+  // limit 10
+  const entries: SendMessageBatchRequestEntry[][] = []
+  const currentTime = new Date().toISOString().replace(/:/g, '__').replace(/\./g, '_')
+  for (let i = 0; i < channelIds.length; i += 10) {
+    entries.push(channelIds.slice(i, i + 10).map((channelId, index) => ({
+      Id: `${currentTime}-${i + index}`,
+      MessageBody: JSON.stringify({ channelId, mode: 'subscribe' }),
+      MessageAttributes: {
+        channelId: {
+          StringValue: channelId,
+          DataType: 'String'
+        },
+        mode: {
+          StringValue: 'subscribe',
+          DataType: 'String'
+        }
+      }
+    })))
+  }
+
+  // Get queue url
+  const command = new GetQueueUrlCommand({
+    QueueName: process.env.PUBSUBHUBBUB_QUEUE_NAME
+  })
+  const { QueueUrl } = await sqs.send(command)
+  if (QueueUrl === undefined) throw new Error('Cannot find queue url')
+
+  await Promise.all(entries.map(async entry => {
+    const command = new SendMessageBatchCommand({
+      QueueUrl,
+      Entries: entry
+    })
+    const data = await sqs.send(command)
+    if (data.Failed !== undefined) {
+      console.log('Failed:', data.Failed)
+    }
+  }))
+  console.log('<= Send to SQS')
+}
+
 const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   const code = event.queryStringParameters?.code
 
@@ -169,6 +220,14 @@ const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
 
   const channels = await getSubscriptions(token.access_token)
   await setSubscription(email, channels)
+  try {
+    await sendToSQS(channels)
+  } catch (e) {
+    return {
+      statusCode: 503,
+      body: e.message
+    }
+  }
 
   return {
     statusCode: 303,

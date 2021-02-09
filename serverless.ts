@@ -35,7 +35,9 @@ const serverlessConfiguration: AWS = {
       // eslint-disable-next-line no-template-curly-in-string
       GOOGLE_CLIENT_SECRET: '${env:GOOGLE_CLIENT_SECRET}',
       // eslint-disable-next-line no-template-curly-in-string
-      OAUTH2_REDIRECT_URL: 'https://${opt:stage, self:provider.stage}.ytfm.app/oauth2'
+      OAUTH2_REDIRECT_URL: 'https://${opt:stage, self:provider.stage}.ytfm.app/oauth2',
+      // eslint-disable-next-line no-template-curly-in-string
+      PUBSUBHUBBUB_QUEUE_NAME: 'ytfm-${opt:stage, self:provider.stage}-pubsubhubbub'
     },
     lambdaHashingVersion: '20201221',
     iamRoleStatements: [{
@@ -51,6 +53,12 @@ const serverlessConfiguration: AWS = {
       ],
       // eslint-disable-next-line no-template-curly-in-string
       Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/*'
+    }, {
+      Effect: 'Allow',
+      Action: ['sqs:SendMessage', 'sqs:GetQueueUrl'],
+      Resource: [{
+        'Fn::GetAtt': ['pubsubhubbubQueue', 'Arn']
+      }]
     }]
   },
   functions: { get, oauth2 },
@@ -131,6 +139,13 @@ const serverlessConfiguration: AWS = {
               ProjectionType: 'ALL'
             }
           }]
+        }
+      },
+      pubsubhubbubQueue: {
+        Type: 'AWS::SQS::Queue',
+        Properties: {
+          // eslint-disable-next-line no-template-curly-in-string
+          QueueName: '${self:provider.environment.PUBSUBHUBBUB_QUEUE_NAME}'
         }
       }
     }
