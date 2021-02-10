@@ -238,7 +238,7 @@ const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   }
 }
 
-export const main = middyfy(get)
+export const handler = middyfy(get)
 
 interface Token {
   'access_token': string

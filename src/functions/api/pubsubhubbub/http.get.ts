@@ -63,7 +63,7 @@ const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   return response(200, query['hub.challenge'])
 }
 
-export const main = middyfy(get)
+export const handler = middyfy(get)
 
 interface Query {
   'hub.topic': string | undefined

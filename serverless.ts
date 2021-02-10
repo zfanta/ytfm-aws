@@ -1,5 +1,5 @@
 import type { AWS } from '@serverless/typescript'
-import { get, oauth2, pubsubhubbub } from './src/functions'
+import functions from './src/functions'
 
 const serverlessConfiguration: AWS = {
   useDotenv: true,
@@ -35,7 +35,7 @@ const serverlessConfiguration: AWS = {
       // eslint-disable-next-line no-template-curly-in-string
       GOOGLE_CLIENT_SECRET: '${env:GOOGLE_CLIENT_SECRET}',
       // eslint-disable-next-line no-template-curly-in-string
-      OAUTH2_REDIRECT_URL: 'https://${opt:stage, self:provider.stage}.ytfm.app/oauth2',
+      OAUTH2_REDIRECT_URL: 'https://${opt:stage, self:provider.stage}.ytfm.app/api/oauth2',
       // eslint-disable-next-line no-template-curly-in-string
       PUBSUBHUBBUB_QUEUE_NAME: 'ytfm-${opt:stage, self:provider.stage}-pubsubhubbub'
     },
@@ -61,7 +61,7 @@ const serverlessConfiguration: AWS = {
       }]
     }]
   },
-  functions: { get, oauth2, pubsubhubbub },
+  functions,
   resources: {
     Resources: {
       channels: {

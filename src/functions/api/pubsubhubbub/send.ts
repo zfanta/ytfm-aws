@@ -8,7 +8,8 @@ async function sendToPubsubhubbub (channelId: string, mode: string): Promise<voi
   }
   const body = {
     // 'hub.lease_seconds': 10,
-    'hub.callback': 'https://dev.ytfm.app/pubsubhubbub',
+    // TODO: env
+    'hub.callback': 'https://dev.ytfm.app/api/pubsubhubbub',
     'hub.mode': mode,
     'hub.topic': `https://www.youtube.com/xml/feeds/videos.xml?channel_id=${channelId}`,
     'hub.verify': 'async'
@@ -21,7 +22,7 @@ async function sendToPubsubhubbub (channelId: string, mode: string): Promise<voi
   })
 }
 
-const main: SQSHandler = async (event) => {
+const handler: SQSHandler = async (event) => {
   console.log('Pubsubhubbub send =>')
 
   await Promise.all(event.Records.map(async record => {
@@ -38,5 +39,5 @@ const main: SQSHandler = async (event) => {
 }
 
 export {
-  main
+  handler
 }
