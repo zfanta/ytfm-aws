@@ -1,5 +1,5 @@
 import type { AWS } from '@serverless/typescript'
-import { get, oauth2 } from './src/functions'
+import { get, oauth2, pubsubhubbub } from './src/functions'
 
 const serverlessConfiguration: AWS = {
   useDotenv: true,
@@ -61,7 +61,7 @@ const serverlessConfiguration: AWS = {
       }]
     }]
   },
-  functions: { get, oauth2 },
+  functions: { get, oauth2, pubsubhubbub },
   resources: {
     Resources: {
       channels: {
