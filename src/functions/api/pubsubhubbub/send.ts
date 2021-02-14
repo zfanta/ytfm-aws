@@ -2,6 +2,10 @@ import { SQSHandler } from 'aws-lambda'
 import qs from 'querystring'
 import fetch from 'node-fetch'
 
+/*
+ * From sqs pubsubhubbub
+ */
+
 async function sendToPubsubhubbub (channelId: string, mode: string): Promise<void> {
   const headers = {
     'Content-Type': 'application/x-www-form-urlencoded'
@@ -32,6 +36,7 @@ const handler: SQSHandler = async (event) => {
     if (channelId === undefined) throw new Error('Channel id is undefined')
     if (mode === undefined) throw new Error('mode id is undefined')
 
+    console.log(`${mode} ${channelId}`)
     return await sendToPubsubhubbub(channelId, mode)
   }))
 

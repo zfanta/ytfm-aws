@@ -30,7 +30,17 @@ const pubsubhubbubSend = {
   }]
 }
 
+const pubsubhubbubResubscribe = {
+  handler: 'src/functions/api/pubsubhubbub/resubscribe.handler',
+  events: [{
+    eventBridge: {
+      schedule: 'rate(1 hour)'
+    }
+  }]
+}
+
 export default {
   pubsubhubbubHttpGet,
-  pubsubhubbubSend
+  pubsubhubbubSend,
+  pubsubhubbubResubscribe
 }

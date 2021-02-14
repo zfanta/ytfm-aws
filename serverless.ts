@@ -49,7 +49,8 @@ const serverlessConfiguration: AWS = {
         'dynamodb:PutItem',
         'dynamodb:UpdateItem',
         'dynamodb:DeleteItem',
-        'dynamodb:BatchWriteItem'
+        'dynamodb:BatchWriteItem',
+        'dynamodb:PartiQLSelect'
       ],
       // eslint-disable-next-line no-template-curly-in-string
       Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/*'
