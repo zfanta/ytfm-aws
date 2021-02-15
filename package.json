@@ -5,13 +5,15 @@
   "main": "serverless.ts~",
   "scripts": {
     "test": "eslint src --ext .ts",
-    "run:get": "serverless invoke local -f get --path src/functions/get/mock.json",
+    "run:get": "serverless invoke local -f pubsubhubbubHttpGet --path src/functions/api/pubsubhubbub/http.get.mock.json",
+    "run:updateEmailTemplates": "sls invoke local -f pubsubhubbubHttpPost",
     "deploy:dev": "serverless deploy --stage dev -v",
     "eslint": "eslint . --ext .ts",
     "eslint:fix": "eslint . --ext .ts --fix"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.4.1",
+    "@aws-sdk/client-sesv2": "^3.5.0",
     "@aws-sdk/client-sqs": "^3.4.1",
     "@middy/core": "^1.5.0",
     "@middy/http-json-body-parser": "^1.5.0",
