@@ -37,7 +37,9 @@ const serverlessConfiguration: AWS = {
       // eslint-disable-next-line no-template-curly-in-string
       OAUTH2_REDIRECT_URL: 'https://${opt:stage, self:provider.stage}.ytfm.app/api/oauth2',
       // eslint-disable-next-line no-template-curly-in-string
-      PUBSUBHUBBUB_QUEUE_NAME: 'ytfm-${opt:stage, self:provider.stage}-pubsubhubbub'
+      PUBSUBHUBBUB_QUEUE_NAME: 'ytfm-${opt:stage, self:provider.stage}-pubsubhubbub',
+      // eslint-disable-next-line no-template-curly-in-string
+      EMAIL_QUEUE_NAME: 'ytfm-${opt:stage, self:provider.stage}-email'
     },
     lambdaHashingVersion: '20201221',
     iamRoleStatements: [{
@@ -59,7 +61,14 @@ const serverlessConfiguration: AWS = {
       Action: ['sqs:SendMessage', 'sqs:GetQueueUrl'],
       Resource: [{
         'Fn::GetAtt': ['pubsubhubbubQueue', 'Arn']
+      }, {
+        'Fn::GetAtt': ['emailQueue', 'Arn']
       }]
+    }, {
+      Effect: 'Allow',
+      Action: ['ses:SendCustomVerificationEmail'],
+      // eslint-disable-next-line no-template-curly-in-string
+      Resource: 'arn:aws:ses:${opt:region, self:provider.region}:*:identity/*'
     }]
   },
   functions,
@@ -147,6 +156,13 @@ const serverlessConfiguration: AWS = {
         Properties: {
           // eslint-disable-next-line no-template-curly-in-string
           QueueName: '${self:provider.environment.PUBSUBHUBBUB_QUEUE_NAME}'
+        }
+      },
+      emailQueue: {
+        Type: 'AWS::SQS::Queue',
+        Properties: {
+          // eslint-disable-next-line no-template-curly-in-string
+          QueueName: '${self:provider.environment.EMAIL_QUEUE_NAME}'
         }
       }
     }

@@ -2,18 +2,27 @@ import {
   GetQueueUrlCommand,
   SendMessageBatchCommand,
   SendMessageBatchRequestEntry,
+  SendMessageCommand,
   SQSClient
 } from '@aws-sdk/client-sqs'
 
-async function pubsubhubbub (mode: 'subscribe'|'unsubscribe', channelIds: string[]): Promise<void> {
-  console.log('Send to SQS =>')
+// TODO: region hard coding
+const sqs = new SQSClient({ region: 'us-east-1' })
 
+async function getQueueUrl (QueueName: string): Promise<string> {
+  const command = new GetQueueUrlCommand({ QueueName })
+  const { QueueUrl } = await sqs.send(command)
+  if (QueueUrl === undefined) throw new Error('Cannot find queue url')
+
+  return QueueUrl
+}
+
+async function pubsubhubbub (mode: 'subscribe'|'unsubscribe', channelIds: string[]): Promise<void> {
   if (process.env.PUBSUBHUBBUB_QUEUE_NAME === undefined) throw new Error('PUBSUBHUBBUB_QUEUE_NAME is undefined')
 
-  console.log('Number of channels:', channelIds.length)
+  console.log(`Send to SQS[${process.env.PUBSUBHUBBUB_QUEUE_NAME}] =>`)
 
-  // TODO: region hard coding
-  const sqs = new SQSClient({ region: 'us-east-1' })
+  console.log('Number of channels:', channelIds.length)
 
   // limit 10
   const entries: SendMessageBatchRequestEntry[][] = []
@@ -35,12 +44,7 @@ async function pubsubhubbub (mode: 'subscribe'|'unsubscribe', channelIds: string
     })))
   }
 
-  // Get queue url
-  const command = new GetQueueUrlCommand({
-    QueueName: process.env.PUBSUBHUBBUB_QUEUE_NAME
-  })
-  const { QueueUrl } = await sqs.send(command)
-  if (QueueUrl === undefined) throw new Error('Cannot find queue url')
+  const QueueUrl = await getQueueUrl(process.env.PUBSUBHUBBUB_QUEUE_NAME)
 
   await Promise.all(entries.map(async entry => {
     const command = new SendMessageBatchCommand({
@@ -52,9 +56,34 @@ async function pubsubhubbub (mode: 'subscribe'|'unsubscribe', channelIds: string
       console.log('Failed:', data.Failed)
     }
   }))
-  console.log('<= Send to SQS')
+  console.log(`<= Send to SQS[${process.env.PUBSUBHUBBUB_QUEUE_NAME}]`)
+}
+
+async function pushVerificationEmail (to: string): Promise<void> {
+  if (process.env.EMAIL_QUEUE_NAME === undefined) throw new Error('PUBSUBHUBBUB_QUEUE_NAME is undefined')
+
+  console.log(`Send to SQS[${process.env.EMAIL_QUEUE_NAME}] =>`)
+
+  const QueueUrl = await getQueueUrl(process.env.EMAIL_QUEUE_NAME)
+  const command = new SendMessageCommand({
+    QueueUrl,
+    // TODO: replacement data
+    MessageBody: 'TODO',
+    DelaySeconds: undefined,
+    MessageDeduplicationId: undefined,
+    MessageGroupId: undefined,
+    MessageAttributes: {
+      type: { StringValue: 'verification', DataType: 'String' },
+      to: { StringValue: to, DataType: 'String' }
+    }
+  })
+
+  await sqs.send(command)
+
+  console.log(`<= Send to SQS[${process.env.EMAIL_QUEUE_NAME}]`)
 }
 
 export {
-  pubsubhubbub
+  pubsubhubbub,
+  pushVerificationEmail
 }

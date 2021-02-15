@@ -6,7 +6,7 @@ import fetch from 'node-fetch'
 import { URLSearchParams } from 'url'
 import { DynamoDBClient, PutItemCommand, BatchWriteItemCommand, UpdateItemCommand } from '@aws-sdk/client-dynamodb'
 import * as qs from 'querystring'
-import { pubsubhubbub } from '@libs/sqs'
+import { pubsubhubbub, pushVerificationEmail } from '@libs/sqs'
 
 // TODO: https://accounts.google.com/o/oauth2/auth?client_id=969455847018-o333jdbaqlsaag1oiv7jq74rcep2sg8g.apps.googleusercontent.com&redirect_uri=https%3A%2F%2Fwww.ytfm.app%2Foauth2&response_type=code&scope=email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.readonly&approval_prompt=auto&access_type=offline
 
@@ -172,6 +172,7 @@ const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   await setSubscription(email, channels)
   try {
     await pubsubhubbub('subscribe', channels)
+    await pushVerificationEmail(email)
   } catch (e) {
     return {
       statusCode: 503,
