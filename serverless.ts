@@ -31,6 +31,8 @@ const serverlessConfiguration: AWS = {
       // eslint-disable-next-line no-template-curly-in-string
       SUBSCRIPTIONS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-subscriptions',
       // eslint-disable-next-line no-template-curly-in-string
+      VIDEOS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-videos',
+      // eslint-disable-next-line no-template-curly-in-string
       GOOGLE_CLIENT_ID: '${env:GOOGLE_CLIENT_ID}',
       // eslint-disable-next-line no-template-curly-in-string
       GOOGLE_CLIENT_SECRET: '${env:GOOGLE_CLIENT_SECRET}',
@@ -39,7 +41,9 @@ const serverlessConfiguration: AWS = {
       // eslint-disable-next-line no-template-curly-in-string
       PUBSUBHUBBUB_QUEUE_NAME: 'ytfm-${opt:stage, self:provider.stage}-pubsubhubbub',
       // eslint-disable-next-line no-template-curly-in-string
-      EMAIL_QUEUE_NAME: 'ytfm-${opt:stage, self:provider.stage}-email'
+      EMAIL_QUEUE_NAME: 'ytfm-${opt:stage, self:provider.stage}-email',
+      // eslint-disable-next-line no-template-curly-in-string
+      STAGE: '${opt:stage, self:provider.stage}'
     },
     lambdaHashingVersion: '20201221',
     iamRoleStatements: [{
@@ -67,6 +71,11 @@ const serverlessConfiguration: AWS = {
     }, {
       Effect: 'Allow',
       Action: ['ses:SendCustomVerificationEmail'],
+      // eslint-disable-next-line no-template-curly-in-string
+      Resource: 'arn:aws:ses:${opt:region, self:provider.region}:*:identity/*'
+    }, {
+      Effect: 'Allow',
+      Action: ['ses:SendTemplatedEmail'],
       // eslint-disable-next-line no-template-curly-in-string
       Resource: 'arn:aws:ses:${opt:region, self:provider.region}:*:identity/*'
     }]
@@ -115,6 +124,22 @@ const serverlessConfiguration: AWS = {
           }],
           KeySchema: [{
             AttributeName: 'email',
+            KeyType: 'HASH'
+          }]
+        }
+      },
+      videos: {
+        Type: 'AWS::DynamoDB::Table',
+        Properties: {
+          BillingMode: 'PAY_PER_REQUEST',
+          // eslint-disable-next-line no-template-curly-in-string
+          TableName: '${self:provider.environment.VIDEOS_TABLE_NAME}',
+          AttributeDefinitions: [{
+            AttributeName: 'id',
+            AttributeType: 'S'
+          }],
+          KeySchema: [{
+            AttributeName: 'id',
             KeyType: 'HASH'
           }]
         }

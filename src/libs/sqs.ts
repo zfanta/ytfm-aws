@@ -5,6 +5,7 @@ import {
   SendMessageCommand,
   SQSClient
 } from '@aws-sdk/client-sqs'
+import { Video } from '@libs/types'
 
 // TODO: region hard coding
 const sqs = new SQSClient({ region: 'us-east-1' })
@@ -83,7 +84,53 @@ async function pushVerificationEmail (to: string): Promise<void> {
   console.log(`<= Send to SQS[${process.env.EMAIL_QUEUE_NAME}]`)
 }
 
+async function pushNotificationEmail (video: Video, subscribers: string[]): Promise<void> {
+  console.log('pushNotificationEmail =>')
+
+  if (process.env.EMAIL_QUEUE_NAME === undefined) throw new Error('EMAIL_QUEUE_NAME is undefined')
+
+  // limit 10
+  const entries: SendMessageBatchRequestEntry[][] = []
+  const currentTime = new Date().toISOString().replace(/:/g, '__').replace(/\./g, '_')
+  for (let i = 0; i < subscribers.length; i += 10) {
+    entries.push(subscribers.slice(i, i + 10).map((subscriber, index) => ({
+      Id: `${currentTime}-${i + index}`,
+      MessageBody: JSON.stringify({ subscriber, video }),
+      MessageAttributes: {
+        videoId: {
+          StringValue: video.id,
+          DataType: 'String'
+        },
+        to: {
+          StringValue: subscriber,
+          DataType: 'String'
+        },
+        type: {
+          StringValue: 'notification',
+          DataType: 'String'
+        }
+      }
+    })))
+  }
+
+  const QueueUrl = await getQueueUrl(process.env.EMAIL_QUEUE_NAME)
+
+  await Promise.all(entries.map(async entry => {
+    const command = new SendMessageBatchCommand({
+      QueueUrl,
+      Entries: entry
+    })
+    const data = await sqs.send(command)
+    if (data.Failed !== undefined) {
+      console.log('Failed:', data.Failed)
+    }
+  }))
+
+  console.log('<= pushNotificationEmail')
+}
+
 export {
   pubsubhubbub,
-  pushVerificationEmail
+  pushVerificationEmail,
+  pushNotificationEmail
 }

@@ -1,7 +1,9 @@
 import 'source-map-support/register'
 
 import { SQSHandler } from 'aws-lambda'
-import { SESv2Client, SendCustomVerificationEmailCommand } from '@aws-sdk/client-sesv2'
+import { SESv2Client, SendCustomVerificationEmailCommand, SendEmailCommand } from '@aws-sdk/client-sesv2'
+import { Video } from '@libs/types'
+import * as templates from './templates'
 
 /*
  * From sqs email
@@ -16,7 +18,7 @@ const client = new SESv2Client({ region: 'us-east-1' })
 async function sendVerificationEmail (to: string[]): Promise<Array<PromiseSettledResult<any>>> {
   const promises = to.map(async to => {
     const command = new SendCustomVerificationEmailCommand({
-      TemplateName: 'verification',
+      TemplateName: templates.verification.TemplateName,
       EmailAddress: to
     })
 
@@ -26,15 +28,46 @@ async function sendVerificationEmail (to: string[]): Promise<Array<PromiseSettle
   return await Promise.allSettled(promises)
 }
 
+// sqs.pushNotificationEmail
+async function sendNotificationEmail (notifications: Notification[]): Promise<Array<PromiseSettledResult<any>>> {
+  console.log('sendNotificationEmail =>')
+  const promises = notifications.map(async notification => {
+    const command = new SendEmailCommand({
+      Content: {
+        Template: {
+          TemplateName: templates.notification.TemplateName,
+          TemplateData: JSON.stringify({ videoTitle: notification.video.title })
+        }
+      },
+      FromEmailAddress: `"${notification.video.channelName}" <noreply@ytfm.app>`,
+      Destination: {
+        ToAddresses: [notification.subscriber]
+      }
+    })
+
+    console.log('command:', command.input)
+
+    return await client.send(command)
+  })
+
+  console.log('<= sendNotificationEmail')
+  return await Promise.allSettled(promises)
+}
+
 const handler: SQSHandler = async (event) => {
   console.log('Send email =>')
 
+  // send verification
   const verifications = event.Records
     .filter(record => record.messageAttributes.type.stringValue === 'verification')
     .map(record => record.messageAttributes.to.stringValue)
     .filter(to => to !== undefined)
 
-  const result = await sendVerificationEmail(verifications as string[])
+  if (verifications.length !== 0) {
+    console.log('Verification:', verifications.length)
+  }
+
+  let result = await sendVerificationEmail(verifications as string[])
   result.forEach(result => {
     if (result.status === 'rejected') {
       console.error(result)
@@ -42,11 +75,30 @@ const handler: SQSHandler = async (event) => {
   })
   // TODO: error handling
 
-  // TODO: send ytfm
+  // send notification
+  const notifications = event.Records
+    .filter(record => record.messageAttributes.type.stringValue === 'notification')
+    .map(record => JSON.parse(record.body) as Notification)
+
+  if (notifications.length !== 0) {
+    console.log('Notifications:', notifications.length)
+  }
+
+  result = await sendNotificationEmail(notifications)
+  result.forEach(result => {
+    if (result.status === 'rejected') {
+      console.error(result)
+    }
+  })
 
   console.log('<= Send email')
 }
 
 export {
   handler
+}
+
+interface Notification {
+  video: Video
+  subscriber: string
 }

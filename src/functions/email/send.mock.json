@@ -1,0 +1,22 @@
+{
+  "Records": [
+    {
+      "messageId": "059f36b4-87a3-44ab-83d2-661975830a7d",
+      "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a...",
+      "body": "{\"subscriber\":\"example@gmail.com\",\"video\":{\"id\":\"video id\",\"title\":\"video title test 하하하\",\"channelId\":\"channel id\",\"channelName\":\"channel name test 하하하\",\"published\":\"\",\"updated\":\"\"}}",
+      "attributes": {
+        "ApproximateReceiveCount": "1",
+        "SentTimestamp": "1545082649183",
+        "SenderId": "AIDAIENQZJOLO23YVJ4VO",
+        "ApproximateFirstReceiveTimestamp": "1545082649185"
+      },
+      "messageAttributes": {
+        "type": {
+          "stringValue": "notification"
+        }
+      },
+      "eventSource": "aws:sqs",
+      "awsRegion": "us-east-1"
+    }
+  ]
+}

@@ -8,17 +8,18 @@ import {
   CreateEmailTemplateCommand,
   DeleteEmailTemplateCommand
 } from '@aws-sdk/client-sesv2'
+import * as templates from './templates'
 
 // TODO: region
 const client = new SESv2Client({ region: 'us-east-1' })
 
 async function deleteTemplates (): Promise<void> {
   try {
-    console.log('Delete verification')
-    await client.send(new DeleteCustomVerificationEmailTemplateCommand({ TemplateName: 'verification' }))
+    console.log(`Delete ${templates.verification.TemplateName}`)
+    await client.send(new DeleteCustomVerificationEmailTemplateCommand({ TemplateName: templates.verification.TemplateName }))
 
-    console.log('Delete ytfm')
-    await client.send(new DeleteEmailTemplateCommand({ TemplateName: 'ytfm' }))
+    console.log(`Delete ${templates.notification.TemplateName}`)
+    await client.send(new DeleteEmailTemplateCommand({ TemplateName: templates.notification.TemplateName }))
   } catch (e) {
     console.log(e)
   }
@@ -26,28 +27,15 @@ async function deleteTemplates (): Promise<void> {
 
 // TODO: make email template
 async function createCustomVerificationEmailTemplate (): Promise<void> {
-  const command = new CreateCustomVerificationEmailTemplateCommand({
-    FailureRedirectionURL: 'https://naver.com',
-    FromEmailAddress: 'noreply@ytfm.app',
-    SuccessRedirectionURL: 'https://google.com',
-    TemplateName: 'verification',
-    TemplateSubject: 'Confirm ytfm subscription',
-    TemplateContent: 'TODO'
-  })
+  console.log(`Create ${templates.verification.TemplateName}`)
+  const command = new CreateCustomVerificationEmailTemplateCommand(templates.verification)
 
   await client.send(command)
 }
 
-// TODO: make email template
-async function createEmailTemplate (): Promise<void> {
-  const command = new CreateEmailTemplateCommand({
-    TemplateName: 'ytfm',
-    TemplateContent: {
-      Subject: '[YTFM] {{channelName}}',
-      Text: '{{title}}',
-      Html: '{{title}}'
-    }
-  })
+async function createNotificationEmailTemplate (): Promise<void> {
+  console.log(`Create ${templates.notification.TemplateName}`)
+  const command = new CreateEmailTemplateCommand(templates.notification)
 
   await client.send(command)
 }
@@ -59,7 +47,7 @@ const handler: Handler = async () => {
 
   await createCustomVerificationEmailTemplate()
 
-  await createEmailTemplate()
+  await createNotificationEmailTemplate()
 
   console.log('<= UpdateEmailTemplates')
 }

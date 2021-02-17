@@ -18,6 +18,16 @@ const pubsubhubbubHttpGet = {
   }]
 }
 
+const pubsubhubbubHttpPost = {
+  handler: 'src/functions/api/pubsubhubbub/http.post',
+  events: [{
+    http: {
+      method: 'post',
+      path: 'api/pubsubhubbub'
+    }
+  }]
+}
+
 const pubsubhubbubSend = {
   handler: 'src/functions/api/pubsubhubbub/send.handler',
   events: [{
@@ -41,6 +51,7 @@ const pubsubhubbubResubscribe = {
 
 export default {
   pubsubhubbubHttpGet,
+  pubsubhubbubHttpPost,
   pubsubhubbubSend,
   pubsubhubbubResubscribe
 }
