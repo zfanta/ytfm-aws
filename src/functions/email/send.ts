@@ -39,7 +39,7 @@ async function sendNotificationEmail (notifications: Notification[]): Promise<Ar
           TemplateData: JSON.stringify({ videoTitle: notification.video.title })
         }
       },
-      FromEmailAddress: `"${notification.video.channelName}" <noreply@ytfm.app>`,
+      FromEmailAddress: `=?UTF-8?B?${Buffer.from(notification.video.channelName).toString('base64')}?= <noreply@ytfm.app>`,
       Destination: {
         ToAddresses: [notification.subscriber]
       }
