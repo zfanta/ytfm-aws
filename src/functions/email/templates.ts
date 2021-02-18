@@ -1,3 +1,5 @@
+import { notification as notificationHtml } from './htmls'
+
 if (process.env.STAGE === undefined) throw new Error('STAGE is undefined')
 
 // TODO: make email template
@@ -10,24 +12,13 @@ const verification = {
   TemplateContent: 'TODO'
 }
 
-const Html = `
-<html>
-<div>{{videoId}}</div>
-<div>{{videoTitle}}</div>
-<div>{{channelId}}</div>
-<div>{{channelTitle}}</div>
-<div>{{thumbnail}}</div>
-<div>{{duration}}</div>
-</html>
-`
-
 // TODO: make email template
 const notification = {
   TemplateName: `${process.env.STAGE}-notification`,
   TemplateContent: {
     Subject: '{{videoTitle}}',
     Text: '[{{duration}}] {{videoTitle}}',
-    Html
+    Html: notificationHtml
   }
 }
 
