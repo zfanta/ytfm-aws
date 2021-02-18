@@ -25,7 +25,6 @@ async function deleteTemplates (): Promise<void> {
   }
 }
 
-// TODO: make email template
 async function createCustomVerificationEmailTemplate (): Promise<void> {
   console.log(`Create ${templates.verification.TemplateName}`)
   const command = new CreateCustomVerificationEmailTemplateCommand(templates.verification)

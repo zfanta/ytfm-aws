@@ -37,6 +37,8 @@ const serverlessConfiguration: AWS = {
       // eslint-disable-next-line no-template-curly-in-string
       GOOGLE_CLIENT_SECRET: '${env:GOOGLE_CLIENT_SECRET}',
       // eslint-disable-next-line no-template-curly-in-string
+      GOOGLE_API_KEY: '${env:GOOGLE_API_KEY}',
+      // eslint-disable-next-line no-template-curly-in-string
       OAUTH2_REDIRECT_URL: 'https://${opt:stage, self:provider.stage}.ytfm.app/api/oauth2',
       // eslint-disable-next-line no-template-curly-in-string
       PUBSUBHUBBUB_QUEUE_NAME: 'ytfm-${opt:stage, self:provider.stage}-pubsubhubbub',

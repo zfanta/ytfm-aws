@@ -5,6 +5,9 @@ import { middyfy } from '@libs/lambda'
 import xml2js from 'xml2js'
 import { DynamoDBClient, PutItemCommand, GetItemCommand, QueryCommand } from '@aws-sdk/client-dynamodb'
 import { pushNotificationEmail } from '@libs/sqs'
+import { VideoFromGoogleApis, VideoResponse } from '@libs/types'
+import qs from 'querystring'
+import fetch from 'node-fetch'
 
 const client = new DynamoDBClient({
   // TODO: region name
@@ -29,29 +32,24 @@ const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
     updated: entry.updated[0]
   }
 
-  // Ignore if mail is sent
-  if (await isNewVideo(video)) {
-    console.log('new video:', video)
-    await addVideo(video.id)
+  // Ignore if it is not publishing
+  if (new Date(video.updated).valueOf() - new Date(video.published).valueOf() < 1000 * 60 * 60) {
+    // Ignore if mail is sent
+    if (!(await videoExists(video.id))) {
+      console.log('new video:', video.id)
 
-    const subscribers = await getSubscribers(video.channelId)
+      await addVideo(video.id)
 
-    await pushNotificationEmail(video, subscribers)
+      const videoFromGoogleApi = await getVideoInformation(video.id, video.channelId)
+
+      const subscribers = await getSubscribers(video.channelId)
+
+      await pushNotificationEmail(videoFromGoogleApi, subscribers)
+    }
   }
 
   console.log('<= Pubsubhubbub callback[post]')
   return response(200, '')
-}
-
-async function isNewVideo (video): Promise<boolean> {
-  if (!(await videoExists(video.id))) {
-    console.log('new video:', video)
-    // Ignore if it is not publishing, but updating
-    if (new Date(video.updated).valueOf() - new Date(video.published).valueOf() < 1000 * 60 * 60) {
-      return true
-    }
-  }
-  return false
 }
 
 async function videoExists (videoId: string): Promise<boolean> {
@@ -95,6 +93,23 @@ async function getSubscribers (channelId: string): Promise<string[]> {
   }
 
   return result.Items.map(item => item.user.S as string)
+}
+
+async function getVideoInformation (videoId: string, channelId: string): Promise<VideoFromGoogleApis> {
+  if (process.env.GOOGLE_API_KEY === undefined) throw new Error('GOOGLE_API_KEY is undefined')
+
+  const query = qs.stringify({
+    id: videoId,
+    part: 'id,snippet,contentDetails,player',
+    key: process.env.GOOGLE_API_KEY
+  })
+
+  const response: VideoResponse = await (await fetch(`https://www.googleapis.com/youtube/v3/videos?${query}`)).json()
+
+  if (response.items.length === 0) throw new Error('Invalid video')
+  if (response.items[0].snippet.channelId !== channelId) throw new Error('Invalid video')
+
+  return response.items[0]
 }
 
 export const handler = middyfy(post)

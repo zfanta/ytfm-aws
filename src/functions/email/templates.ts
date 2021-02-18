@@ -10,13 +10,24 @@ const verification = {
   TemplateContent: 'TODO'
 }
 
+const Html = `
+<html>
+<div>{{videoId}}</div>
+<div>{{videoTitle}}</div>
+<div>{{channelId}}</div>
+<div>{{channelTitle}}</div>
+<div>{{thumbnail}}</div>
+<div>{{duration}}</div>
+</html>
+`
+
 // TODO: make email template
 const notification = {
   TemplateName: `${process.env.STAGE}-notification`,
   TemplateContent: {
     Subject: '{{videoTitle}}',
-    Text: '{{videoTitle}}',
-    Html: '{{videoTitle}}'
+    Text: '[{{duration}}] {{videoTitle}}',
+    Html
   }
 }
 

@@ -5,7 +5,7 @@ import {
   SendMessageCommand,
   SQSClient
 } from '@aws-sdk/client-sqs'
-import { Video } from '@libs/types'
+import { VideoFromGoogleApis } from '@libs/types'
 
 // TODO: region hard coding
 const sqs = new SQSClient({ region: 'us-east-1' })
@@ -84,7 +84,7 @@ async function pushVerificationEmail (to: string): Promise<void> {
   console.log(`<= Send to SQS[${process.env.EMAIL_QUEUE_NAME}]`)
 }
 
-async function pushNotificationEmail (video: Video, subscribers: string[]): Promise<void> {
+async function pushNotificationEmail (video: VideoFromGoogleApis, subscribers: string[]): Promise<void> {
   console.log('pushNotificationEmail =>')
 
   if (process.env.EMAIL_QUEUE_NAME === undefined) throw new Error('EMAIL_QUEUE_NAME is undefined')
