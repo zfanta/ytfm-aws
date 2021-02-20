@@ -14,9 +14,25 @@ const serverlessConfiguration: AWS = {
     },
     dynamodb: {
       stages: ['dev']
+    },
+    fullstack: {
+      domain: '${opt:stage, self:provider.stage}.ytfm.app',
+      // TODO:
+      certificate: 'arn:aws:acm:us-east-1:756346208077:certificate/8e69b6f6-ff85-4c76-b203-9902da44bd7a',
+      bucketName: 'web',
+      distributionFolder: 'src/frontend/dist',
+      indexDocument: 'index.html',
+      singlePageApp: true,
+      compressWebContent: true,
+      apiPath: 'api',
+      // TODO:
+      // clientCommand: 'TODO',
+      // clientSrcPath: 'src/frontend',
+      minimumProtocolVersion: 'TLSv1.2_2018',
+      priceClass: 'PriceClass_100'
     }
   },
-  plugins: ['serverless-webpack', 'serverless-dynamodb-local'],
+  plugins: ['serverless-webpack', 'serverless-dynamodb-local', 'fullstack-serverless'],
   provider: {
     name: 'aws',
     runtime: 'nodejs12.x',
