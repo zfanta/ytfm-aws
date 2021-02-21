@@ -4,8 +4,8 @@
   "description": "Serverless aws-nodejs-typescript template",
   "scripts": {
     "test": "eslint src --ext .ts",
-    "parcel:serve": "parcel --target frontend --dist-dir dist/frontend/dev src/frontend/index.html",
-    "parcel:build": "parcel build --target frontend --dist-dir dist/frontend/www src/frontend/index.html",
+    "parcel:serve": "parcel --target frontend --dist-dir dist/frontend/serve src/frontend/index.html",
+    "parcel:build": "parcel build --target frontend --dist-dir dist/frontend/build src/frontend/index.html",
     "run:get": "serverless invoke local -f pubsubhubbubHttpGet --path src/functions/api/pubsubhubbub/http.get.mock.json",
     "run:updateEmailTemplates": "sls invoke local -f updateEmailTemplates",
     "run:sendEmail": "sls invoke local -f sendEmail --path src/functions/email/send.mock.json",
@@ -19,6 +19,9 @@
     "@aws-sdk/client-sqs": "^3.4.1",
     "@middy/core": "^1.5.0",
     "@middy/http-json-body-parser": "^1.5.0",
+    "cookie": "^0.4.1",
+    "dayjs": "^1.10.4",
+    "nanoid": "^3.1.20",
     "node-fetch": "^2.6.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -61,7 +64,7 @@
   "targets": {
     "frontend": {
       "engines": {
-        "browsers": "> 0.25%"
+        "browsers": "last 1 Chrome version"
       }
     }
   }

@@ -20,7 +20,7 @@ const serverlessConfiguration: AWS = {
       // TODO:
       certificate: 'arn:aws:acm:us-east-1:756346208077:certificate/8e69b6f6-ff85-4c76-b203-9902da44bd7a',
       bucketName: 'web',
-      distributionFolder: 'dist/frontend/${opt:stage, self:provider.stage}',
+      distributionFolder: 'dist/frontend/build',
       indexDocument: 'index.html',
       singlePageApp: true,
       compressWebContent: true,
@@ -44,6 +44,7 @@ const serverlessConfiguration: AWS = {
       USERS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-users',
       SUBSCRIPTIONS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-subscriptions',
       VIDEOS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-videos',
+      SESSIONS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-sessions',
       GOOGLE_CLIENT_ID: '${env:GOOGLE_CLIENT_ID}',
       GOOGLE_CLIENT_SECRET: '${env:GOOGLE_CLIENT_SECRET}',
       GOOGLE_API_KEY: '${env:GOOGLE_API_KEY}',
@@ -172,6 +173,61 @@ const serverlessConfiguration: AWS = {
             }],
             Projection: {
               ProjectionType: 'ALL'
+            }
+          }]
+        }
+      },
+      sessions: {
+        Type: 'AWS::DynamoDB::Table',
+        Properties: {
+          BillingMode: 'PAY_PER_REQUEST',
+          TableName: '${self:provider.environment.SESSIONS_TABLE_NAME}',
+          AttributeDefinitions: [{
+            AttributeName: 'id',
+            AttributeType: 'S'
+          }, {
+            AttributeName: 'user',
+            AttributeType: 'S'
+          }, {
+            AttributeName: 'atime',
+            AttributeType: 'N'
+          }, {
+            AttributeName: 'expiresAt',
+            AttributeType: 'N'
+          }],
+          KeySchema: [{
+            AttributeName: 'id',
+            KeyType: 'HASH'
+          }],
+          GlobalSecondaryIndexes: [{
+            IndexName: 'empty-idx',
+            KeySchema: [{
+              AttributeName: 'user',
+              KeyType: 'HASH'
+            }, {
+              AttributeName: 'atime',
+              KeyType: 'RANGE'
+            }],
+            Projection: {
+              ProjectionType: 'KEYS_ONLY'
+            }
+          }, {
+            IndexName: 'expiresAt-idx',
+            KeySchema: [{
+              AttributeName: 'expiresAt',
+              KeyType: 'HASH'
+            }],
+            Projection: {
+              ProjectionType: 'KEYS_ONLY'
+            }
+          }, {
+            IndexName: 'user-idx',
+            KeySchema: [{
+              AttributeName: 'user',
+              KeyType: 'HASH'
+            }],
+            Projection: {
+              ProjectionType: 'KEYS_ONLY'
             }
           }]
         }
