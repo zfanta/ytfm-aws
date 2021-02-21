@@ -10,3 +10,7 @@ jspm_packages
 .webpack
 
 .env
+
+.parcel-cache/
+
+dist/

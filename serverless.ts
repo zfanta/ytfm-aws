@@ -20,14 +20,12 @@ const serverlessConfiguration: AWS = {
       // TODO:
       certificate: 'arn:aws:acm:us-east-1:756346208077:certificate/8e69b6f6-ff85-4c76-b203-9902da44bd7a',
       bucketName: 'web',
-      distributionFolder: 'src/frontend/dist',
+      distributionFolder: 'dist/frontend/${opt:stage, self:provider.stage}',
       indexDocument: 'index.html',
       singlePageApp: true,
       compressWebContent: true,
       apiPath: 'api',
-      // TODO:
-      // clientCommand: 'TODO',
-      // clientSrcPath: 'src/frontend',
+      clientCommand: 'yarn parcel:build',
       minimumProtocolVersion: 'TLSv1.2_2018',
       priceClass: 'PriceClass_100'
     }
