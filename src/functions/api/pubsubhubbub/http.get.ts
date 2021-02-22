@@ -1,7 +1,7 @@
 import 'source-map-support/register'
 
 import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/apiGateway'
-import { middyfy } from '@libs/lambda'
+import { middyfy, response } from '@libs/lambda'
 import {
   DynamoDBClient,
   PutItemCommand
@@ -12,10 +12,6 @@ const client = new DynamoDBClient({
   region: 'us-east-1'
   // endpoint: 'http://localhost:8000'
 })
-
-function response (statusCode: number, body: string): {statusCode: number, body: string} {
-  return { statusCode, body }
-}
 
 function verifyRequest (event): Query {
   if (event.queryStringParameters === null) throw new Error('Query string is null')

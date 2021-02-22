@@ -1,7 +1,7 @@
 import 'source-map-support/register'
 
 import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/apiGateway'
-import { middyfy } from '@libs/lambda'
+import { middyfy, response } from '@libs/lambda'
 import xml2js from 'xml2js'
 import { DynamoDBClient, PutItemCommand, GetItemCommand, QueryCommand } from '@aws-sdk/client-dynamodb'
 import { pushNotificationEmail } from '@libs/sqs'
@@ -13,10 +13,6 @@ const client = new DynamoDBClient({
   // TODO: region name
   region: 'us-east-1'
 })
-
-function response (statusCode: number, body: string): {statusCode: number, body: string} {
-  return { statusCode, body }
-}
 
 const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   console.log('Pubsubhubbub callback[post] =>')
