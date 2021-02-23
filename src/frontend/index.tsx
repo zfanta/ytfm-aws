@@ -19,6 +19,22 @@ async function checkSignedIn (): Promise<{user: string}> {
   }
 }
 
+async function getSubscriptions (): Promise<Array<{channel: string, enabled: boolean}>> {
+  return await (await fetch('/api/subscriptions')).json()
+}
+
+function Subscriptions ({ subscriptions }: {subscriptions: Array<{channel: string, enabled: boolean}>}): ReactElement {
+  return (
+    <div>
+      {subscriptions.map(subscription => {
+        return (
+          <div key={subscription.channel}>channel={subscription.channel},enabled={`${subscription.enabled ? 'true' : 'false'}`}</div>
+        )
+      })}
+    </div>
+  )
+}
+
 function App (): ReactElement {
   const SID: string = cookie.parse(document.cookie).SID ?? ''
 
@@ -34,10 +50,17 @@ function App (): ReactElement {
   })
 
   const [email, setEmail] = useState<string>()
+  const [subscriptions, setSubscriptions] = useState<Array<{channel: string, enabled: boolean}>>()
 
   useEffect(() => {
     checkSignedIn().then(profile => setEmail(profile.user)).catch(console.error)
   }, [])
+
+  useEffect(() => {
+    if (email !== undefined) {
+      getSubscriptions().then(setSubscriptions).catch(console.error)
+    }
+  }, [email])
 
   return (
     <>
@@ -46,6 +69,7 @@ function App (): ReactElement {
       <div>email={email}</div>
       <a href={`https://accounts.google.com/o/oauth2/auth?${query}`}>Sign in</a>
       <a href="/api/signOut">Sign out</a>
+      <Subscriptions subscriptions={subscriptions ?? []} />
     </>
   )
 }

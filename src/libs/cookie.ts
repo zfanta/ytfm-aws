@@ -1,3 +1,5 @@
+import 'source-map-support/register'
+
 import { AttributeValue } from '@aws-sdk/client-dynamodb/models/models_0'
 import { DynamoDBClient, GetItemCommand, UpdateItemCommand } from '@aws-sdk/client-dynamodb'
 
@@ -33,7 +35,43 @@ async function updateUser (SID: string, user: string): Promise<void> {
   await client.send(command)
 }
 
+async function getUser (SID: string): Promise<User|undefined> {
+  const cookie = await get(SID)
+  if (cookie === undefined) return undefined
+
+  const email = cookie.user.S
+  if (email === undefined) return undefined
+
+  const command = new GetItemCommand({
+    TableName: process.env.USERS_TABLE_NAME,
+    Key: { email: { S: email } }
+  })
+
+  const user = await client.send(command)
+  if (user.Item === undefined) return undefined
+  if (user.Item.email.S === undefined) return undefined
+  if (user.Item.token.S === undefined) return undefined
+
+  return {
+    email: user.Item.email.S,
+    token: JSON.parse(user.Item.token.S)
+  }
+}
+
 export {
   get,
-  updateUser
+  updateUser,
+  getUser
+}
+
+interface User {
+  email: string
+  token: {
+    access_token: string
+    expires_in: number
+    refresh_token: string
+    scope: string
+    token_type: 'Bearer'
+    id_token: string
+  }
 }
