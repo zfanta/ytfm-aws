@@ -2,6 +2,8 @@ import 'source-map-support/register'
 
 import { AttributeValue } from '@aws-sdk/client-dynamodb/models/models_0'
 import { DynamoDBClient, GetItemCommand, UpdateItemCommand } from '@aws-sdk/client-dynamodb'
+import { Token } from '@libs/types'
+import { refreshToken, updateGoogleToken } from '@libs/oauth2'
 
 const client = new DynamoDBClient({
   // TODO: region
@@ -35,7 +37,7 @@ async function updateUser (SID: string, user: string): Promise<void> {
   await client.send(command)
 }
 
-async function getUser (SID: string): Promise<User|undefined> {
+async function getUser (SID: string, refreshTokenIfExpired: boolean = false): Promise<User|undefined> {
   const cookie = await get(SID)
   if (cookie === undefined) return undefined
 
@@ -50,11 +52,24 @@ async function getUser (SID: string): Promise<User|undefined> {
   const user = await client.send(command)
   if (user.Item === undefined) return undefined
   if (user.Item.email.S === undefined) return undefined
+  if (user.Item.expiresAt.N === undefined) return undefined
   if (user.Item.token.S === undefined) return undefined
 
+  let token: Token = JSON.parse(user.Item.token.S)
+
+  // Refresh token if expired
+  if (refreshTokenIfExpired) {
+    const currentTime = new Date()
+    if (parseInt(user.Item.expiresAt.N) < currentTime.valueOf()) {
+      const newToken = await refreshToken(token.refresh_token as string)
+      token = await updateGoogleToken(email, newToken)
+    }
+  }
+
   return {
-    email: user.Item.email.S,
-    token: JSON.parse(user.Item.token.S)
+    email,
+    token,
+    syncedAt: user.Item.syncedAt.N !== undefined ? parseInt(user.Item.syncedAt.N) : undefined
   }
 }
 
@@ -66,12 +81,6 @@ export {
 
 interface User {
   email: string
-  token: {
-    access_token: string
-    expires_in: number
-    refresh_token: string
-    scope: string
-    token_type: 'Bearer'
-    id_token: string
-  }
+  token: Token
+  syncedAt?: number
 }

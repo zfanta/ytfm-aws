@@ -8,6 +8,17 @@ const subscriptionsHttpGet = {
   }]
 }
 
+const subscriptionsHttpPost = {
+  handler: 'src/functions/api/subscriptions/http.post',
+  events: [{
+    http: {
+      method: 'post',
+      path: 'api/subscriptions'
+    }
+  }]
+}
+
 export default {
-  subscriptionsHttpGet
+  subscriptionsHttpGet,
+  subscriptionsHttpPost
 }

@@ -2,16 +2,8 @@ import 'source-map-support/register'
 
 import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/apiGateway'
 import { middyfy, response } from '@libs/lambda'
-import {
-  DynamoDBClient,
-  PutItemCommand
-} from '@aws-sdk/client-dynamodb'
 import isInt from 'validator/lib/isInt'
-
-const client = new DynamoDBClient({
-  region: 'us-east-1'
-  // endpoint: 'http://localhost:8000'
-})
+import { updateChannelExpiry } from '@libs/dynamodb'
 
 function verifyRequest (event): Query {
   if (event.queryStringParameters === null) throw new Error('Query string is null')
@@ -45,16 +37,7 @@ const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   const currentTime = new Date().valueOf()
   const expiresAt = currentTime + (parseInt(leaseSeconds) * 1000)
 
-  const TableName = process.env.CHANNELS_TABLE_NAME
-  const putItemCommand = new PutItemCommand({
-    TableName,
-    Item: {
-      id: { S: id },
-      expiresAt: { N: `${expiresAt}` }
-    }
-  })
-
-  await client.send(putItemCommand)
+  await updateChannelExpiry(id, expiresAt)
 
   return response(200, query['hub.challenge'])
 }

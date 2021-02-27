@@ -9,7 +9,7 @@ const client = new DynamoDBClient({
   // endpoint: 'http://localhost:8000'
 })
 
-async function getSubscriptions (accessToken: string, pageToken?: string): Promise<string[]> {
+async function getSubscriptions (accessToken: string, pageToken?: string): Promise<SubscriptionResponse[]> {
   const url = 'https://www.googleapis.com/youtube/v3/subscriptions'
   const query = qs.stringify({
     access_token: accessToken,
@@ -22,13 +22,11 @@ async function getSubscriptions (accessToken: string, pageToken?: string): Promi
 
   const response: SubscriptionListResponse = await fetch(`${url}?${query}`).then(async response => await response.json())
 
-  const channels = response.items.map(item => item.snippet.resourceId.channelId)
-
   if (response.nextPageToken === undefined) {
-    return channels
+    return response.items
   }
 
-  return [...channels, ...(await getSubscriptions(accessToken, response.nextPageToken))]
+  return [...response.items, ...(await getSubscriptions(accessToken, response.nextPageToken))]
 }
 
 async function setSubscription (user: string, channels: string[]): Promise<void> {
@@ -143,3 +141,7 @@ type PutRequests = Array<Array<{
     }
   }
 }>>
+
+export type {
+  SubscriptionResponse
+}

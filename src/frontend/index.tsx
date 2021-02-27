@@ -19,16 +19,29 @@ async function checkSignedIn (): Promise<{user: string}> {
   }
 }
 
-async function getSubscriptions (): Promise<Array<{channel: string, enabled: boolean}>> {
+interface SubscriptionsResponse {
+  syncedAt?: number
+  channels: Array<{
+    id: string
+    title: string
+    enabled: boolean
+  }>
+}
+async function getSubscriptions (): Promise<SubscriptionsResponse> {
   return await (await fetch('/api/subscriptions')).json()
 }
 
-function Subscriptions ({ subscriptions }: {subscriptions: Array<{channel: string, enabled: boolean}>}): ReactElement {
+async function sync (): Promise<SubscriptionsResponse> {
+  return await (await fetch('/api/subscriptions', { method: 'POST' })).json()
+}
+
+function Subscriptions ({ subscriptions }: {subscriptions: SubscriptionsResponse}): ReactElement {
   return (
     <div>
-      {subscriptions.map(subscription => {
+      syncedAt: {subscriptions.syncedAt !== undefined ? new Date(subscriptions.syncedAt).toLocaleString() : 'N/A'}
+      {subscriptions.channels.map(channel => {
         return (
-          <div key={subscription.channel}>channel={subscription.channel},enabled={`${subscription.enabled ? 'true' : 'false'}`}</div>
+          <div key={channel.id}>channel={channel.title},enabled={`${channel.enabled ? 'true' : 'false'}`}</div>
         )
       })}
     </div>
@@ -50,7 +63,7 @@ function App (): ReactElement {
   })
 
   const [email, setEmail] = useState<string>()
-  const [subscriptions, setSubscriptions] = useState<Array<{channel: string, enabled: boolean}>>()
+  const [subscriptions, setSubscriptions] = useState<SubscriptionsResponse>()
 
   useEffect(() => {
     checkSignedIn().then(profile => setEmail(profile.user)).catch(console.error)
@@ -62,6 +75,10 @@ function App (): ReactElement {
     }
   }, [email])
 
+  function onClickSync (): void {
+    sync().then(a => setSubscriptions(a)).catch(console.error)
+  }
+
   return (
     <>
       <div onClick={getCookie}>Allow cookie</div>
@@ -69,7 +86,8 @@ function App (): ReactElement {
       <div>email={email}</div>
       <a href={`https://accounts.google.com/o/oauth2/auth?${query}`}>Sign in</a>
       <a href="/api/signOut">Sign out</a>
-      <Subscriptions subscriptions={subscriptions ?? []} />
+      <a href="#" onClick={onClickSync}>Sync</a>
+      {subscriptions !== undefined ? <Subscriptions subscriptions={subscriptions} /> : null}
     </>
   )
 }

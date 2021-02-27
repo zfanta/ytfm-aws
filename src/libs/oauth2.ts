@@ -2,13 +2,14 @@ import { DynamoDBClient, GetItemCommand, PutItemCommand } from '@aws-sdk/client-
 import { URLSearchParams } from 'url'
 import fetch from 'node-fetch'
 import qs from 'querystring'
+import { Token } from '@libs/types'
 
 const client = new DynamoDBClient({
   // TODO: region
   region: 'us-east-1'
 })
 
-async function updateGoogleToken (email: string, token: Token): Promise<void> {
+async function updateGoogleToken (email: string, token: Token): Promise<Token> {
   const TableName = process.env.USERS_TABLE_NAME
 
   let newToken = token
@@ -37,6 +38,8 @@ async function updateGoogleToken (email: string, token: Token): Promise<void> {
   }))
 
   await client.send(putItemCommand)
+
+  return newToken
 }
 
 async function getTokenFromGoogle (code: string): Promise<Token> {
@@ -75,18 +78,33 @@ async function getEmail (accessToken: string): Promise<string> {
   return response.email
 }
 
+async function refreshToken (refreshToken: string): Promise<Token> {
+  const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = process.env
+  if (GOOGLE_CLIENT_ID === undefined) throw new Error('GOOGLE_CLIENT_ID is undefined')
+  if (GOOGLE_CLIENT_SECRET === undefined) throw new Error('GOOGLE_CLIENT_SECRET is undefined')
+
+  const headers = {
+    'Content-Type': 'application/x-www-form-urlencoded'
+  }
+
+  const urlencoded = new URLSearchParams()
+  urlencoded.append('client_id', GOOGLE_CLIENT_ID)
+  urlencoded.append('client_secret', GOOGLE_CLIENT_SECRET)
+  urlencoded.append('refresh_token', refreshToken)
+  urlencoded.append('grant_type', 'refresh_token')
+
+  const requestOptions = {
+    method: 'POST',
+    headers: headers,
+    body: urlencoded
+  }
+
+  return await (await fetch('https://accounts.google.com/o/oauth2/token', requestOptions)).json()
+}
+
 export {
   updateGoogleToken,
   getTokenFromGoogle,
+  refreshToken,
   getEmail
-}
-
-interface Token {
-  'access_token': string
-  'token_type': 'Bearer'
-  'expires_in': number
-  'refresh_token'?: string
-  'scope': string
-  'error'?: string
-  'error_description'?: string
 }

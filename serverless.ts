@@ -64,7 +64,8 @@ const serverlessConfiguration: AWS = {
         'dynamodb:UpdateItem',
         'dynamodb:DeleteItem',
         'dynamodb:BatchWriteItem',
-        'dynamodb:PartiQLSelect'
+        'dynamodb:PartiQLSelect',
+        'dynamodb:BatchGetItem'
       ],
       Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/*'
     }, {
