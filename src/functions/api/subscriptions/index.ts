@@ -18,7 +18,18 @@ const subscriptionsHttpPost = {
   }]
 }
 
+const subscriptionsHttpPatch = {
+  handler: 'src/functions/api/subscriptions/http.patch',
+  events: [{
+    http: {
+      method: 'patch',
+      path: 'api/subscriptions'
+    }
+  }]
+}
+
 export default {
   subscriptionsHttpGet,
-  subscriptionsHttpPost
+  subscriptionsHttpPost,
+  subscriptionsHttpPatch
 }

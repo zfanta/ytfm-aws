@@ -3,7 +3,8 @@ import 'source-map-support/register'
 import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/apiGateway'
 import { middyfy, response } from '@libs/lambda'
 import { get as getCookie, updateUser } from '@libs/cookie'
-import { getEmail, getTokenFromGoogle, updateGoogleToken } from '@libs/oauth2'
+import { getEmail, getTokenFromGoogle } from '@libs/oauth2'
+import { updateGoogleToken } from '@libs/dynamodb'
 
 function parseState (state: string): any {
   const result = {}
@@ -50,19 +51,6 @@ const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
     updateGoogleToken(email, token),
     updateUser(SID, email)
   ])
-
-  // TODO: reuse
-  // const channels = await getSubscriptions(token.access_token)
-  // await setSubscription(email, channels)
-  // try {
-  //   await pubsubhubbub('subscribe', channels)
-  //   await pushVerificationEmail(email)
-  // } catch (e) {
-  //   return {
-  //     statusCode: 503,
-  //     body: e.message
-  //   }
-  // }
 
   return {
     statusCode: 303,

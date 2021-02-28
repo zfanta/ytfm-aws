@@ -1,46 +1,7 @@
-import { DynamoDBClient, GetItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb'
 import { URLSearchParams } from 'url'
 import fetch from 'node-fetch'
 import qs from 'querystring'
 import { Token } from '@libs/types'
-
-const client = new DynamoDBClient({
-  // TODO: region
-  region: 'us-east-1'
-})
-
-async function updateGoogleToken (email: string, token: Token): Promise<Token> {
-  const TableName = process.env.USERS_TABLE_NAME
-
-  let newToken = token
-
-  const getItemCommand = new GetItemCommand({
-    TableName,
-    Key: { email: { S: email } }
-  })
-
-  const result = await client.send(getItemCommand)
-  if (result?.Item?.token?.S !== undefined) {
-    const oldToken = JSON.parse(result.Item.token.S)
-    newToken = Object.assign({}, oldToken, token)
-  }
-
-  const currentTime = new Date().valueOf()
-  const expiresAt = currentTime + (token.expires_in * 1000)
-
-  const putItemCommand = new PutItemCommand(({
-    TableName,
-    Item: {
-      email: { S: email },
-      token: { S: JSON.stringify(newToken) },
-      expiresAt: { N: `${expiresAt}` }
-    }
-  }))
-
-  await client.send(putItemCommand)
-
-  return newToken
-}
 
 async function getTokenFromGoogle (code: string): Promise<Token> {
   const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, OAUTH2_REDIRECT_URL } = process.env
@@ -103,7 +64,6 @@ async function refreshToken (refreshToken: string): Promise<Token> {
 }
 
 export {
-  updateGoogleToken,
   getTokenFromGoogle,
   refreshToken,
   getEmail

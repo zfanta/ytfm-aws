@@ -3,12 +3,13 @@ import 'source-map-support/register'
 import {
   BatchGetItemCommand,
   BatchWriteItemCommand,
-  DynamoDBClient,
+  DynamoDBClient, GetItemCommand,
   QueryCommand,
   UpdateItemCommand
 } from '@aws-sdk/client-dynamodb'
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb'
 import { pubsubhubbub } from '@libs/sqs'
+import { Token } from '@libs/types'
 
 // TODO: region
 const client = new DynamoDBClient({ region: 'us-east-1' })
@@ -67,36 +68,6 @@ interface ChannelInformation {
     'height': number
   }>>
 }
-// async function getChannelsByEmail (email: string): Promise<Channel[]> {
-//   if (process.env.CHANNELS_TABLE_NAME === undefined) throw new Error('CHANNELS_TABLE_NAME is undefined')
-//
-//   const subscriptions = await getSubscriptions(email)
-//   const ids = subscriptions.map(subscription => subscription.channel)
-//
-//   const result: Channel[] = []
-//
-//   for (let i = 0; i < ids.length; i += 100) {
-//     // 100 limit
-//     const ids100 = ids.slice(i, i + 100)
-//
-//     const command = new BatchGetItemCommand({
-//       RequestItems: {
-//         [process.env.CHANNELS_TABLE_NAME]: {
-//           ConsistentRead: false,
-//           Keys: ids100.map(id => ({ id: { S: id } }))
-//         }
-//       }
-//     })
-//
-//     const items = (await client.send(command)).Responses?.[process.env.CHANNELS_TABLE_NAME]
-//
-//     result.push(...(
-//       items?.map(item => unmarshall(item) as Channel) ?? []
-//     ))
-//   }
-//
-//   return result
-// }
 async function getChannels (channelIds: string[]): Promise<Channel[]> {
   if (process.env.CHANNELS_TABLE_NAME === undefined) throw new Error('CHANNELS_TABLE_NAME is undefined')
 
@@ -307,10 +278,73 @@ async function updateUserSyncTime (email: string): Promise<Date> {
   return currentTime
 }
 
+async function getSubscription (channel: string, user: string): Promise<Subscription|undefined> {
+  const command = new GetItemCommand({
+    TableName: process.env.SUBSCRIPTIONS_TABLE_NAME,
+    Key: marshall({ channel, user })
+  })
+
+  const response = await client.send(command)
+
+  if (response.Item === undefined) return undefined
+
+  return unmarshall(response.Item) as Subscription
+}
+
+async function updateSubscription (channel: string, user: string, enabled: boolean): Promise<boolean> {
+  if (await getSubscription(channel, user) === undefined) return false
+
+  const command = new UpdateItemCommand({
+    TableName: process.env.SUBSCRIPTIONS_TABLE_NAME,
+    Key: marshall({ channel, user }),
+    UpdateExpression: 'SET #enabled = :enabled',
+    ExpressionAttributeNames: { '#enabled': 'enabled' },
+    ExpressionAttributeValues: marshall({ ':enabled': enabled })
+  })
+
+  await client.send(command)
+
+  return true
+}
+
+async function updateGoogleToken (email: string, token: Token): Promise<Token> {
+  const TableName = process.env.USERS_TABLE_NAME
+
+  let newToken = token
+
+  const getItemCommand = new GetItemCommand({
+    TableName,
+    Key: { email: { S: email } }
+  })
+
+  const result = await client.send(getItemCommand)
+  if (result?.Item?.token?.S !== undefined) {
+    const oldToken = JSON.parse(result.Item.token.S)
+    newToken = Object.assign({}, oldToken, token)
+  }
+
+  const currentTime = new Date().valueOf()
+  const expiresAt = currentTime + (token.expires_in * 1000)
+
+  const updateItemCommand = new UpdateItemCommand({
+    TableName,
+    Key: marshall({ email }),
+    UpdateExpression: 'SET #token = :token, #expiresAt = :expiresAt',
+    ExpressionAttributeNames: { '#token': 'token', '#expiresAt': 'expiresAt' },
+    ExpressionAttributeValues: marshall({ ':token': JSON.stringify(newToken), ':expiresAt': expiresAt })
+  })
+
+  await client.send(updateItemCommand)
+
+  return newToken
+}
+
 export {
   getSubscriptions,
+  updateSubscription,
   getSubscriptionsWithTitle,
   syncChannels,
   updateChannelExpiry,
-  updateUserSyncTime
+  updateUserSyncTime,
+  updateGoogleToken
 }

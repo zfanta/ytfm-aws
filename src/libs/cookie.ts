@@ -3,7 +3,8 @@ import 'source-map-support/register'
 import { AttributeValue } from '@aws-sdk/client-dynamodb/models/models_0'
 import { DynamoDBClient, GetItemCommand, UpdateItemCommand } from '@aws-sdk/client-dynamodb'
 import { Token } from '@libs/types'
-import { refreshToken, updateGoogleToken } from '@libs/oauth2'
+import { refreshToken } from '@libs/oauth2'
+import { updateGoogleToken } from '@libs/dynamodb'
 
 const client = new DynamoDBClient({
   // TODO: region
@@ -69,7 +70,7 @@ async function getUser (SID: string, refreshTokenIfExpired: boolean = false): Pr
   return {
     email,
     token,
-    syncedAt: user.Item.syncedAt.N !== undefined ? parseInt(user.Item.syncedAt.N) : undefined
+    syncedAt: user.Item.syncedAt?.N !== undefined ? parseInt(user.Item.syncedAt.N) : undefined
   }
 }
 

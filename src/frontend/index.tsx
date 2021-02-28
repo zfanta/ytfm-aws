@@ -21,11 +21,12 @@ async function checkSignedIn (): Promise<{user: string}> {
 
 interface SubscriptionsResponse {
   syncedAt?: number
-  channels: Array<{
-    id: string
-    title: string
-    enabled: boolean
-  }>
+  channels: Channel[]
+}
+interface Channel {
+  id: string
+  title: string
+  enabled: boolean
 }
 async function getSubscriptions (): Promise<SubscriptionsResponse> {
   return await (await fetch('/api/subscriptions')).json()
@@ -35,13 +36,15 @@ async function sync (): Promise<SubscriptionsResponse> {
   return await (await fetch('/api/subscriptions', { method: 'POST' })).json()
 }
 
-function Subscriptions ({ subscriptions }: {subscriptions: SubscriptionsResponse}): ReactElement {
+function Subscriptions ({ subscriptions, toggleFunction }: {subscriptions: SubscriptionsResponse, toggleFunction: (channelId: string) => void}): ReactElement {
   return (
     <div>
       syncedAt: {subscriptions.syncedAt !== undefined ? new Date(subscriptions.syncedAt).toLocaleString() : 'N/A'}
       {subscriptions.channels.map(channel => {
         return (
-          <div key={channel.id}>channel={channel.title},enabled={`${channel.enabled ? 'true' : 'false'}`}</div>
+          <div key={channel.id} onClick={() => toggleFunction(channel.id)}>
+            channel={channel.title},enabled={`${channel.enabled ? 'true' : 'false'}`}
+          </div>
         )
       })}
     </div>
@@ -79,6 +82,33 @@ function App (): ReactElement {
     sync().then(a => setSubscriptions(a)).catch(console.error)
   }
 
+  async function toggle (channelId: string): Promise<void> {
+    if (subscriptions === undefined || subscriptions.channels === undefined) throw new Error('Channel not found')
+
+    const targetChannel = subscriptions.channels.find(channel => channel.id === channelId)
+    if (targetChannel === undefined) throw new Error('Channel not found')
+
+    await fetch('/api/subscriptions', {
+      method: 'PATCH',
+      body: JSON.stringify({ channel: channelId, notification: !targetChannel.enabled }),
+      headers: { 'Content-Type': 'application/json' }
+    })
+
+    const targetIndex = subscriptions.channels.findIndex(channel => channel.id === channelId)
+
+    const channels = [
+      ...subscriptions.channels.slice(0, targetIndex),
+      {
+        id: targetChannel.id,
+        title: targetChannel.title,
+        enabled: !targetChannel.enabled
+      },
+      ...subscriptions.channels.slice(targetIndex + 1)
+    ]
+
+    setSubscriptions(Object.assign({}, subscriptions, { channels }))
+  }
+
   return (
     <>
       <div onClick={getCookie}>Allow cookie</div>
@@ -87,7 +117,7 @@ function App (): ReactElement {
       <a href={`https://accounts.google.com/o/oauth2/auth?${query}`}>Sign in</a>
       <a href="/api/signOut">Sign out</a>
       <a href="#" onClick={onClickSync}>Sync</a>
-      {subscriptions !== undefined ? <Subscriptions subscriptions={subscriptions} /> : null}
+      {subscriptions !== undefined ? <Subscriptions subscriptions={subscriptions} toggleFunction={toggle} /> : null}
     </>
   )
 }
