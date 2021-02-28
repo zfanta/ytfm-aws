@@ -2,9 +2,8 @@ import 'source-map-support/register'
 
 import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/apiGateway'
 import { middyfy, response } from '@libs/lambda'
-import { get as getCookie, updateUser } from '@libs/cookie'
 import { getEmail, getTokenFromGoogle } from '@libs/oauth2'
-import { updateGoogleToken } from '@libs/dynamodb'
+import { getSession, updateGoogleToken, updateSessionUser } from '@libs/dynamodb'
 
 function parseState (state: string): any {
   const result = {}
@@ -29,7 +28,7 @@ const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   if (SID === undefined) return response(400, 'SID is undefined')
 
   // Check cookie
-  if (await getCookie(SID) === undefined) return response(400, 'Cookie is invalid')
+  if (await getSession(SID) === undefined) return response(400, 'Cookie is invalid')
 
   let token
   try {
@@ -49,7 +48,7 @@ const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
 
   await Promise.all([
     updateGoogleToken(email, token),
-    updateUser(SID, email)
+    updateSessionUser(SID, email)
   ])
 
   return {

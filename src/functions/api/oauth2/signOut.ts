@@ -2,8 +2,8 @@ import 'source-map-support/register'
 
 import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/apiGateway'
 import { middyfy, response } from '@libs/lambda'
-import { updateUser } from '@libs/cookie'
 import cookie from 'cookie'
+import { updateSessionUser } from '@libs/dynamodb'
 
 const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   if (event.headers.Cookie === undefined) return response(400, 'Invalid header')
@@ -13,7 +13,7 @@ const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
 
   if (SID === undefined) return response(400, 'SID is undefined')
 
-  await updateUser(SID, 'empty')
+  await updateSessionUser(SID, 'empty')
 
   return response(303, '', { Location: '/' })
 }

@@ -12,7 +12,6 @@ const verification = {
   TemplateContent: 'TODO'
 }
 
-// TODO: make email template
 const notification = {
   TemplateName: `${process.env.STAGE}-notification`,
   TemplateContent: {

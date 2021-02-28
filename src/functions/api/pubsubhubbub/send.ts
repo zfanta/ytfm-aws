@@ -7,13 +7,15 @@ import fetch from 'node-fetch'
  */
 
 async function sendToPubsubhubbub (channelId: string, mode: string): Promise<void> {
+  const stage = process.env.STAGE
+  if (stage === undefined) throw new Error('STAGE is undefined')
+
   const headers = {
     'Content-Type': 'application/x-www-form-urlencoded'
   }
   const body = {
     // 'hub.lease_seconds': 10,
-    // TODO: env
-    'hub.callback': 'https://dev.ytfm.app/api/pubsubhubbub',
+    'hub.callback': `https://${stage}.ytfm.app/api/pubsubhubbub`,
     'hub.mode': mode,
     'hub.topic': `https://www.youtube.com/xml/feeds/videos.xml?channel_id=${channelId}`,
     'hub.verify': 'async'

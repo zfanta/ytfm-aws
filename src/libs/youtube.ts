@@ -1,13 +1,6 @@
 // TODO: use etag
 import qs from 'querystring'
 import fetch from 'node-fetch'
-import { BatchWriteItemCommand, DynamoDBClient, UpdateItemCommand } from '@aws-sdk/client-dynamodb'
-
-const client = new DynamoDBClient({
-  // TODO: region
-  region: 'us-east-1'
-  // endpoint: 'http://localhost:8000'
-})
 
 async function getSubscriptions (accessToken: string, pageToken?: string): Promise<SubscriptionResponse[]> {
   const url = 'https://www.googleapis.com/youtube/v3/subscriptions'
@@ -29,58 +22,8 @@ async function getSubscriptions (accessToken: string, pageToken?: string): Promi
   return [...response.items, ...(await getSubscriptions(accessToken, response.nextPageToken))]
 }
 
-async function setSubscription (user: string, channels: string[]): Promise<void> {
-  if (process.env.SUBSCRIPTIONS_TABLE_NAME === undefined) throw new Error('SUBSCRIPTIONS_TABLE_NAME is undefined')
-  if (process.env.USERS_TABLE_NAME === undefined) throw new Error('USERS_TABLE_NAME is undefined')
-
-  let TableName = process.env.SUBSCRIPTIONS_TABLE_NAME
-
-  // 25 limit
-  const requests: PutRequests = []
-  for (let i = 0; i < channels.length; i += 25) {
-    requests.push(channels.slice(i, i + 25).map(channel => ({
-      PutRequest: {
-        Item: {
-          channel: { S: channel },
-          user: { S: user },
-          enabled: { BOOL: true }
-        }
-      }
-    })))
-  }
-
-  await Promise.all(requests.map(async request => {
-    const command = new BatchWriteItemCommand({
-      RequestItems: {
-        [TableName]: request
-      }
-    })
-
-    await client.send(command)
-  }))
-
-  // Set syncedAt
-  TableName = process.env.USERS_TABLE_NAME
-
-  const currentTime = new Date().valueOf()
-
-  const updateItemCommand = new UpdateItemCommand({
-    TableName,
-    Key: {
-      email: { S: user }
-    },
-    UpdateExpression: 'set syncedAt = :value',
-    ExpressionAttributeValues: {
-      ':value': { N: `${currentTime}` }
-    }
-  })
-
-  await client.send(updateItemCommand)
-}
-
 export {
-  getSubscriptions,
-  setSubscription
+  getSubscriptions
 }
 
 interface SubscriptionListResponse {
@@ -131,16 +74,6 @@ interface SubscriptionResponse {
     }>>
   }
 }
-
-type PutRequests = Array<Array<{
-  PutRequest: {
-    Item: {
-      channel: { S: string }
-      user: { S: string }
-      enabled: { BOOL: true }
-    }
-  }
-}>>
 
 export type {
   SubscriptionResponse
