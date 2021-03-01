@@ -40,7 +40,7 @@ async function getSubscriptions (user: string, ExclusiveStartKey?: any): Promise
   return [...items, ...await getSubscriptions(user, response.LastEvaluatedKey)]
 }
 
-async function getSubscriptionsWithTitle (user: string): Promise<Array<{channel: string, notification: boolean, title: string}>> {
+async function getSubscriptionsWithTitle (user: string): Promise<Array<{channel: string, notification: boolean, title: string, thumbnail: string|undefined}>> {
   const subscriptions = await getSubscriptions(user)
   const channels = await getChannels(subscriptions.map(a => a.channel))
 
@@ -52,7 +52,8 @@ async function getSubscriptionsWithTitle (user: string): Promise<Array<{channel:
   return subscriptions.map(subscription => ({
     channel: subscription.channel,
     notification: subscription.notification,
-    title: channelsObject[subscription.channel].information.title
+    title: channelsObject[subscription.channel].information.title,
+    thumbnail: channelsObject[subscription.channel].information.thumbnails.default?.url
   }))
 }
 
@@ -217,7 +218,7 @@ async function subscribeChannels (email: string, channelIds: string[]): Promise<
   await Promise.all(promiseSubscriptions)
 }
 
-async function syncChannels (email: string, channelsFromYoutube: Channel[]): Promise<Array<{id: string, title: string, notification: boolean}>> {
+async function syncChannels (email: string, channelsFromYoutube: Channel[]): Promise<Array<{id: string, title: string, notification: boolean, thumbnail: string|undefined}>> {
   const channelIdsFromYoutube = channelsFromYoutube.map(channel => channel.id)
   const channelsFromDB = await getChannels(channelIdsFromYoutube)
 
@@ -250,7 +251,8 @@ async function syncChannels (email: string, channelsFromYoutube: Channel[]): Pro
   return channelsFromYoutube.map(channel => ({
     id: channel.id,
     title: channel.information.title,
-    notification: subscriptionsFromDBObject[channel.id]?.notification ?? true
+    notification: subscriptionsFromDBObject[channel.id]?.notification ?? true,
+    thumbnail: channel.information.thumbnails.default?.url
   }))
 }
 
