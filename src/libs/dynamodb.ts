@@ -20,7 +20,7 @@ const client = new DynamoDBClient({ region: 'us-east-1' })
 interface Subscription {
   user: string
   channel: string
-  enabled: boolean
+  notification: boolean
 }
 async function getSubscriptions (user: string, ExclusiveStartKey?: any): Promise<Subscription[]> {
   const command = new QueryCommand({
@@ -40,7 +40,7 @@ async function getSubscriptions (user: string, ExclusiveStartKey?: any): Promise
   return [...items, ...await getSubscriptions(user, response.LastEvaluatedKey)]
 }
 
-async function getSubscriptionsWithTitle (user: string): Promise<Array<{channel: string, enabled: boolean, title: string}>> {
+async function getSubscriptionsWithTitle (user: string): Promise<Array<{channel: string, notification: boolean, title: string}>> {
   const subscriptions = await getSubscriptions(user)
   const channels = await getChannels(subscriptions.map(a => a.channel))
 
@@ -51,7 +51,7 @@ async function getSubscriptionsWithTitle (user: string): Promise<Array<{channel:
 
   return subscriptions.map(subscription => ({
     channel: subscription.channel,
-    enabled: subscription.enabled,
+    notification: subscription.notification,
     title: channelsObject[subscription.channel].information.title
   }))
 }
@@ -195,7 +195,7 @@ async function subscribeChannels (email: string, channelIds: string[]): Promise<
           Item: marshall({
             channel: channelId,
             user: email,
-            enabled: true
+            notification: true
           })
         }
       }
@@ -217,7 +217,7 @@ async function subscribeChannels (email: string, channelIds: string[]): Promise<
   await Promise.all(promiseSubscriptions)
 }
 
-async function syncChannels (email: string, channelsFromYoutube: Channel[]): Promise<Array<{id: string, title: string, enabled: boolean}>> {
+async function syncChannels (email: string, channelsFromYoutube: Channel[]): Promise<Array<{id: string, title: string, notification: boolean}>> {
   const channelIdsFromYoutube = channelsFromYoutube.map(channel => channel.id)
   const channelsFromDB = await getChannels(channelIdsFromYoutube)
 
@@ -250,7 +250,7 @@ async function syncChannels (email: string, channelsFromYoutube: Channel[]): Pro
   return channelsFromYoutube.map(channel => ({
     id: channel.id,
     title: channel.information.title,
-    enabled: subscriptionsFromDBObject[channel.id]?.enabled ?? true
+    notification: subscriptionsFromDBObject[channel.id]?.notification ?? true
   }))
 }
 
@@ -294,15 +294,15 @@ async function getSubscription (channel: string, user: string): Promise<Subscrip
   return unmarshall(response.Item) as Subscription
 }
 
-async function updateSubscription (channel: string, user: string, enabled: boolean): Promise<boolean> {
+async function updateSubscription (channel: string, user: string, notification: boolean): Promise<boolean> {
   if (await getSubscription(channel, user) === undefined) return false
 
   const command = new UpdateItemCommand({
     TableName: process.env.SUBSCRIPTIONS_TABLE_NAME,
     Key: marshall({ channel, user }),
-    UpdateExpression: 'SET #enabled = :enabled',
-    ExpressionAttributeNames: { '#enabled': 'enabled' },
-    ExpressionAttributeValues: marshall({ ':enabled': enabled })
+    UpdateExpression: 'SET #notification = :notification',
+    ExpressionAttributeNames: { '#notification': 'notification' },
+    ExpressionAttributeValues: marshall({ ':notification': notification })
   })
 
   await client.send(command)

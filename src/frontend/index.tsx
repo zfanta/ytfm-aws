@@ -26,7 +26,7 @@ interface SubscriptionsResponse {
 interface Channel {
   id: string
   title: string
-  enabled: boolean
+  notification: boolean
 }
 async function getSubscriptions (): Promise<SubscriptionsResponse> {
   return await (await fetch('/api/subscriptions')).json()
@@ -43,7 +43,7 @@ function Subscriptions ({ subscriptions, toggleFunction }: {subscriptions: Subsc
       {subscriptions.channels.map(channel => {
         return (
           <div key={channel.id} onClick={() => toggleFunction(channel.id)}>
-            channel={channel.title},enabled={`${channel.enabled ? 'true' : 'false'}`}
+            channel={channel.title},notification={`${channel.notification ? 'true' : 'false'}`}
           </div>
         )
       })}
@@ -90,7 +90,7 @@ function App (): ReactElement {
 
     await fetch('/api/subscriptions', {
       method: 'PATCH',
-      body: JSON.stringify({ channel: channelId, notification: !targetChannel.enabled }),
+      body: JSON.stringify({ channel: channelId, notification: !targetChannel.notification }),
       headers: { 'Content-Type': 'application/json' }
     })
 
@@ -101,7 +101,7 @@ function App (): ReactElement {
       {
         id: targetChannel.id,
         title: targetChannel.title,
-        enabled: !targetChannel.enabled
+        notification: !targetChannel.notification
       },
       ...subscriptions.channels.slice(targetIndex + 1)
     ]

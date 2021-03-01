@@ -18,7 +18,7 @@ const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
 
   const channels = (await getSubscriptionsWithTitle(user.email)).map(subscription => ({
     id: subscription.channel,
-    enabled: subscription.enabled,
+    notification: subscription.notification,
     title: subscription.title
   }))
 
