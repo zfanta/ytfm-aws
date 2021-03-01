@@ -8,9 +8,9 @@ import { updateSubscription } from '@libs/dynamodb'
 
 const patch: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   if (event.headers === undefined) return response(400, 'Invalid header')
-  if (event.headers.Cookie === undefined) return response(400, 'Invalid header')
+  if (event.headers.Cookie === undefined && event.headers.cookie === undefined) return response(400, 'Invalid header')
 
-  const { SID } = cookie.parse(event.headers.Cookie)
+  const { SID } = cookie.parse(event.headers.Cookie ?? event.headers.cookie)
   if (SID === undefined) return response(400, 'SID is undefined')
 
   const user = await getUser(SID, false)

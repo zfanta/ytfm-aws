@@ -6,9 +6,9 @@ import { getSession } from '@libs/dynamodb'
 import cookie from 'cookie'
 
 const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
-  if (event.headers.Cookie === undefined) return response(400, 'Invalid header')
+  if (event.headers.Cookie === undefined && event.headers.cookie === undefined) return response(400, 'Invalid header')
 
-  const cookies = cookie.parse(event.headers.Cookie)
+  const cookies = cookie.parse(event.headers.Cookie ?? event.headers.cookie)
   const SID = cookies.SID
 
   if (SID === undefined) return response(400, 'SID is undefined')

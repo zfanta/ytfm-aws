@@ -7,6 +7,7 @@ const profile = {
   handler: 'src/functions/api/profile.handler',
   events: [{
     http: {
+      cors: true,
       method: 'get',
       path: 'api/profile'
     }

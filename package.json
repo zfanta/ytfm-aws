@@ -11,13 +11,16 @@
     "run:sendEmail": "sls invoke local -f sendEmail --path src/functions/email/send.mock.json",
     "deploy:dev": "serverless deploy --stage dev -v",
     "eslint": "eslint . --ext .ts",
-    "eslint:fix": "eslint . --ext .ts --fix"
+    "eslint:fix": "eslint . --ext .ts --fix",
+    "serverless:offline": "sls offline"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.4.1",
     "@aws-sdk/client-sesv2": "^3.5.0",
     "@aws-sdk/client-sqs": "^3.4.1",
     "@aws-sdk/util-dynamodb": "^3.6.1",
+    "@material-ui/core": "^4.11.3",
+    "@material-ui/icons": "^4.11.2",
     "@middy/core": "^1.5.0",
     "@middy/http-json-body-parser": "^1.5.0",
     "cookie": "^0.4.1",
@@ -54,6 +57,7 @@
     "parcel": "^2.0.0-beta.1",
     "pre-commit": "^1.2.2",
     "serverless": "^2.16.0",
+    "serverless-offline": "^6.8.0",
     "serverless-webpack": "^5.2.0",
     "ts-loader": "^8.0.10",
     "ts-node": "^9.0.0",

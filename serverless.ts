@@ -30,7 +30,7 @@ const serverlessConfiguration: AWS = {
       priceClass: 'PriceClass_100'
     }
   },
-  plugins: ['serverless-webpack', 'serverless-dynamodb-local', 'fullstack-serverless'],
+  plugins: ['serverless-webpack', 'serverless-dynamodb-local', 'fullstack-serverless', 'serverless-offline'],
   provider: {
     name: 'aws',
     runtime: 'nodejs12.x',

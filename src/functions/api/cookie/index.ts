@@ -2,6 +2,7 @@ const cookieHttpGet = {
   handler: 'src/functions/api/cookie/http.get',
   events: [{
     http: {
+      cors: true,
       method: 'get',
       path: 'api/cookie'
     }
