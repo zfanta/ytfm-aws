@@ -19,7 +19,7 @@ const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
 
   if (result.user === 'empty') return response(404, '')
 
-  return response(200, JSON.stringify({ user: result.user }))
+  return response(200, JSON.stringify({ email: result.user }))
 }
 
 export const handler = middyfy(get)
