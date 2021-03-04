@@ -119,23 +119,25 @@ function SignInButton (): ReactElement {
 
   if (!cookieAccepted) return <CookieAcceptButton setCookieAccepted={setCookieAccepted} />
 
-  const SID = cookie.parse(document.cookie).SID as string
+  function makeQuery (): string {
+    const SID = cookie.parse(document.cookie).SID as string
 
-  const query: string = qs.stringify({
-    client_id: '969455847018-a7agkq11k0p97jumrronqnrtctfu45pp.apps.googleusercontent.com',
-    // TODO: replace dev to variable
-    redirect_uri: 'https://dev.ytfm.app/api/oauth2',
-    state: `SID=${SID}`,
-    response_type: 'code',
-    scope: 'email https://www.googleapis.com/auth/youtube.readonly',
-    approval_prompt: 'auto',
-    access_type: 'offline'
-  })
+    return qs.stringify({
+      client_id: '969455847018-a7agkq11k0p97jumrronqnrtctfu45pp.apps.googleusercontent.com',
+      // TODO: replace dev to variable
+      redirect_uri: 'https://dev.ytfm.app/api/oauth2',
+      state: `SID=${SID}`,
+      response_type: 'code',
+      scope: 'email https://www.googleapis.com/auth/youtube.readonly',
+      approval_prompt: 'auto',
+      access_type: 'offline'
+    })
+  }
 
   return (
     <Button
       variant="outlined"
-      onClick={() => { window.location.href = `https://accounts.google.com/o/oauth2/auth?${query}` }}
+      onClick={() => { window.location.href = `https://accounts.google.com/o/oauth2/auth?${makeQuery()}` }}
     >
       Sign in
     </Button>
