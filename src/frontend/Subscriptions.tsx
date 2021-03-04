@@ -2,12 +2,19 @@ import React, { ReactElement, useEffect, useState } from 'react'
 import { Avatar, Grid, Box, Checkbox, CircularProgress } from '@material-ui/core'
 import { RefreshSharp } from '@material-ui/icons'
 
+function sortSubscriptions (subscriptions: SubscriptionsResponse): SubscriptionsResponse {
+  subscriptions.channels.sort((a, b) => a.title.localeCompare(b.title))
+  return subscriptions
+}
+
 async function getSubscriptions (): Promise<SubscriptionsResponse> {
-  return await (await fetch('/api/subscriptions', { mode: 'cors', credentials: 'include' })).json()
+  const subscriptions = await (await fetch('/api/subscriptions', { mode: 'cors', credentials: 'include' })).json()
+  return sortSubscriptions(subscriptions)
 }
 
 async function syncSubscriptions (): Promise<SubscriptionsResponse> {
-  return await (await fetch('/api/subscriptions', { method: 'POST', mode: 'cors', credentials: 'include' })).json()
+  const subscriptions = await (await fetch('/api/subscriptions', { method: 'POST', mode: 'cors', credentials: 'include' })).json()
+  return sortSubscriptions(subscriptions)
 }
 
 function Subscription ({ channel, toggle }: {channel: Channel, toggle: (string) => Promise<void>}): ReactElement {
