@@ -1,21 +1,14 @@
 import 'source-map-support/register'
 
-import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/apiGateway'
-import { middyfy, response } from '@libs/lambda'
-import cookie from 'cookie'
+import type { ValidatedEventAPIGatewayProxyEventWithSID } from '@libs/apiGateway'
+import { middyfy, response, injectSID } from '@libs/lambda'
 import { getUser } from '@libs/cookie'
 import { getSubscriptions } from '@libs/youtube'
 import { syncChannels, updateUserSyncTime } from '@libs/dynamodb'
 
 // Sync subscriptions from youtube
-const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
-  if (event.headers === undefined) return response(400, 'Invalid header')
-  if (event.headers.Cookie === undefined && event.headers.cookie === undefined) return response(400, 'Invalid header')
-
-  const { SID } = cookie.parse(event.headers.Cookie ?? event.headers.cookie)
-  if (SID === undefined) return response(400, 'SID is undefined')
-
-  const user = await getUser(SID, true)
+const post: ValidatedEventAPIGatewayProxyEventWithSID<any> = async (event) => {
+  const user = await getUser(event.SID, true)
   if (user === undefined) return response(404, '')
 
   const subscriptions = (await getSubscriptions(user.token.access_token)).map(subscription => ({
@@ -42,4 +35,4 @@ const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   }
 }
 
-export const handler = middyfy(post)
+export const handler = middyfy(injectSID(post))
