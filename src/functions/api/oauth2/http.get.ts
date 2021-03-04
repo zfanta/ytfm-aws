@@ -39,7 +39,7 @@ const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
 
   if (token.error !== undefined) {
     return {
-      statusCode: 403,
+      statusCode: 401,
       body: JSON.stringify(token)
     }
   }

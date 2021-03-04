@@ -1,15 +1,11 @@
 import 'source-map-support/register'
 
-import type { ValidatedEventAPIGatewayProxyEventWithSID } from '@libs/apiGateway'
-import { middyfy, response, injectSID } from '@libs/lambda'
-import { getUser } from '@libs/cookie'
+import type { ValidatedEventAPIGatewayProxyEventWithUser } from '@libs/apiGateway'
+import { middyfy, response, injectUser } from '@libs/lambda'
 import { updateSubscription } from '@libs/dynamodb'
 
-const patch: ValidatedEventAPIGatewayProxyEventWithSID<any> = async (event) => {
-  const user = await getUser(event.SID, false)
-  if (user === undefined) return response(404, '')
-
-  const { body } = event
+const patch: ValidatedEventAPIGatewayProxyEventWithUser<any> = async (event) => {
+  const { user, body } = event
 
   if (await updateSubscription(body.channel, user.email, body.notification) === undefined) {
     return response(404, '')
@@ -18,4 +14,4 @@ const patch: ValidatedEventAPIGatewayProxyEventWithSID<any> = async (event) => {
   return response(200, JSON.stringify(body))
 }
 
-export const handler = middyfy(injectSID(patch))
+export const handler = middyfy(injectUser(patch))

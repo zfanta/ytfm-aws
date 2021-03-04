@@ -1,13 +1,11 @@
 import 'source-map-support/register'
 
 import { getSubscriptionsWithTitle } from '@libs/dynamodb'
-import type { ValidatedEventAPIGatewayProxyEventWithSID } from '@libs/apiGateway'
-import { injectSID, middyfy, response } from '@libs/lambda'
-import { getUser } from '@libs/cookie'
+import type { ValidatedEventAPIGatewayProxyEventWithUser } from '@libs/apiGateway'
+import { injectUser, middyfy, response } from '@libs/lambda'
 
-const get: ValidatedEventAPIGatewayProxyEventWithSID<any> = async (event) => {
-  const user = await getUser(event.SID)
-  if (user === undefined) return response(404, '')
+const get: ValidatedEventAPIGatewayProxyEventWithUser<any> = async (event) => {
+  const { user } = event
 
   const channels = (await getSubscriptionsWithTitle(user.email)).map(subscription => ({
     id: subscription.channel,
@@ -24,4 +22,4 @@ const get: ValidatedEventAPIGatewayProxyEventWithSID<any> = async (event) => {
   return response(200, JSON.stringify(result))
 }
 
-export const handler = middyfy(injectSID(get))
+export const handler = middyfy(injectUser(get))

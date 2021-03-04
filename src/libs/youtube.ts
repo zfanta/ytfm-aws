@@ -1,11 +1,16 @@
 // TODO: use etag
 import qs from 'querystring'
 import fetch from 'node-fetch'
+import { updateGoogleToken, User } from '@libs/dynamodb'
+import { Token } from '@libs/types'
+import { refreshToken } from '@libs/oauth2'
 
-async function getSubscriptions (accessToken: string, pageToken?: string): Promise<SubscriptionResponse[]> {
+async function getSubscriptions (user: User, pageToken?: string): Promise<SubscriptionResponse[]> {
+  const token = await refreshGoogleToken(user)
+
   const url = 'https://www.googleapis.com/youtube/v3/subscriptions'
   const query = qs.stringify({
-    access_token: accessToken,
+    access_token: token.access_token,
     part: ['snippet'],
     mine: true,
     maxResults: 50,
@@ -19,7 +24,19 @@ async function getSubscriptions (accessToken: string, pageToken?: string): Promi
     return response.items
   }
 
-  return [...response.items, ...(await getSubscriptions(accessToken, response.nextPageToken))]
+  return [...response.items, ...(await getSubscriptions(user, response.nextPageToken))]
+}
+
+async function refreshGoogleToken (user: User): Promise<Token> {
+  let token = user.token
+  // Refresh token if expired
+  const currentTime = new Date()
+  if (user.expiresAt < currentTime.valueOf()) {
+    const newToken = await refreshToken(token.refresh_token as string)
+    token = await updateGoogleToken(user.email, newToken)
+  }
+
+  return token
 }
 
 export {

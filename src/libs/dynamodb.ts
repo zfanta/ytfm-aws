@@ -365,7 +365,7 @@ async function getSession (SID: string): Promise<Session|undefined> {
   return unmarshall(result.Item) as Session
 }
 
-interface User {
+export interface User {
   email: string
   expiresAt: number
   syncedAt?: number
