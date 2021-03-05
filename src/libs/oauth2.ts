@@ -63,8 +63,35 @@ async function refreshToken (refreshToken: string): Promise<Token> {
   return await (await fetch('https://accounts.google.com/o/oauth2/token', requestOptions)).json()
 }
 
+async function getPhotos (accessToken: string): Promise<string[]> {
+  const query = qs.stringify({
+    personFields: 'photos',
+    access_token: accessToken
+  })
+
+  const response: PeopleResponse = await (await fetch(`https://people.googleapis.com/v1/people/me?${query}`)).json()
+  return response.photos.map(photo => photo.url)
+}
+
 export {
   getTokenFromGoogle,
   refreshToken,
-  getEmail
+  getEmail,
+  getPhotos
+}
+
+interface PeopleResponse {
+  'resourceName': string
+  'etag': string
+  'photos': Array<{
+    'metadata': {
+      'primary': boolean
+      'source': {
+        'type': string
+        'id': string
+      }
+    }
+    'url': string
+    'default': boolean
+  }>
 }

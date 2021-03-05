@@ -312,7 +312,7 @@ async function updateSubscription (channel: string, user: string, notification: 
   return true
 }
 
-async function updateGoogleToken (email: string, token: Token): Promise<Token> {
+async function updateGoogleTokenAndPhotos (email: string, token: Token, photos: string[]): Promise<Token> {
   const TableName = process.env.USERS_TABLE_NAME
 
   let newToken = token
@@ -334,9 +334,9 @@ async function updateGoogleToken (email: string, token: Token): Promise<Token> {
   const updateItemCommand = new UpdateItemCommand({
     TableName,
     Key: marshall({ email }),
-    UpdateExpression: 'SET #token = :token, #expiresAt = :expiresAt',
-    ExpressionAttributeNames: { '#token': 'token', '#expiresAt': 'expiresAt' },
-    ExpressionAttributeValues: marshall({ ':token': newToken, ':expiresAt': expiresAt })
+    UpdateExpression: 'SET #token = :token, #expiresAt = :expiresAt, #photos = :photos',
+    ExpressionAttributeNames: { '#token': 'token', '#expiresAt': 'expiresAt', '#photos': 'photos' },
+    ExpressionAttributeValues: marshall({ ':token': newToken, ':expiresAt': expiresAt, ':photos': photos })
   })
 
   await client.send(updateItemCommand)
@@ -579,7 +579,7 @@ export {
   syncChannels,
   updateChannelExpiry,
   updateUserSyncTime,
-  updateGoogleToken,
+  updateGoogleTokenAndPhotos,
   getUser,
 
   getSession,

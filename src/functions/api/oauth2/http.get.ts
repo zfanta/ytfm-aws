@@ -2,8 +2,8 @@ import 'source-map-support/register'
 
 import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/apiGateway'
 import { middyfy, response } from '@libs/lambda'
-import { getEmail, getTokenFromGoogle } from '@libs/oauth2'
-import { getSession, updateGoogleToken, updateSessionUser } from '@libs/dynamodb'
+import { getEmail, getPhotos, getTokenFromGoogle } from '@libs/oauth2'
+import { getSession, updateGoogleTokenAndPhotos, updateSessionUser } from '@libs/dynamodb'
 
 function parseState (state: string): any {
   const result = {}
@@ -45,9 +45,10 @@ const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   }
 
   const email = await getEmail(token.access_token)
+  const photos = await getPhotos(token.access_token)
 
   await Promise.all([
-    updateGoogleToken(email, token),
+    updateGoogleTokenAndPhotos(email, token, photos),
     updateSessionUser(SID, email)
   ])
 
