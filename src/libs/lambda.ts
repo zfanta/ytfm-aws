@@ -1,7 +1,7 @@
 import middy from '@middy/core'
 import middyJsonBodyParser from '@middy/http-json-body-parser'
 import cookie from 'cookie'
-import { getSession, getUser as getUserFromDB } from '@libs/dynamodb'
+import { getSession, getUser } from '@libs/dynamodb'
 import { createSession } from '@libs/cookie'
 import Middy = middy.Middy
 
@@ -39,7 +39,7 @@ function injectUser (handler): any {
       return response(401, '')
     }
 
-    const user = await getUserFromDB(session.user)
+    const user = await getUser(session.user)
     if (user === undefined) {
       return response(401, '')
     }

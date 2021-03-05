@@ -2,9 +2,9 @@ import React, { ReactElement, useEffect, useState } from 'react'
 import cookie from 'cookie'
 import { Container } from '@material-ui/core'
 import Subscriptions from './Subscriptions'
-import Header from './Header'
+import Header, { User } from './Header'
 
-async function getProfile (): Promise<{ email: string }|undefined> {
+async function getProfile (): Promise<User|undefined> {
   const SID: string|undefined = cookie.parse(document.cookie).SID
   if (SID === undefined) return undefined
 
@@ -17,7 +17,7 @@ async function getProfile (): Promise<{ email: string }|undefined> {
 }
 
 function App (): ReactElement {
-  const [user, setUser] = useState<{email: string}>()
+  const [user, setUser] = useState<User>()
 
   useEffect(() => {
     getProfile().then(setUser).catch(console.error)

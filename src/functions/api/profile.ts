@@ -5,7 +5,7 @@ import { injectUser, middyfy, response } from '@libs/lambda'
 
 const get: ValidatedEventAPIGatewayProxyEventWithUser<any> = async (event) => {
   const { user } = event
-  return response(200, JSON.stringify({ email: user.email }))
+  return response(200, JSON.stringify({ email: user.email, photos: user.photos }))
 }
 
 export const handler = middyfy(injectUser(get))

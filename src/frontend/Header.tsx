@@ -12,16 +12,18 @@ import {
   DialogTitle,
   DialogActions,
   DialogContent,
-  DialogContentText
+  DialogContentText,
+  Avatar
 } from '@material-ui/core'
 import cookie from 'cookie'
 import qs from 'query-string'
 
 interface SignOutButtonProps {
   email: string
+  photo: string
   signOut: () => Promise<void>
 }
-function SignOutButton ({ email, signOut }: SignOutButtonProps): ReactElement {
+function SignOutButton ({ email, photo, signOut }: SignOutButtonProps): ReactElement {
   const [open, setOpen] = useState(false)
   const anchorRef = useRef<HTMLButtonElement>(null)
 
@@ -57,7 +59,7 @@ function SignOutButton ({ email, signOut }: SignOutButtonProps): ReactElement {
         aria-haspopup="true"
         onClick={handleToggle}
       >
-        {email}
+        <Avatar alt={email} src={photo} />
       </Button>
       <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal>
         {({ TransitionProps, placement }) => (
@@ -128,7 +130,7 @@ function SignInButton (): ReactElement {
       redirect_uri: 'https://dev.ytfm.app/api/oauth2',
       state: `SID=${SID}`,
       response_type: 'code',
-      scope: 'email https://www.googleapis.com/auth/youtube.readonly',
+      scope: 'email https://www.googleapis.com/auth/youtube.readonly profile',
       approval_prompt: 'auto',
       access_type: 'offline'
     })
@@ -145,17 +147,20 @@ function SignInButton (): ReactElement {
 }
 
 interface HeaderProps {
-  user: {
-    email: string
-  }|undefined
+  user: User|undefined
   signOut: () => Promise<void>
 }
 function Header ({ user, signOut }: HeaderProps): ReactElement {
   return (
     <Box style={{ textAlign: 'right' }}>
-      {user === undefined ? <SignInButton /> : <SignOutButton signOut={signOut} email={user.email} />}
+      {user === undefined ? <SignInButton /> : <SignOutButton signOut={signOut} email={user.email} photo={user.photos[0]} />}
     </Box>
   )
 }
 
 export default Header
+
+export interface User {
+  email: string
+  photos: string[]
+}

@@ -312,7 +312,7 @@ async function updateSubscription (channel: string, user: string, notification: 
   return true
 }
 
-async function updateGoogleTokenAndPhotos (email: string, token: Token, photos: string[]): Promise<Token> {
+async function updateGoogleTokenAndPhotos (email: string, token: Token, photos?: string[]): Promise<Token> {
   const TableName = process.env.USERS_TABLE_NAME
 
   let newToken = token
@@ -334,9 +334,16 @@ async function updateGoogleTokenAndPhotos (email: string, token: Token, photos: 
   const updateItemCommand = new UpdateItemCommand({
     TableName,
     Key: marshall({ email }),
-    UpdateExpression: 'SET #token = :token, #expiresAt = :expiresAt, #photos = :photos',
-    ExpressionAttributeNames: { '#token': 'token', '#expiresAt': 'expiresAt', '#photos': 'photos' },
-    ExpressionAttributeValues: marshall({ ':token': newToken, ':expiresAt': expiresAt, ':photos': photos })
+    UpdateExpression: photos === undefined
+      ? 'SET #token = :token, #expiresAt = :expiresAt'
+      : 'SET #token = :token, #expiresAt = :expiresAt, #photos = :photos',
+    ExpressionAttributeNames: photos === undefined
+      ? { '#token': 'token', '#expiresAt': 'expiresAt' }
+      : { '#token': 'token', '#expiresAt': 'expiresAt', '#photos': 'photos' },
+    ExpressionAttributeValues: marshall(photos === undefined
+      ? { ':token': newToken, ':expiresAt': expiresAt }
+      : { ':token': newToken, ':expiresAt': expiresAt, ':photos': photos }
+    )
   })
 
   await client.send(updateItemCommand)
@@ -370,6 +377,7 @@ export interface User {
   expiresAt: number
   syncedAt?: number
   token: Token
+  photos: string[]
 }
 async function getUser (email: string): Promise<User| undefined> {
   const command = new GetItemCommand({
