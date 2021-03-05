@@ -319,7 +319,7 @@ async function updateGoogleToken (email: string, token: Token): Promise<Token> {
 
   const getItemCommand = new GetItemCommand({
     TableName,
-    Key: { email: { S: email } }
+    Key: marshall({ email })
   })
 
   const result = await client.send(getItemCommand)
@@ -336,7 +336,7 @@ async function updateGoogleToken (email: string, token: Token): Promise<Token> {
     Key: marshall({ email }),
     UpdateExpression: 'SET #token = :token, #expiresAt = :expiresAt',
     ExpressionAttributeNames: { '#token': 'token', '#expiresAt': 'expiresAt' },
-    ExpressionAttributeValues: marshall({ ':token': JSON.stringify(newToken), ':expiresAt': expiresAt })
+    ExpressionAttributeValues: marshall({ ':token': newToken, ':expiresAt': expiresAt })
   })
 
   await client.send(updateItemCommand)
@@ -374,18 +374,16 @@ export interface User {
 async function getUser (email: string): Promise<User| undefined> {
   const command = new GetItemCommand({
     TableName: process.env.USERS_TABLE_NAME,
-    Key: { email: { S: email } }
+    Key: marshall({ email })
   })
 
   const response = await client.send(command)
   if (response.Item === undefined) return undefined
 
-  const user = unmarshall(response.Item) as User & {token: string}
+  const user = unmarshall(response.Item) as User
   if (user.email === undefined) return undefined
   if (user.expiresAt === undefined) return undefined
   if (user.token === undefined) return undefined
-
-  user.token = JSON.parse(user.token)
 
   return user
 }
