@@ -1,6 +1,5 @@
 import React, { ReactElement, useRef, useState, MouseEvent, KeyboardEvent, Dispatch, SetStateAction } from 'react'
 import {
-  Box,
   Button,
   ClickAwayListener,
   Popper,
@@ -13,10 +12,26 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  Avatar
+  Avatar,
+  AppBar,
+  Typography,
+  useScrollTrigger,
+  Slide,
+  Container,
+  Toolbar
 } from '@material-ui/core'
 import cookie from 'cookie'
 import qs from 'query-string'
+
+function HideOnScroll ({ children }): ReactElement {
+  const trigger = useScrollTrigger()
+
+  return (
+    <Slide appear={false} direction="down" in={!trigger}>
+      {children}
+    </Slide>
+  )
+}
 
 interface SignOutButtonProps {
   email: string
@@ -52,12 +67,13 @@ function SignOutButton ({ email, photo, signOut }: SignOutButtonProps): ReactEle
   }
 
   return (
-    <Box>
+    <>
       <Button
         ref={anchorRef}
         aria-controls={open ? 'menu-list-grow' : undefined}
         aria-haspopup="true"
         onClick={handleToggle}
+        style={{ padding: 0, minWidth: '40px' }}
       >
         <Avatar alt={email} src={photo} />
       </Button>
@@ -77,7 +93,7 @@ function SignOutButton ({ email, photo, signOut }: SignOutButtonProps): ReactEle
           </Grow>
         )}
       </Popper>
-    </Box>
+    </>
   )
 }
 
@@ -152,9 +168,19 @@ interface HeaderProps {
 }
 function Header ({ user, signOut }: HeaderProps): ReactElement {
   return (
-    <Box style={{ textAlign: 'right' }}>
-      {user === undefined ? <SignInButton /> : <SignOutButton signOut={signOut} email={user.email} photo={user.photos[0]} />}
-    </Box>
+    <>
+      <HideOnScroll>
+        <AppBar color="transparent" style={{ backgroundColor: 'white' }}>
+          <Container maxWidth="sm" style={{ padding: 0 }}>
+            <Toolbar>
+              <Typography variant="h6" style={{ flexGrow: 1 }}>YTFM</Typography>
+              {user === undefined ? <SignInButton /> : <SignOutButton signOut={signOut} email={user.email} photo={user.photos[0]} />}
+          </Toolbar>
+          </Container>
+        </AppBar>
+      </HideOnScroll>
+      <Toolbar style={{ marginBottom: '1rem' }} />
+    </>
   )
 }
 
