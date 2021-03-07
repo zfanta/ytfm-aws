@@ -3,11 +3,11 @@ import 'source-map-support/register'
 import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/apiGateway'
 import { middyfy, response } from '@libs/lambda'
 import xml2js from 'xml2js'
-import { pushNotificationEmail } from '@libs/sqs'
 import { VideoFromGoogleApis, VideoResponse } from '@libs/types'
 import qs from 'querystring'
 import fetch from 'node-fetch'
 import { getChannelSubscribers, getVideo, putVideo } from '@libs/dynamodb'
+import { sendNotificationEmail } from '@libs/email'
 
 const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   console.log('Pubsubhubbub callback[post] =>')
@@ -35,7 +35,11 @@ const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
 
       const subscribers = await getChannelSubscribers(video.channelId)
 
-      await pushNotificationEmail(videoFromGoogleApi, subscribers)
+      const notifications = subscribers.map(subscriber => ({
+        video: videoFromGoogleApi,
+        subscriber
+      }))
+      await sendNotificationEmail(notifications)
     }
   }
 
