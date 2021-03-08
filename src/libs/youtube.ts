@@ -39,8 +39,41 @@ async function refreshGoogleToken (user: User): Promise<Token> {
   return token
 }
 
+async function sendToPubsubhubbub (channelIds: string[], mode: 'subscribe'|'unsubscribe'): Promise<void> {
+  async function send (channelId: string, mode: string): Promise<void> {
+    const stage = process.env.STAGE
+    if (stage === undefined) throw new Error('STAGE is undefined')
+
+    const headers = {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+    const body = {
+      // 'hub.lease_seconds': 10,
+      'hub.callback': `https://${stage}.ytfm.app/api/pubsubhubbub`,
+      'hub.mode': mode,
+      'hub.topic': `https://www.youtube.com/xml/feeds/videos.xml?channel_id=${channelId}`,
+      'hub.verify': 'async'
+      // 'hub.secret': APP_SECRET_KEY
+    }
+    await fetch('https://pubsubhubbub.appspot.com/', {
+      method: 'post',
+      headers,
+      body: qs.stringify(body)
+    })
+  }
+
+  await Promise.all(channelIds.map(async channelId => {
+    if (channelId === undefined) throw new Error('Channel id is undefined')
+    if (mode === undefined) throw new Error('mode id is undefined')
+
+    console.log(`${mode} ${channelId}`)
+    return await send(channelId, mode)
+  }))
+}
+
 export {
-  getSubscriptions
+  getSubscriptions,
+  sendToPubsubhubbub
 }
 
 interface SubscriptionListResponse {

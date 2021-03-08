@@ -10,9 +10,9 @@ import {
 } from '@aws-sdk/client-dynamodb'
 import type { DeleteRequest } from '@aws-sdk/client-dynamodb'
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb'
-import { pubsubhubbub } from '@libs/sqs'
 import { Token } from '@libs/types'
 import dayjs from 'dayjs'
+import { sendToPubsubhubbub } from '@libs/youtube'
 
 // TODO: region
 const client = new DynamoDBClient({ region: 'us-east-1' })
@@ -240,7 +240,7 @@ async function syncChannels (email: string, channelsFromYoutube: Channel[]): Pro
     subscribeChannels(email, subscribe.map(a => a.id))
   ])
 
-  await pubsubhubbub('subscribe', subscribe.map(a => a.id))
+  await sendToPubsubhubbub(subscribe.map(a => a.id), 'subscribe')
 
   // return result
   const subscriptionsFromDBObject: {[key: string]: Subscription} = {}

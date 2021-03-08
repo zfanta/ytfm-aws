@@ -1,7 +1,5 @@
 import {
   GetQueueUrlCommand,
-  SendMessageBatchCommand,
-  SendMessageBatchRequestEntry,
   SendMessageCommand,
   SQSClient
 } from '@aws-sdk/client-sqs'
@@ -15,48 +13,6 @@ async function getQueueUrl (QueueName: string): Promise<string> {
   if (QueueUrl === undefined) throw new Error('Cannot find queue url')
 
   return QueueUrl
-}
-
-async function pubsubhubbub (mode: 'subscribe'|'unsubscribe', channelIds: string[]): Promise<void> {
-  if (process.env.PUBSUBHUBBUB_QUEUE_NAME === undefined) throw new Error('PUBSUBHUBBUB_QUEUE_NAME is undefined')
-
-  console.log(`Send to SQS[${process.env.PUBSUBHUBBUB_QUEUE_NAME}] =>`)
-
-  console.log('Number of channels:', channelIds.length)
-
-  // limit 10
-  const entries: SendMessageBatchRequestEntry[][] = []
-  const currentTime = new Date().toISOString().replace(/:/g, '__').replace(/\./g, '_')
-  for (let i = 0; i < channelIds.length; i += 10) {
-    entries.push(channelIds.slice(i, i + 10).map((channelId, index) => ({
-      Id: `${currentTime}-${i + index}`,
-      MessageBody: JSON.stringify({ channelId, mode: 'subscribe' }),
-      MessageAttributes: {
-        channelId: {
-          StringValue: channelId,
-          DataType: 'String'
-        },
-        mode: {
-          StringValue: mode,
-          DataType: 'String'
-        }
-      }
-    })))
-  }
-
-  const QueueUrl = await getQueueUrl(process.env.PUBSUBHUBBUB_QUEUE_NAME)
-
-  await Promise.all(entries.map(async entry => {
-    const command = new SendMessageBatchCommand({
-      QueueUrl,
-      Entries: entry
-    })
-    const data = await sqs.send(command)
-    if (data.Failed !== undefined) {
-      console.log('Failed:', data.Failed)
-    }
-  }))
-  console.log(`<= Send to SQS[${process.env.PUBSUBHUBBUB_QUEUE_NAME}]`)
 }
 
 async function pushVerificationEmail (to: string): Promise<void> {
@@ -84,6 +40,5 @@ async function pushVerificationEmail (to: string): Promise<void> {
 }
 
 export {
-  pubsubhubbub,
   pushVerificationEmail
 }

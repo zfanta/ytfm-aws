@@ -1,6 +1,6 @@
 import { EventBridgeHandler } from 'aws-lambda'
-import { pubsubhubbub } from '@libs/sqs'
 import { getImpendingPubsubhubbub } from '@libs/dynamodb'
+import { sendToPubsubhubbub } from '@libs/youtube'
 
 /*
  * From scheduled event
@@ -11,7 +11,7 @@ const handler: EventBridgeHandler<any, any, any> = async () => {
   const channelIds = await getImpendingPubsubhubbub()
   if (channelIds.length > 0) {
     console.log(`Resubscribe ${channelIds.length} channels`)
-    await pubsubhubbub('subscribe', channelIds)
+    await sendToPubsubhubbub(channelIds, 'subscribe')
   }
 
   console.log('<= Pubsubhubbub resubscribe')
