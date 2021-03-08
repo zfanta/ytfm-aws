@@ -224,14 +224,13 @@ async function syncChannels (email: string, channelsFromYoutube: Channel[]): Pro
 
   const subscriptionsFromDB = await getSubscriptions(email)
   const subscriptionChannelIdsFromDB = subscriptionsFromDB.map(subscriptionFromDB => subscriptionFromDB.channel)
-  const channelIdsFromDB = channelsFromDB.filter(channelFromDB => subscriptionChannelIdsFromDB.includes(channelFromDB.id)).map(a => a.id)
 
   const intersection = subscriptionChannelIdsFromDB.filter(id => channelIdsFromYoutube.includes(id))
 
-  // unsubscribe(channelsFromDB - channelsFromYoutube)
-  const unsubscribes = channelIdsFromDB.filter(id => !intersection.includes(id))
+  // unsubscribe(subscriptionsFromDB - channelsFromYoutube)
+  const unsubscribes = subscriptionChannelIdsFromDB.filter(id => !intersection.includes(id))
 
-  // subscribe(channelsFromYoutube - channelsFromDB)
+  // subscribe(channelsFromYoutube - subscriptionsFromDB)
   const subscribe = channelsFromYoutube.filter(channel => !intersection.includes(channel.id))
 
   await Promise.all([
