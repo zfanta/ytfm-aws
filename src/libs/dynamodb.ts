@@ -311,24 +311,23 @@ async function updateSubscription (channel: string, user: string, notification: 
   return true
 }
 
-async function updateGoogleTokenAndPhotos (email: string, token: Token, photos?: string[]): Promise<Token> {
+async function updateGoogleTokenAndPhotos (email: string, oldToken: Token|undefined, newToken: Token, photos?: string[]): Promise<Token> {
   const TableName = process.env.USERS_TABLE_NAME
 
-  let newToken = token
+  let tokenToInsert = newToken
 
-  const getItemCommand = new GetItemCommand({
-    TableName,
-    Key: marshall({ email })
-  })
-
-  const result = await client.send(getItemCommand)
-  if (result?.Item?.token?.S !== undefined) {
-    const oldToken = JSON.parse(result.Item.token.S)
-    newToken = Object.assign({}, oldToken, token)
+  if (oldToken === undefined) {
+    const user = await getUser(email)
+    if (user?.token === undefined) {
+      throw new Error('Failed to get user information')
+    }
+    oldToken = user.token
   }
 
+  tokenToInsert = Object.assign({}, oldToken, newToken)
+
   const currentTime = new Date().valueOf()
-  const expiresAt = currentTime + (token.expires_in * 1000)
+  const expiresAt = currentTime + (newToken.expires_in * 1000)
 
   const updateItemCommand = new UpdateItemCommand({
     TableName,
@@ -340,14 +339,14 @@ async function updateGoogleTokenAndPhotos (email: string, token: Token, photos?:
       ? { '#token': 'token', '#expiresAt': 'expiresAt' }
       : { '#token': 'token', '#expiresAt': 'expiresAt', '#photos': 'photos' },
     ExpressionAttributeValues: marshall(photos === undefined
-      ? { ':token': newToken, ':expiresAt': expiresAt }
-      : { ':token': newToken, ':expiresAt': expiresAt, ':photos': photos }
+      ? { ':token': tokenToInsert, ':expiresAt': expiresAt }
+      : { ':token': tokenToInsert, ':expiresAt': expiresAt, ':photos': photos }
     )
   })
 
   await client.send(updateItemCommand)
 
-  return newToken
+  return tokenToInsert
 }
 
 interface Session {

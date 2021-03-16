@@ -33,7 +33,7 @@ async function refreshGoogleToken (user: User): Promise<Token> {
   const currentTime = new Date()
   if (user.expiresAt < currentTime.valueOf()) {
     const newToken = await refreshToken(token.refresh_token as string)
-    token = await updateGoogleTokenAndPhotos(user.email, newToken)
+    token = await updateGoogleTokenAndPhotos(user.email, token, newToken)
   }
 
   return token

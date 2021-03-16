@@ -48,7 +48,7 @@ const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   const photos = await getPhotos(token.access_token)
 
   await Promise.all([
-    updateGoogleTokenAndPhotos(email, token, photos),
+    updateGoogleTokenAndPhotos(email, undefined, token, photos),
     updateSessionUser(SID, email)
   ])
 
