@@ -28,18 +28,6 @@ const pubsubhubbubHttpPost = {
   }]
 }
 
-const pubsubhubbubSend = {
-  handler: 'src/functions/api/pubsubhubbub/send.handler',
-  events: [{
-    sqs: {
-      arn: {
-        // eslint-disable-next-line no-template-curly-in-string
-        'Fn::GetAtt': ['pubsubhubbubQueue', 'Arn']
-      }
-    }
-  }]
-}
-
 const pubsubhubbubResubscribe = {
   handler: 'src/functions/api/pubsubhubbub/resubscribe.handler',
   events: [{
@@ -52,6 +40,5 @@ const pubsubhubbubResubscribe = {
 export default {
   pubsubhubbubHttpGet,
   pubsubhubbubHttpPost,
-  pubsubhubbubSend,
   pubsubhubbubResubscribe
 }

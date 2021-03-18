@@ -1,5 +1,9 @@
 import 'source-map-support/register'
 
+/*
+ * Deprecated
+ */
+
 import { SQSHandler } from 'aws-lambda'
 import { SESv2Client, SendCustomVerificationEmailCommand } from '@aws-sdk/client-sesv2'
 import * as templates from './templates'

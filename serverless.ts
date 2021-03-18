@@ -50,8 +50,6 @@ const serverlessConfiguration: AWS = {
       GOOGLE_CLIENT_SECRET: '${env:GOOGLE_CLIENT_SECRET}',
       GOOGLE_API_KEY: '${env:GOOGLE_API_KEY}',
       OAUTH2_REDIRECT_URL: 'https://${opt:stage, self:provider.stage}.ytfm.app/api/oauth2',
-      PUBSUBHUBBUB_QUEUE_NAME: 'ytfm-${opt:stage, self:provider.stage}-pubsubhubbub',
-      EMAIL_QUEUE_NAME: 'ytfm-${opt:stage, self:provider.stage}-email',
       STAGE: '${opt:stage, self:provider.stage}'
     },
     lambdaHashingVersion: '20201221',
@@ -69,14 +67,6 @@ const serverlessConfiguration: AWS = {
         'dynamodb:BatchGetItem'
       ],
       Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/*'
-    }, {
-      Effect: 'Allow',
-      Action: ['sqs:SendMessage', 'sqs:GetQueueUrl'],
-      Resource: [{
-        'Fn::GetAtt': ['pubsubhubbubQueue', 'Arn']
-      }, {
-        'Fn::GetAtt': ['emailQueue', 'Arn']
-      }]
     }, {
       Effect: 'Allow',
       Action: ['ses:SendCustomVerificationEmail'],
@@ -232,18 +222,6 @@ const serverlessConfiguration: AWS = {
               ProjectionType: 'KEYS_ONLY'
             }
           }]
-        }
-      },
-      pubsubhubbubQueue: {
-        Type: 'AWS::SQS::Queue',
-        Properties: {
-          QueueName: '${self:provider.environment.PUBSUBHUBBUB_QUEUE_NAME}'
-        }
-      },
-      emailQueue: {
-        Type: 'AWS::SQS::Queue',
-        Properties: {
-          QueueName: '${self:provider.environment.EMAIL_QUEUE_NAME}'
         }
       }
     }

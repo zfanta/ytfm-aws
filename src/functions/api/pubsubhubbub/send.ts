@@ -3,6 +3,10 @@ import qs from 'querystring'
 import fetch from 'node-fetch'
 
 /*
+ * Deprecated
+ */
+
+/*
  * From sqs pubsubhubbub
  */
 
