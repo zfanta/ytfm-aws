@@ -8,39 +8,42 @@ import {
   CreateEmailTemplateCommand,
   DeleteEmailTemplateCommand
 } from '@aws-sdk/client-sesv2'
+import createLogger from '@libs/createLogger'
 import * as templates from './templates'
+
+const logger = createLogger('/email/updateEmailTemplates.ts')
 
 // TODO: region
 const client = new SESv2Client({ region: 'us-east-1' })
 
 async function deleteTemplates (): Promise<void> {
   try {
-    console.log(`Delete ${templates.verification.TemplateName}`)
+    logger.info(`Delete ${templates.verification.TemplateName}`)
     await client.send(new DeleteCustomVerificationEmailTemplateCommand({ TemplateName: templates.verification.TemplateName }))
 
-    console.log(`Delete ${templates.notification.TemplateName}`)
+    logger.info(`Delete ${templates.notification.TemplateName}`)
     await client.send(new DeleteEmailTemplateCommand({ TemplateName: templates.notification.TemplateName }))
   } catch (e) {
-    console.log(e)
+    logger.error(e)
   }
 }
 
 async function createCustomVerificationEmailTemplate (): Promise<void> {
-  console.log(`Create ${templates.verification.TemplateName}`)
+  logger.info(`Create ${templates.verification.TemplateName}`)
   const command = new CreateCustomVerificationEmailTemplateCommand(templates.verification)
 
   await client.send(command)
 }
 
 async function createNotificationEmailTemplate (): Promise<void> {
-  console.log(`Create ${templates.notification.TemplateName}`)
+  logger.info(`Create ${templates.notification.TemplateName}`)
   const command = new CreateEmailTemplateCommand(templates.notification)
 
   await client.send(command)
 }
 
 const handler: Handler = async () => {
-  console.log('UpdateEmailTemplates =>')
+  logger.info('UpdateEmailTemplates =>')
 
   await deleteTemplates()
 
@@ -48,7 +51,7 @@ const handler: Handler = async () => {
 
   await createNotificationEmailTemplate()
 
-  console.log('<= UpdateEmailTemplates')
+  logger.info('<= UpdateEmailTemplates')
 }
 
 export {

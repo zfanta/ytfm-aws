@@ -33,6 +33,7 @@
     "serverless-dynamodb-local": "^0.2.39",
     "source-map-support": "^0.5.19",
     "validator": "^13.5.2",
+    "winston": "^3.3.3",
     "xml2js": "^0.4.23"
   },
   "devDependencies": {

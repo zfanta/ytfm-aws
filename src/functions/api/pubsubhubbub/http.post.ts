@@ -8,9 +8,12 @@ import qs from 'querystring'
 import fetch from 'node-fetch'
 import { getChannelSubscribers, getVideo, putVideo } from '@libs/dynamodb'
 import { sendNotificationEmail } from '@libs/email'
+import createLogger from '@libs/createLogger'
+
+const logger = createLogger('/api/pubsubhubbub/http.post.ts')
 
 const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
-  console.log('Pubsubhubbub callback[post] =>')
+  logger.info('Pubsubhubbub callback[post] =>')
 
   const entry = (await xml2js.parseStringPromise(event.body)).feed.entry[0]
 
@@ -27,7 +30,7 @@ const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   if (new Date(video.updated).valueOf() - new Date(video.published).valueOf() < 1000 * 60 * 60) {
     // Ignore if mail is sent
     if (await getVideo(video.id) === undefined) {
-      console.log('new video:', video.id)
+      logger.info('new video:', video.id)
 
       await putVideo(video.id)
 
@@ -43,7 +46,7 @@ const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
     }
   }
 
-  console.log('<= Pubsubhubbub callback[post]')
+  logger.info('<= Pubsubhubbub callback[post]')
   return response(200, '')
 }
 
