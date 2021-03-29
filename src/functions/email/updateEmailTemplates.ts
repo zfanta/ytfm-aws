@@ -43,7 +43,7 @@ async function createNotificationEmailTemplate (): Promise<void> {
 }
 
 const handler: Handler = async () => {
-  logger.info('UpdateEmailTemplates =>')
+  logger.debug('=>')
 
   await deleteTemplates()
 
@@ -51,7 +51,7 @@ const handler: Handler = async () => {
 
   await createNotificationEmailTemplate()
 
-  logger.info('<= UpdateEmailTemplates')
+  logger.debug('<=')
 }
 
 export {

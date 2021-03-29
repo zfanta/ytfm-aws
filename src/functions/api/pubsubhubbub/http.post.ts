@@ -13,7 +13,10 @@ import createLogger from '@libs/createLogger'
 const logger = createLogger('/api/pubsubhubbub/http.post.ts')
 
 const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
-  logger.info('Pubsubhubbub callback[post] =>')
+  logger.debug('=>')
+  if (typeof event.body === 'string') {
+    logger.info(`Received\n${event.body}`)
+  }
 
   const entry = (await xml2js.parseStringPromise(event.body)).feed.entry[0]
 
@@ -42,11 +45,12 @@ const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
         video: videoFromGoogleApi,
         subscriber
       }))
+      logger.info(`Send notification\n${JSON.stringify(videoFromGoogleApi)}`)
       await sendNotificationEmail(notifications)
     }
   }
 
-  logger.info('<= Pubsubhubbub callback[post]')
+  logger.debug('<=')
   return response(200, '')
 }
 
