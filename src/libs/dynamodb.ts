@@ -552,12 +552,14 @@ async function getChannelSubscribers (channelId: string, ExclusiveStartKey?: any
   return [...items, ...await getChannelSubscribers(channelId, response.LastEvaluatedKey)]
 }
 
-async function getImpendingPubsubhubbub (ExclusiveStartKey?: any): Promise<string[]> {
+async function getImpendingPubsubhubbub (impendingTime: number|undefined, ExclusiveStartKey: any|undefined): Promise<string[]> {
   if (process.env.CHANNELS_TABLE_NAME === undefined) throw new Error('CHANNELS_TABLE_NAME is undefined')
 
-  // const currentTime = new Date().valueOf()
-  // const impendingTime = currentTime + (1000 * 60 * 60 * 24) // 1 day
-  const impendingTime = 1714864336894
+  const currentTime = new Date().valueOf()
+  if (impendingTime === undefined) {
+    impendingTime = currentTime + (1000 * 60 * 60 * 24) // 1 day
+  }
+  // const impendingTime = 1714864336894
 
   console.log(`Get before ${new Date(impendingTime).toISOString()}`)
 
@@ -575,7 +577,7 @@ async function getImpendingPubsubhubbub (ExclusiveStartKey?: any): Promise<strin
 
   if (result.LastEvaluatedKey === undefined) return channelIds
 
-  return [...channelIds, ...await getImpendingPubsubhubbub(result.LastEvaluatedKey)]
+  return [...channelIds, ...await getImpendingPubsubhubbub(impendingTime, result.LastEvaluatedKey)]
 }
 
 export {

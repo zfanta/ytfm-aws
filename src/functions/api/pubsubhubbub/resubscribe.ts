@@ -10,9 +10,10 @@ const logger = createLogger('/api/pubsubhubbub/resubscribe.ts')
  */
 const handler: EventBridgeHandler<any, any, any> = async () => {
   logger.info('=>')
-  const channelIds = await getImpendingPubsubhubbub()
+  const channelIds = await getImpendingPubsubhubbub(undefined, undefined)
   if (channelIds.length > 0) {
     logger.info(`Resubscribe ${channelIds.length} channels`)
+    logger.info(channelIds)
     await sendToPubsubhubbub(channelIds, 'subscribe')
   }
   logger.info('<=')

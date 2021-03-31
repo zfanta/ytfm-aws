@@ -66,7 +66,6 @@ async function sendToPubsubhubbub (channelIds: string[], mode: 'subscribe'|'unsu
     if (channelId === undefined) throw new Error('Channel id is undefined')
     if (mode === undefined) throw new Error('mode id is undefined')
 
-    console.log(`${mode} ${channelId}`)
     return await send(channelId, mode)
   }))
 }
