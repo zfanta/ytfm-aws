@@ -36,7 +36,7 @@ interface VideoFromGoogleApis {
     'channelTitle': string
     'tags': string[]
     'categoryId': string
-    'liveBroadcastContent': string
+    'liveBroadcastContent': 'live' | 'none' | 'upcoming'
     'defaultLanguage': string
     'localized': {
       'title': string

@@ -1,19 +1,37 @@
 import { SendEmailCommand, SESv2Client } from '@aws-sdk/client-sesv2'
+import { parse } from 'iso8601-duration'
 import * as templates from '../functions/email/templates'
 import { VideoFromGoogleApis } from '@libs/types'
 
 // TODO: region name
 const client = new SESv2Client({ region: 'us-east-1' })
 
-function makeTemplateData (video: VideoFromGoogleApis): string {
+function getDuration (video: VideoFromGoogleApis): string {
+  const { liveBroadcastContent } = video.snippet
+  if (liveBroadcastContent === 'live') {
+    return 'LIVE'
+  }
+  if (liveBroadcastContent === 'upcoming') {
+    return 'PREMIERE'
+  }
+
   // https://en.wikipedia.org/wiki/ISO_8601#Durations
-  const duration = video.contentDetails.duration
-    .replace(/^PT/, '') // remove first 'PT'
-    .split(/[HMS]/) // split #H#M#S
-    .slice(0, -1) // remove last empty element
-    .map(s => `00${s}`.slice(-2)) // add left zero padding
-    .join(':') // join 'H:M:S'
-    .replace(/^0/, '') // remove first zero
+  let duration = ''
+  let { hours, minutes, seconds } = parse(video.contentDetails.duration)
+  hours ??= 0
+  minutes ??= 0
+  seconds ??= 0
+  duration = `0${seconds}`.slice(-2)
+  if (hours !== 0) {
+    duration = `${hours}` + ':' + `0${minutes}`.slice(-2) + ':' + duration
+  } else {
+    duration = `${minutes}` + ':' + duration
+  }
+  return duration
+}
+
+function makeTemplateData (video: VideoFromGoogleApis): string {
+  const duration = getDuration(video)
 
   const largestThumbnail = Object.keys(video.snippet.thumbnails).sort((a, b) => {
     if (video.snippet.thumbnails[a].width < video.snippet.thumbnails[b].width) {
