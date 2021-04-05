@@ -29,25 +29,22 @@ const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
     updated: entry.updated[0]
   }
 
-  // Ignore if it is not publishing
-  if (new Date(video.updated).valueOf() - new Date(video.published).valueOf() < 1000 * 60 * 60) {
-    // Ignore if mail is sent
-    if (await getVideo(video.id) === undefined) {
-      logger.info('new video:', video.id)
+  // Ignore if mail is sent
+  if (await getVideo(video.id) === undefined) {
+    logger.info('new video:', video.id)
 
-      await putVideo(video.id)
+    await putVideo(video.id)
 
-      const videoFromGoogleApi = await getVideoInformation(video.id, video.channelId)
+    const videoFromGoogleApi = await getVideoInformation(video.id, video.channelId)
 
-      const subscribers = await getChannelSubscribers(video.channelId)
+    const subscribers = await getChannelSubscribers(video.channelId)
 
-      const notifications = subscribers.map(subscriber => ({
-        video: videoFromGoogleApi,
-        subscriber
-      }))
-      logger.info(`Send notification\n${JSON.stringify(videoFromGoogleApi)}`)
-      await sendNotificationEmail(notifications)
-    }
+    const notifications = subscribers.map(subscriber => ({
+      video: videoFromGoogleApi,
+      subscriber
+    }))
+    logger.info(`Send notification\n${JSON.stringify(videoFromGoogleApi)}`)
+    await sendNotificationEmail(notifications)
   }
 
   logger.debug('<=')
