@@ -1,5 +1,7 @@
 import 'source-map-support/register'
 
+// TODO: replace ScanCommand -> QueryCommand
+
 import {
   BatchGetItemCommand,
   BatchWriteItemCommand, DeleteItemCommand,
@@ -367,6 +369,24 @@ async function getSession (SID: string): Promise<Session|undefined> {
   return unmarshall(result.Item) as Session
 }
 
+async function getSessionsByUser (user: string, ExclusiveStartKey?: any): Promise<Session[]> {
+  const command = new QueryCommand({
+    TableName: process.env.SESSIONS_TABLE_NAME,
+    KeyConditionExpression: '#kn0 = :kv0',
+    IndexName: 'user-idx',
+    ExpressionAttributeNames: { '#kn0': 'user' },
+    ExpressionAttributeValues: { ':kv0': { S: user } },
+    ExclusiveStartKey
+  })
+
+  const result = await client.send(command)
+  const sessions = result.Items?.map(item => unmarshall(item)) as Session[] ?? []
+
+  if (result.LastEvaluatedKey === undefined) return sessions
+
+  return [...sessions, ...await getSessionsByUser(user, result.LastEvaluatedKey)]
+}
+
 export interface User {
   email: string
   expiresAt: number
@@ -389,6 +409,15 @@ async function getUser (email: string): Promise<User| undefined> {
   if (user.token === undefined) return undefined
 
   return user
+}
+
+async function deleteUser (email: string): Promise<void> {
+  const command = new DeleteItemCommand({
+    TableName: process.env.USERS_TABLE_NAME,
+    Key: { email: { S: email } }
+  })
+
+  await client.send(command)
 }
 
 async function updateSessionUser (SID: string, user: string): Promise<void> {
@@ -577,6 +606,19 @@ async function getImpendingPubsubhubbub (impendingTime: number|undefined, Exclus
   return [...channelIds, ...await getImpendingPubsubhubbub(impendingTime, result.LastEvaluatedKey)]
 }
 
+async function deleteAccount (user: string): Promise<void> {
+  const [sessions, subscriptions] = await Promise.all([
+    await getSessionsByUser(user),
+    await getSubscriptions(user)
+  ])
+
+  await Promise.all([
+    unsubscribeChannels(user, subscriptions.map(subscription => subscription.channel)),
+    deleteSessions(sessions.map(session => session.id)),
+    deleteUser(user)
+  ])
+}
+
 export {
   getSubscriptions,
   updateSubscription,
@@ -599,5 +641,7 @@ export {
   putVideo,
   getChannelSubscribers,
 
-  getImpendingPubsubhubbub
+  getImpendingPubsubhubbub,
+
+  deleteAccount
 }

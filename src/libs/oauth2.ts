@@ -73,11 +73,20 @@ async function getPhotos (accessToken: string): Promise<string[]> {
   return response.photos.map(photo => photo.url)
 }
 
+async function revokeToken (accessToken: string): Promise<void> {
+  const query = qs.stringify({
+    token: accessToken
+  })
+
+  await fetch(`https://oauth2.googleapis.com/revoke?${query}`, { method: 'POST' })
+}
+
 export {
   getTokenFromGoogle,
   refreshToken,
   getEmail,
-  getPhotos
+  getPhotos,
+  revokeToken
 }
 
 interface PeopleResponse {
