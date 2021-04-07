@@ -318,10 +318,7 @@ async function updateGoogleTokenAndPhotos (email: string, oldToken: Token|undefi
 
   if (oldToken === undefined) {
     const user = await getUser(email)
-    if (user?.token === undefined) {
-      throw new Error('Failed to get user information')
-    }
-    oldToken = user.token
+    oldToken = user?.token ?? newToken
   }
 
   tokenToInsert = Object.assign({}, oldToken, newToken)
