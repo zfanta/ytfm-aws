@@ -1,3 +1,5 @@
+import profileHttpPatchSchema from './http.patch.schema'
+
 const profileHttpGet = {
   handler: 'src/functions/api/profile/http.get',
   events: [{
@@ -18,7 +20,23 @@ const profileHttpDelete = {
   }]
 }
 
+const profileHttpPatch = {
+  handler: 'src/functions/api/profile/http.patch',
+  events: [{
+    http: {
+      method: 'patch',
+      path: 'api/profile',
+      request: {
+        schema: {
+          'application/json': profileHttpPatchSchema
+        }
+      }
+    }
+  }]
+}
+
 export default {
   profileHttpGet,
-  profileHttpDelete
+  profileHttpDelete,
+  profileHttpPatch
 }

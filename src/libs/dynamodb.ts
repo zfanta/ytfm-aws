@@ -284,6 +284,21 @@ async function updateUserSyncTime (email: string): Promise<Date> {
   return currentTime
 }
 
+async function updateUserNotification (email: string, notification: boolean): Promise<Date> {
+  const currentTime = new Date()
+  const command = new UpdateItemCommand({
+    TableName: process.env.USERS_TABLE_NAME,
+    Key: marshall({ email }),
+    UpdateExpression: 'SET #notification = :notification',
+    ExpressionAttributeNames: { '#notification': 'notification' },
+    ExpressionAttributeValues: { ':notification': { BOOL: notification } }
+  })
+
+  await client.send(command)
+
+  return currentTime
+}
+
 async function getSubscription (channel: string, user: string): Promise<Subscription|undefined> {
   const command = new GetItemCommand({
     TableName: process.env.SUBSCRIPTIONS_TABLE_NAME,
@@ -332,14 +347,14 @@ async function updateGoogleTokenAndPhotos (email: string, oldToken: Token|undefi
     TableName,
     Key: marshall({ email }),
     UpdateExpression: photos === undefined
-      ? 'SET #token = :token, #expiresAt = :expiresAt'
-      : 'SET #token = :token, #expiresAt = :expiresAt, #photos = :photos',
+      ? 'SET #token = :token, #expiresAt = :expiresAt, #notification = :notification'
+      : 'SET #token = :token, #expiresAt = :expiresAt, #photos = :photos, #notification = :notification',
     ExpressionAttributeNames: photos === undefined
-      ? { '#token': 'token', '#expiresAt': 'expiresAt' }
-      : { '#token': 'token', '#expiresAt': 'expiresAt', '#photos': 'photos' },
+      ? { '#token': 'token', '#expiresAt': 'expiresAt', '#notification': 'notification' }
+      : { '#token': 'token', '#expiresAt': 'expiresAt', '#photos': 'photos', '#notification': 'notification' },
     ExpressionAttributeValues: marshall(photos === undefined
-      ? { ':token': tokenToInsert, ':expiresAt': expiresAt }
-      : { ':token': tokenToInsert, ':expiresAt': expiresAt, ':photos': photos }
+      ? { ':token': tokenToInsert, ':expiresAt': expiresAt, ':notification': true }
+      : { ':token': tokenToInsert, ':expiresAt': expiresAt, ':photos': photos, ':notification': true }
     )
   })
 
@@ -389,6 +404,7 @@ async function getSessionsByUser (user: string, ExclusiveStartKey?: any): Promis
 
 export interface User {
   email: string
+  notification: boolean
   expiresAt: number
   syncedAt?: number
   token: Token
@@ -626,6 +642,7 @@ export {
   syncChannels,
   updateChannelExpiry,
   updateUserSyncTime,
+  updateUserNotification,
   updateGoogleTokenAndPhotos,
   getUser,
 

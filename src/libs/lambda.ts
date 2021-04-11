@@ -1,12 +1,24 @@
 import middy from '@middy/core'
 import middyJsonBodyParser from '@middy/http-json-body-parser'
 import cookie from 'cookie'
-import { getSession, getUser } from '@libs/dynamodb'
+import { getSession, getUser, User } from '@libs/dynamodb'
 import { createSession } from '@libs/cookie'
 import Middy = middy.Middy
 
 function response (statusCode: number, body: string, headers?: Headers): {statusCode: number, body: string, headers?: Headers} {
   return { statusCode, body, headers }
+}
+
+function responseProfile (user: User): {statusCode: number, body: string, headers?: Headers} {
+  const body = JSON.stringify({
+    email: user.email,
+    photos: user.photos,
+    notification: user.notification
+  })
+  return {
+    statusCode: 200,
+    body
+  }
 }
 
 const middyfy = (handler): Middy<any, any> => {
@@ -53,6 +65,7 @@ function injectUser (handler): any {
 export {
   middyfy,
   response,
+  responseProfile,
   injectUser
 }
 
