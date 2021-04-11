@@ -22,6 +22,7 @@ import {
 } from '@material-ui/core'
 import cookie from 'cookie'
 import qs from 'query-string'
+import { useLocation } from 'wouter'
 
 function HideOnScroll ({ children }): ReactElement {
   const trigger = useScrollTrigger()
@@ -38,9 +39,10 @@ interface SignOutButtonProps {
   photo: string
   signOut: () => Promise<void>
 }
-function SignOutButton ({ email, photo, signOut }: SignOutButtonProps): ReactElement {
+function ButtonsAfterSignIn ({ email, photo, signOut }: SignOutButtonProps): ReactElement {
   const [open, setOpen] = useState(false)
   const anchorRef = useRef<HTMLButtonElement>(null)
+  const [location, setLocation] = useLocation()
 
   function handleToggle (): void {
     setOpen((pervOpen) => !pervOpen)
@@ -87,6 +89,10 @@ function SignOutButton ({ email, photo, signOut }: SignOutButtonProps): ReactEle
               <ClickAwayListener onClickAway={handleClose}>
                 <MenuList autoFocusItem={open} id="menu-list-grow" onKeyDown={handleListKeyDown}>
                   <MenuItem onClick={e => { handleClose(e); handleSignOut() }}>Sign out</MenuItem>
+                  {location === '/'
+                    ? <MenuItem onClick={e => { handleClose(e); setLocation('/profile') }}>Profile</MenuItem>
+                    : <MenuItem onClick={e => { handleClose(e); setLocation('/') }}>Subscriptions</MenuItem>
+                  }
                 </MenuList>
               </ClickAwayListener>
             </Paper>
@@ -174,7 +180,10 @@ function Header ({ user, signOut }: HeaderProps): ReactElement {
           <Container maxWidth="sm" style={{ padding: 0 }}>
             <Toolbar>
               <Typography variant="h6" style={{ flexGrow: 1 }}>YTFM</Typography>
-              {user === undefined ? <SignInButton /> : <SignOutButton signOut={signOut} email={user.email} photo={user.photos[0]} />}
+              {user === undefined
+                ? <SignInButton />
+                : <ButtonsAfterSignIn signOut={signOut} email={user.email} photo={user.photos[0]} />
+              }
           </Toolbar>
           </Container>
         </AppBar>
@@ -189,4 +198,5 @@ export default Header
 export interface User {
   email: string
   photos: string[]
+  notification: boolean
 }

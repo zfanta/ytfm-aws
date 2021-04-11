@@ -1,7 +1,9 @@
 import React, { ReactElement, useEffect, useState } from 'react'
 import cookie from 'cookie'
 import { Container } from '@material-ui/core'
+import { Switch, Route } from 'wouter'
 import Subscriptions from './Subscriptions'
+import Profile from './Profile'
 import Header, { User } from './Header'
 
 async function getProfile (): Promise<User|undefined> {
@@ -36,7 +38,15 @@ function App (): ReactElement {
   return (
     <Container maxWidth="sm">
       <Header user={user} signOut={signOut} />
-      {user === undefined ? <div>TODO</div> : <Subscriptions />}
+      {user === undefined
+        ? <div>TODO</div>
+        : <Switch>
+            <Route path="/" component={Subscriptions} />
+            <Route path="/profile">
+              <Profile user={user} setUser={setUser} />
+            </Route>
+        </Switch>
+      }
     </Container>
   )
 }
