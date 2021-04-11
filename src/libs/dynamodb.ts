@@ -427,6 +427,34 @@ async function getUser (email: string): Promise<User| undefined> {
   return user
 }
 
+async function getUsers (emails: string[]): Promise<User[]> {
+  if (process.env.USERS_TABLE_NAME === undefined) throw new Error('CHANNELS_TABLE_NAME is undefined')
+
+  const result: User[] = []
+
+  for (let i = 0; i < emails.length; i += 100) {
+    // 100 limit
+    const emails100 = emails.slice(i, i + 100)
+
+    const command = new BatchGetItemCommand({
+      RequestItems: {
+        [process.env.USERS_TABLE_NAME]: {
+          ConsistentRead: false,
+          Keys: emails100.map(email => ({ email: { S: email } }))
+        }
+      }
+    })
+
+    const items = (await client.send(command)).Responses?.[process.env.USERS_TABLE_NAME]
+
+    result.push(...(
+      items?.map(item => unmarshall(item) as User) ?? []
+    ))
+  }
+
+  return result
+}
+
 async function deleteUser (email: string): Promise<void> {
   const command = new DeleteItemCommand({
     TableName: process.env.USERS_TABLE_NAME,
@@ -645,6 +673,7 @@ export {
   updateUserNotification,
   updateGoogleTokenAndPhotos,
   getUser,
+  getUsers,
 
   getSession,
   updateSessionUser,

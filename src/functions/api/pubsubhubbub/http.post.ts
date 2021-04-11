@@ -6,7 +6,7 @@ import xml2js from 'xml2js'
 import { VideoFromGoogleApis, VideoResponse } from '@libs/types'
 import qs from 'querystring'
 import fetch from 'node-fetch'
-import { getChannelSubscribers, getVideo, putVideo } from '@libs/dynamodb'
+import { getChannelSubscribers, getUsers, getVideo, putVideo } from '@libs/dynamodb'
 import { sendNotificationEmail } from '@libs/email'
 import createLogger from '@libs/createLogger'
 
@@ -38,8 +38,9 @@ const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
     const videoFromGoogleApi = await getVideoInformation(video.id, video.channelId)
 
     const subscribers = await getChannelSubscribers(video.channelId)
+    const users = new Set((await getUsers(subscribers)).filter(user => user.notification).map(user => user.email))
 
-    const notifications = subscribers.map(subscriber => ({
+    const notifications = subscribers.filter(subscriber => users.has(subscriber) !== undefined).map(subscriber => ({
       video: videoFromGoogleApi,
       subscriber
     }))
