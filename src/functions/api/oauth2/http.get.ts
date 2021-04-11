@@ -55,7 +55,7 @@ const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   return {
     statusCode: 303,
     headers: {
-      Location: '/subscriptions'
+      Location: '/'
     },
     body: ''
   }
