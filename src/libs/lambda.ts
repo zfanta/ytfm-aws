@@ -5,7 +5,7 @@ import { getSession, getUser, User } from '@libs/dynamodb'
 import { createSession } from '@libs/cookie'
 import Middy = middy.Middy
 
-function response (statusCode: number, body: string = '', headers?: Headers): {statusCode: number, body: string, headers?: Headers} {
+function response (statusCode: number, body: string, headers?: Headers): {statusCode: number, body: string, headers?: Headers} {
   return { statusCode, body, headers }
 }
 
