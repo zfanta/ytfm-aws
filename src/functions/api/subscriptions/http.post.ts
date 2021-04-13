@@ -3,7 +3,8 @@ import 'source-map-support/register'
 import type { ValidatedEventAPIGatewayProxyEventWithUser } from '@libs/apiGateway'
 import { middyfy, response, injectUser } from '@libs/lambda'
 import { getSubscriptions } from '@libs/youtube'
-import { syncChannels, updateUserSyncTime } from '@libs/dynamodb'
+import { syncChannels, updateSubscriptionEtag, updateUserSyncTime } from '@libs/dynamodb'
+import { generateEtag } from '@libs/crypto'
 
 // Sync subscriptions from youtube
 const post: ValidatedEventAPIGatewayProxyEventWithUser<any> = async (event) => {
@@ -27,7 +28,13 @@ const post: ValidatedEventAPIGatewayProxyEventWithUser<any> = async (event) => {
     channels
   }
 
-  return response(200, JSON.stringify(result))
+  const newEtag = await generateEtag(user.email, new Date().valueOf())
+  await updateSubscriptionEtag(user.email, newEtag)
+  const headers = {
+    Etag: newEtag
+  }
+
+  return response(200, JSON.stringify(result), headers)
 }
 
 export const handler = middyfy(injectUser(post))

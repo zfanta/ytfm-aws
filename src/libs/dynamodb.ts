@@ -363,6 +363,20 @@ async function updateGoogleTokenAndPhotos (email: string, oldToken: Token|undefi
   return tokenToInsert
 }
 
+async function updateSubscriptionEtag (email: string, etag: string|undefined): Promise<void> {
+  const TableName = process.env.USERS_TABLE_NAME
+
+  const updateItemCommand = new UpdateItemCommand({
+    TableName,
+    Key: marshall({ email }),
+    UpdateExpression: 'SET #subscriptionEtag = :subscriptionEtag',
+    ExpressionAttributeNames: { '#subscriptionEtag': 'subscriptionEtag' },
+    ExpressionAttributeValues: marshall({ ':subscriptionEtag': etag ?? '' })
+  })
+
+  await client.send(updateItemCommand)
+}
+
 interface Session {
   id: string
   atime: number
@@ -409,6 +423,7 @@ export interface User {
   syncedAt?: number
   token: Token
   photos: string[]
+  subscriptionEtag?: string
 }
 async function getUser (email: string): Promise<User| undefined> {
   const command = new GetItemCommand({
@@ -672,6 +687,7 @@ export {
   updateUserSyncTime,
   updateUserNotification,
   updateGoogleTokenAndPhotos,
+  updateSubscriptionEtag,
   getUser,
   getUsers,
 
