@@ -24,6 +24,7 @@ const post: ValidatedEventAPIGatewayProxyEventWithUser<any> = async (event) => {
   const channels = await syncChannels(user.email, subscriptions)
   const result = {
     syncedAt,
+    updatedAt: syncedAt,
     channels
   }
 

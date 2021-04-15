@@ -5,13 +5,16 @@ import { Switch, Route } from 'wouter'
 import Subscriptions from './Subscriptions'
 import Profile from './Profile'
 import Header, { User } from './Header'
+import { setUser } from './storage'
 
 async function getProfile (): Promise<User|undefined> {
   const SID: string|undefined = cookie.parse(document.cookie).SID
   if (SID === undefined) return undefined
 
   try {
-    return await (await fetch('/api/profile')).json()
+    const result = await (await fetch('/api/profile')).json()
+    setUser(result)
+    return result
   } catch (e) {
     // TODO
     return undefined

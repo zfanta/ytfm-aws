@@ -13,7 +13,8 @@ function responseProfile (user: User): {statusCode: number, body: string, header
   const body = JSON.stringify({
     email: user.email,
     photos: user.photos,
-    notification: user.notification
+    notification: user.notification,
+    updatedAt: user.updatedAt
   })
   return {
     statusCode: 200,

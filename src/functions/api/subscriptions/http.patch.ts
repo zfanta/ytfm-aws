@@ -7,11 +7,13 @@ import { updateSubscription } from '@libs/dynamodb'
 const patch: ValidatedEventAPIGatewayProxyEventWithUser<any> = async (event) => {
   const { user, body } = event
 
-  if (await updateSubscription(body.channel, user.email, body.notification) === undefined) {
+  const currentTime = new Date()
+
+  if (await updateSubscription(body.channel, user.email, body.notification, currentTime) === undefined) {
     return response(404, '')
   }
 
-  return response(200, JSON.stringify(body))
+  return response(200, JSON.stringify(Object.assign({}, body, { updatedAt: currentTime.valueOf() })))
 }
 
 export const handler = middyfy(injectUser(patch))

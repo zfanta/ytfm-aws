@@ -279,9 +279,24 @@ async function updateUserSyncTime (email: string): Promise<Date> {
     ExpressionAttributeValues: { ':syncedAt': { N: `${currentTime.valueOf()}` } }
   })
 
-  await client.send(command)
+  await Promise.all([
+    client.send(command),
+    updateUserSubscriptionUpdatedTime(email, currentTime)
+  ])
 
   return currentTime
+}
+
+async function updateUserSubscriptionUpdatedTime (email: string, currentTime: Date): Promise<void> {
+  const command = new UpdateItemCommand({
+    TableName: process.env.USERS_TABLE_NAME,
+    Key: marshall({ email }),
+    UpdateExpression: 'SET #updatedAt = :updatedAt',
+    ExpressionAttributeNames: { '#updatedAt': 'updatedAt' },
+    ExpressionAttributeValues: { ':updatedAt': { N: `${currentTime.valueOf()}` } }
+  })
+
+  await client.send(command)
 }
 
 async function updateUserNotification (email: string, notification: boolean): Promise<Date> {
@@ -312,7 +327,7 @@ async function getSubscription (channel: string, user: string): Promise<Subscrip
   return unmarshall(response.Item) as Subscription
 }
 
-async function updateSubscription (channel: string, user: string, notification: boolean): Promise<boolean> {
+async function updateSubscription (channel: string, user: string, notification: boolean, currentTime: Date): Promise<boolean> {
   if (await getSubscription(channel, user) === undefined) return false
 
   const command = new UpdateItemCommand({
@@ -323,7 +338,10 @@ async function updateSubscription (channel: string, user: string, notification: 
     ExpressionAttributeValues: marshall({ ':notification': notification })
   })
 
-  await client.send(command)
+  await Promise.all([
+    client.send(command),
+    updateUserSubscriptionUpdatedTime(user, currentTime)
+  ])
 
   return true
 }
@@ -407,6 +425,7 @@ export interface User {
   notification: boolean
   expiresAt: number
   syncedAt?: number
+  updatedAt?: number
   token: Token
   photos: string[]
 }

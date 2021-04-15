@@ -23,6 +23,7 @@ import {
 import cookie from 'cookie'
 import qs from 'query-string'
 import { useLocation } from 'wouter'
+import { clear } from './storage'
 
 function HideOnScroll ({ children }): ReactElement {
   const trigger = useScrollTrigger()
@@ -59,6 +60,7 @@ function ButtonsAfterSignIn ({ email, photo, signOut }: SignOutButtonProps): Rea
 
   function handleSignOut (): void {
     signOut().catch(console.error)
+    clear()
   }
 
   function handleListKeyDown (event: KeyboardEvent): void {
@@ -199,4 +201,5 @@ export interface User {
   email: string
   photos: string[]
   notification: boolean
+  updatedAt: number
 }

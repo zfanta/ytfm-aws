@@ -12,6 +12,7 @@ import {
 } from '@material-ui/core'
 import { NotificationsOffSharp, NotificationsActiveSharp } from '@material-ui/icons'
 import { useLocation } from 'wouter'
+import {clear} from "./storage";
 
 interface EmailNotificationProps {
   email: string
@@ -61,6 +62,7 @@ function DeleteAccount ({ callback }: DeleteAccountProps): ReactElement {
   const [, setLocation] = useLocation()
 
   async function deleteAccount (): Promise<void> {
+    clear()
     setDeleting(true)
     await fetch('/api/profile', { method: 'DELETE' })
     setDeleting(false)

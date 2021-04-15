@@ -16,6 +16,7 @@ const get: ValidatedEventAPIGatewayProxyEventWithUser<any> = async (event) => {
 
   const result = {
     syncedAt: user.syncedAt,
+    updatedAt: user.updatedAt,
     channels
   }
 
