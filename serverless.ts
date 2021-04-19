@@ -73,7 +73,7 @@ const serverlessConfiguration: AWS = {
       Resource: 'arn:aws:ses:${opt:region, self:provider.region}:*:identity/*'
     }, {
       Effect: 'Allow',
-      Action: ['ses:SendTemplatedEmail'],
+      Action: ['ses:SendTemplatedEmail', 'ses:SendRawEmail'],
       Resource: 'arn:aws:ses:${opt:region, self:provider.region}:*:identity/*'
     }]
   },

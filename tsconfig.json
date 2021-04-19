@@ -12,7 +12,8 @@
 
     "allowSyntheticDefaultImports": true,
     "strictNullChecks": true,
-    "jsx": "react"
+    "jsx": "react",
+    "esModuleInterop": true
   },
   "exclude": [
     "node_modules/**/*",
