@@ -1,20 +1,23 @@
 import 'source-map-support/register'
 
+import type { DeleteRequest } from '@aws-sdk/client-dynamodb'
 // TODO: replace ScanCommand -> QueryCommand
-
 import {
   BatchGetItemCommand,
-  BatchWriteItemCommand, DeleteItemCommand,
+  BatchWriteItemCommand,
+  DeleteItemCommand,
   DynamoDBClient,
-  GetItemCommand, PutItemCommand,
-  QueryCommand, ScanCommand,
+  GetItemCommand,
+  PutItemCommand,
+  QueryCommand,
+  ScanCommand,
   UpdateItemCommand
 } from '@aws-sdk/client-dynamodb'
-import type { DeleteRequest } from '@aws-sdk/client-dynamodb'
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb'
 import { Token } from '@libs/types'
 import dayjs from 'dayjs'
 import { sendToPubsubhubbub } from '@libs/youtube'
+import sodium from 'libsodium-wrappers'
 
 // TODO: region
 const client = new DynamoDBClient({ region: 'us-east-1' })
@@ -682,6 +685,68 @@ async function deleteAccount (user: string): Promise<void> {
   ])
 }
 
+async function putNewKey (type: 'unsubscribe'): Promise<void> {
+  await sodium.ready
+
+  const key = sodium.crypto_secretbox_keygen('uint8array')
+  const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES, 'uint8array')
+
+  const Item = marshall({
+    type,
+    createdAt: new Date().valueOf(),
+    key,
+    nonce
+  })
+
+  const putItemCommand = new PutItemCommand(({
+    TableName: process.env.KEYS_TABLE_NAME,
+    Item
+  }))
+
+  await client.send(putItemCommand)
+}
+
+interface UnsubscribeKeys {
+  keys: Array<{
+    type: string
+    createdAt: number
+    key: Uint8Array
+    nonce: Uint8Array
+  }>
+  ExclusiveStartKey?: any
+}
+async function getKeys (type: 'unsubscribe', ExclusiveStartKey?: any): Promise<UnsubscribeKeys> {
+  const command = new QueryCommand({
+    TableName: process.env.KEYS_TABLE_NAME,
+    KeyConditionExpression: '#type = :type',
+    ExpressionAttributeNames: { '#type': 'type' },
+    ExpressionAttributeValues: { ':type': { S: type } },
+    ConsistentRead: false,
+    ScanIndexForward: false,
+    ExclusiveStartKey
+  })
+
+  const response = await client.send(command)
+  const items = response.Items ?? []
+
+  if (items.length === 0) {
+    await putNewKey(type)
+    return await getKeys(type, ExclusiveStartKey)
+  }
+
+  return {
+    keys: items.map(item => unmarshall(item) as {
+      type: string
+      createdAt: number
+      key: Uint8Array
+      nonce: Uint8Array
+    }),
+    ExclusiveStartKey: response.LastEvaluatedKey
+  }
+}
+
+putNewKey('unsubscribe').catch(console.error)
+
 export {
   getSubscriptions,
   updateSubscription,
@@ -708,5 +773,8 @@ export {
 
   getImpendingPubsubhubbub,
 
-  deleteAccount
+  deleteAccount,
+
+  putNewKey,
+  getKeys
 }
