@@ -2,6 +2,7 @@ import { SendEmailCommand, SESv2Client } from '@aws-sdk/client-sesv2'
 import { parse } from 'iso8601-duration'
 import { VideoFromGoogleApis } from '@libs/types'
 import MailComposer from 'nodemailer/lib/mail-composer'
+import { generateUnsubscribeToken } from '@libs/crypto'
 
 // TODO: region name
 const client = new SESv2Client({ region: 'us-east-1' })
@@ -63,8 +64,11 @@ interface MailData {
   duration: string
   channelId: string
   channelTitle: string
+  unsubscribeLink: string
 }
 async function getRaw (video: VideoFromGoogleApis, to: string): Promise<Buffer> {
+  if (process.env.STAGE === undefined) throw new Error('STAGE is undefined')
+
   const largestThumbnail = Object.keys(video.snippet.thumbnails).sort((a, b) => {
     if (video.snippet.thumbnails[a].width < video.snippet.thumbnails[b].width) {
       return 1
@@ -73,6 +77,10 @@ async function getRaw (video: VideoFromGoogleApis, to: string): Promise<Buffer> 
     }
   })[0]
 
+  const channelId = video.snippet.channelId
+  const unsubscribeToken = await generateUnsubscribeToken(to, channelId)
+  const unsubscribeLink = `https://${process.env.STAGE}.ytfm.app/unsubscribe/${channelId}?token=${unsubscribeToken}`
+
   const duration = getDuration(video)
   const mail = new MailComposer({
     from: {
@@ -80,6 +88,9 @@ async function getRaw (video: VideoFromGoogleApis, to: string): Promise<Buffer> 
       name: video.snippet.channelTitle
     },
     to,
+    headers: {
+      'List-Unsubscribe': `<${unsubscribeLink}>`
+    },
     subject: video.snippet.title,
     text: `[${duration}] ${video.snippet.title}`,
     html: getHtml({
@@ -88,14 +99,15 @@ async function getRaw (video: VideoFromGoogleApis, to: string): Promise<Buffer> 
       channelId: video.snippet.channelId,
       channelTitle: video.snippet.channelTitle,
       thumbnail: video.snippet.thumbnails[largestThumbnail].url,
-      duration
+      duration,
+      unsubscribeLink
     })
   })
   return await mail.compile().build()
 }
 
 function getHtml (data: MailData): string {
-  const { videoTitle, videoId, thumbnail, duration, channelId, channelTitle } = data
+  const { videoTitle, videoId, thumbnail, duration, channelId, channelTitle, unsubscribeLink } = data
   return `
 <html>
 <head>
@@ -247,6 +259,13 @@ function getHtml (data: MailData): string {
                                       <td>
                                         <a class="video-link-font-class" href="https://www.youtube.com/channel/${channelId}" style="font-family:Roboto,sans-serif;font-size:12px; color: #757575;; line-height:16px; letter-spacing:0px; -webkit-text-size-adjust:none; text-decoration:none;">
                                           ${channelTitle}
+                                        </a>
+                                      </td>
+                                    </tr>
+                                    <tr style="height: 40px">
+                                      <td style="width: 600px">
+                                        <a class="video-link-font-class" href="${unsubscribeLink}" style="font-family:Roboto,sans-serif;font-size:12px; color: #757575;; line-height:16px; letter-spacing:0px; -webkit-text-size-adjust:none; text-decoration:none;">
+                                          Unsubscribe channel
                                         </a>
                                       </td>
                                     </tr>
