@@ -745,8 +745,6 @@ async function getKeys (type: 'unsubscribe', ExclusiveStartKey?: any): Promise<U
   }
 }
 
-putNewKey('unsubscribe').catch(console.error)
-
 export {
   getSubscriptions,
   updateSubscription,

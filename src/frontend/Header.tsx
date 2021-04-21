@@ -175,6 +175,8 @@ interface HeaderProps {
   signOut: () => Promise<void>
 }
 function Header ({ user, signOut }: HeaderProps): ReactElement {
+  const [location] = useLocation()
+
   return (
     <>
       <HideOnScroll>
@@ -182,9 +184,11 @@ function Header ({ user, signOut }: HeaderProps): ReactElement {
           <Container maxWidth="sm" style={{ padding: 0 }}>
             <Toolbar>
               <Typography variant="h6" style={{ flexGrow: 1 }}>YTFM</Typography>
-              {user === undefined
-                ? <SignInButton />
-                : <ButtonsAfterSignIn signOut={signOut} email={user.email} photo={user.photos[0]} />
+              {location.startsWith('/unsubscribe')
+                ? null
+                : user === undefined
+                  ? <SignInButton />
+                  : <ButtonsAfterSignIn signOut={signOut} email={user.email} photo={user.photos[0]} />
               }
           </Toolbar>
           </Container>

@@ -79,7 +79,7 @@ async function getRaw (video: VideoFromGoogleApis, to: string): Promise<Buffer> 
 
   const channelId = video.snippet.channelId
   const unsubscribeToken = await generateUnsubscribeToken(to, channelId)
-  const unsubscribeLink = `https://${process.env.STAGE}.ytfm.app/unsubscribe/${channelId}?token=${unsubscribeToken}`
+  const unsubscribeLink = `https://${process.env.STAGE}.ytfm.app/unsubscribe/${channelId}?token=${unsubscribeToken}&channelTitle=${encodeURIComponent(video.snippet.channelTitle)}`
 
   const duration = getDuration(video)
   const mail = new MailComposer({

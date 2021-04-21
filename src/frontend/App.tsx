@@ -1,11 +1,12 @@
 import React, { ReactElement, useEffect, useState } from 'react'
 import cookie from 'cookie'
 import { Container } from '@material-ui/core'
-import { Switch, Route } from 'wouter'
+import { Switch, Route, useLocation } from 'wouter'
 import Subscriptions from './Subscriptions'
 import Profile from './Profile'
 import Header, { User } from './Header'
 import { setUser } from './storage'
+import Unsubscribe from './Unsubscribe'
 
 async function getProfile (): Promise<User|undefined> {
   const SID: string|undefined = cookie.parse(document.cookie).SID
@@ -23,9 +24,12 @@ async function getProfile (): Promise<User|undefined> {
 
 function App (): ReactElement {
   const [user, setUser] = useState<User>()
+  const [location, setLocation] = useLocation()
 
   useEffect(() => {
-    getProfile().then(setUser).catch(console.error)
+    if (!location.startsWith('/unsubscribe')) {
+      getProfile().then(setUser).catch(console.error)
+    }
   }, [])
 
   async function signOut (): Promise<void> {
@@ -41,14 +45,23 @@ function App (): ReactElement {
   return (
     <Container maxWidth="sm">
       <Header user={user} signOut={signOut} />
-      {user === undefined
-        ? <div>TODO</div>
-        : <Switch>
+      {location.startsWith('/unsubscribe')
+        ? <Switch>
+            <Route path="/unsubscribe">
+              {() => { setLocation('/'); return <></> }}
+            </Route>
+            <Route path="/unsubscribe/:channelId">
+              {params => <Unsubscribe channelId={params.channelId} />}
+            </Route>
+          </Switch>
+        : user === undefined
+          ? <div>TODO: main</div>
+          : <Switch>
             <Route path="/" component={Subscriptions} />
             <Route path="/profile">
               <Profile user={user} setUser={setUser} />
             </Route>
-        </Switch>
+          </Switch>
       }
     </Container>
   )

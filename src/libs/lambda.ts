@@ -3,9 +3,11 @@ import middyJsonBodyParser from '@middy/http-json-body-parser'
 import cookie from 'cookie'
 import { getSession, getUser, User } from '@libs/dynamodb'
 import { createSession } from '@libs/cookie'
+import { decryptUnsubscribeToken } from '@libs/crypto'
+import type { ValidatedEventAPIGatewayProxyEventWithUser } from '@libs/apiGateway'
 import Middy = middy.Middy
 
-function response (statusCode: number, body: string, headers?: Headers): {statusCode: number, body: string, headers?: Headers} {
+function response (statusCode: number, body: string = '', headers?: Headers): {statusCode: number, body: string, headers?: Headers} {
   return { statusCode, body, headers }
 }
 
@@ -26,9 +28,25 @@ const middyfy = (handler): Middy<any, any> => {
   return middy(handler).use(middyJsonBodyParser())
 }
 
-function injectUser (handler): any {
+function injectUser (handler): ValidatedEventAPIGatewayProxyEventWithUser<any> {
   return async (event, context, callback) => {
     console.log('inject user =>')
+
+    if (
+      (event.path.startsWith('/api/subscriptions') || event.path.startsWith('/api/profile')) &&
+      event.httpMethod === 'PATCH' &&
+      event.body.token !== undefined
+    ) {
+      const unsubscribeData = await decryptUnsubscribeToken(event.body.token)
+      if (unsubscribeData === undefined) return response(401, '')
+
+      const user = await getUser(unsubscribeData.user)
+      if (user === undefined) return response(401, '')
+
+      event.user = user
+      return handler(event, context, callback)
+    }
+
     if (event.headers === undefined) return response(400, 'Invalid header')
     if (event.headers.Cookie === undefined && event.headers.cookie === undefined) return response(400, 'Invalid header')
 
