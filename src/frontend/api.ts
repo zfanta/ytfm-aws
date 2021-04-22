@@ -79,5 +79,6 @@ export {
 
 export type {
   SubscriptionsGetResponse,
-  ChannelInSubscriptionResponse
+  ChannelInSubscriptionResponse,
+  ProfileGetResponse
 }

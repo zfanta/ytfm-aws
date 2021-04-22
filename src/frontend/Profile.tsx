@@ -1,5 +1,4 @@
 import React, { Dispatch, ReactElement, SetStateAction, useState } from 'react'
-import { User } from './Header'
 import {
   Button,
   CircularProgress,
@@ -14,11 +13,12 @@ import { NotificationsOffSharp, NotificationsActiveSharp } from '@material-ui/ic
 import { useLocation } from 'wouter'
 import { clear } from './storage'
 import { profile } from './api'
+import type { ProfileGetResponse } from './api'
 
 interface EmailNotificationProps {
   email: string
   notification: boolean
-  callback: (result: User) => void
+  callback: (result: ProfileGetResponse) => void
 }
 function EmailNotification ({ email, notification, callback }: EmailNotificationProps): ReactElement {
   const [patching, setPatching] = useState(false)
@@ -99,8 +99,8 @@ function DeleteAccount ({ callback }: DeleteAccountProps): ReactElement {
 }
 
 interface ProfileProps {
-  user: User
-  setUser: Dispatch<SetStateAction<User | undefined>>
+  user: ProfileGetResponse
+  setUser: Dispatch<SetStateAction<ProfileGetResponse | undefined>>
 }
 function Profile ({ user, setUser }: ProfileProps): ReactElement {
   return (

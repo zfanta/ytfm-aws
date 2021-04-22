@@ -1,15 +1,14 @@
 import React, { ReactElement, useEffect, useState } from 'react'
 import cookie from 'cookie'
 import { Container } from '@material-ui/core'
-import { Switch, Route, useLocation } from 'wouter'
-import Subscriptions from './Subscriptions'
-import Profile from './Profile'
-import Header, { User } from './Header'
+import { useLocation } from 'wouter'
+import Header from './Header'
 import { setUser } from './storage'
-import Unsubscribe from './Unsubscribe'
 import { profile, signOut as signOutApi } from './api'
+import type { ProfileGetResponse } from './api'
+import Body from './Body'
 
-async function getProfile (): Promise<User|undefined> {
+async function getProfile (): Promise<ProfileGetResponse|undefined> {
   const SID: string|undefined = cookie.parse(document.cookie).SID
   if (SID === undefined) return undefined
 
@@ -24,13 +23,19 @@ async function getProfile (): Promise<User|undefined> {
 }
 
 function App (): ReactElement {
-  const [user, setUser] = useState<User>()
+  const [user, setUser] = useState<ProfileGetResponse>()
   const [location, setLocation] = useLocation()
 
   useEffect(() => {
-    if (!location.startsWith('/unsubscribe')) {
-      getProfile().then(setUser).catch(console.error)
-    }
+    (async () => {
+      const user = await getProfile()
+      setUser(user)
+      if (user === undefined && location !== '/') {
+        setLocation('/')
+      } else if (user !== undefined && location === '/') {
+        setLocation('/subscriptions')
+      }
+    })().catch(console.error)
   }, [])
 
   async function signOut (): Promise<void> {
@@ -46,24 +51,7 @@ function App (): ReactElement {
   return (
     <Container maxWidth="sm">
       <Header user={user} signOut={signOut} />
-      {location.startsWith('/unsubscribe')
-        ? <Switch>
-            <Route path="/unsubscribe">
-              {() => { setLocation('/'); return <></> }}
-            </Route>
-            <Route path="/unsubscribe/:channelId">
-              {params => <Unsubscribe channelId={params.channelId} />}
-            </Route>
-          </Switch>
-        : user === undefined
-          ? <div>TODO: main</div>
-          : <Switch>
-            <Route path="/" component={Subscriptions} />
-            <Route path="/profile">
-              <Profile user={user} setUser={setUser} />
-            </Route>
-          </Switch>
-      }
+      <Body user={user} setUser={setUser} />
     </Container>
   )
 }

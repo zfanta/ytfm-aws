@@ -25,6 +25,7 @@ import qs from 'query-string'
 import { useLocation } from 'wouter'
 import { clear } from './storage'
 import { cookie as cookieApi } from './api'
+import type { ProfileGetResponse } from './api'
 
 function HideOnScroll ({ children }): ReactElement {
   const trigger = useScrollTrigger()
@@ -92,9 +93,9 @@ function ButtonsAfterSignIn ({ email, photo, signOut }: SignOutButtonProps): Rea
               <ClickAwayListener onClickAway={handleClose}>
                 <MenuList autoFocusItem={open} id="menu-list-grow" onKeyDown={handleListKeyDown}>
                   <MenuItem onClick={e => { handleClose(e); handleSignOut() }}>Sign out</MenuItem>
-                  {location === '/'
+                  {location.startsWith('/subscriptions')
                     ? <MenuItem onClick={e => { handleClose(e); setLocation('/profile') }}>Profile</MenuItem>
-                    : <MenuItem onClick={e => { handleClose(e); setLocation('/') }}>Subscriptions</MenuItem>
+                    : <MenuItem onClick={e => { handleClose(e); setLocation('/subscriptions') }}>Subscriptions</MenuItem>
                   }
                 </MenuList>
               </ClickAwayListener>
@@ -172,7 +173,7 @@ function SignInButton (): ReactElement {
 }
 
 interface HeaderProps {
-  user: User|undefined
+  user: ProfileGetResponse|undefined
   signOut: () => Promise<void>
 }
 function Header ({ user, signOut }: HeaderProps): ReactElement {
@@ -201,10 +202,3 @@ function Header ({ user, signOut }: HeaderProps): ReactElement {
 }
 
 export default Header
-
-export interface User {
-  email: string
-  photos: string[]
-  notification: boolean
-  updatedAt: number
-}
