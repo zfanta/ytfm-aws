@@ -1,4 +1,4 @@
-import { SubscriptionsResponse } from './Subscriptions'
+import type { SubscriptionsGetResponse } from './api'
 import { User } from './Header'
 
 function setUser (user: User): void {
@@ -11,7 +11,7 @@ function getUser (): User|undefined {
   return JSON.parse(user)
 }
 
-function setSubscriptions (user: User, subscriptions: SubscriptionsResponse): void {
+function setSubscriptions (user: User, subscriptions: SubscriptionsGetResponse): void {
   const allSubscriptions = localStorage.getItem('subscriptions')
   if (allSubscriptions === null) {
     localStorage.setItem('subscriptions', JSON.stringify({
@@ -29,7 +29,7 @@ function setSubscriptions (user: User, subscriptions: SubscriptionsResponse): vo
   }))
 }
 
-function getSubscriptions (user: User): SubscriptionsResponse|undefined {
+function getSubscriptions (user: User): SubscriptionsGetResponse|undefined {
   const allSubscriptions = localStorage.getItem('subscriptions')
   if (allSubscriptions === null) return undefined
   const allSubscriptionsParsed = JSON.parse(allSubscriptions)

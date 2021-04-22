@@ -12,7 +12,8 @@ import {
 } from '@material-ui/core'
 import { NotificationsOffSharp, NotificationsActiveSharp } from '@material-ui/icons'
 import { useLocation } from 'wouter'
-import {clear} from "./storage";
+import { clear } from './storage'
+import { profile } from './api'
 
 interface EmailNotificationProps {
   email: string
@@ -24,13 +25,7 @@ function EmailNotification ({ email, notification, callback }: EmailNotification
 
   async function updateNotification (): Promise<void> {
     setPatching(true)
-    const result = await (await fetch('/api/profile', {
-      method: 'PATCH',
-      body: JSON.stringify({ notification: !notification }),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })).json()
+    const result = await profile.patch(!notification)
     callback(result)
     setPatching(false)
   }
@@ -64,7 +59,7 @@ function DeleteAccount ({ callback }: DeleteAccountProps): ReactElement {
   async function deleteAccount (): Promise<void> {
     clear()
     setDeleting(true)
-    await fetch('/api/profile', { method: 'DELETE' })
+    await profile.delete()
     setDeleting(false)
     callback(undefined)
     setLocation('/')

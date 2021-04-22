@@ -2,20 +2,22 @@ import React, { ReactElement, useEffect, useState } from 'react'
 import { Avatar, Grid, Box, Checkbox, CircularProgress } from '@material-ui/core'
 import { RefreshSharp } from '@material-ui/icons'
 import { getUser, getSubscriptions as getSubscriptionsFromStorage, setSubscriptions as setSubscriptionsInStorage } from './storage'
+import * as api from './api'
+import type { SubscriptionsGetResponse, ChannelInSubscriptionResponse } from './api'
 
-function sortSubscriptions (subscriptions: SubscriptionsResponse): SubscriptionsResponse {
+function sortSubscriptions (subscriptions: SubscriptionsGetResponse): SubscriptionsGetResponse {
   subscriptions.channels.sort((a, b) => a.title.localeCompare(b.title))
   return subscriptions
 }
 
-async function getSubscriptions (): Promise<SubscriptionsResponse> {
+async function getSubscriptions (): Promise<SubscriptionsGetResponse> {
   const user = getUser()
   if (user !== undefined) {
     const subscriptions = getSubscriptionsFromStorage(user)
     if (subscriptions !== undefined && subscriptions.updatedAt === user.updatedAt) return subscriptions
   }
 
-  const subscriptions = await (await fetch('/api/subscriptions', { mode: 'cors', credentials: 'include' })).json()
+  const subscriptions = await api.subscriptions.get()
   const sorted = sortSubscriptions(subscriptions)
   if (user !== undefined) {
     setSubscriptionsInStorage(user, sorted)
@@ -23,8 +25,8 @@ async function getSubscriptions (): Promise<SubscriptionsResponse> {
   return sorted
 }
 
-async function syncSubscriptions (): Promise<SubscriptionsResponse> {
-  const subscriptions = await (await fetch('/api/subscriptions', { method: 'POST', mode: 'cors', credentials: 'include' })).json()
+async function syncSubscriptions (): Promise<SubscriptionsGetResponse> {
+  const subscriptions = await api.subscriptions.post()
   const sorted = sortSubscriptions(subscriptions)
   const user = getUser()
   if (user !== undefined) {
@@ -33,7 +35,7 @@ async function syncSubscriptions (): Promise<SubscriptionsResponse> {
   return sorted
 }
 
-function Subscription ({ channel, toggle }: {channel: Channel, toggle: (string) => Promise<void>}): ReactElement {
+function Subscription ({ channel, toggle }: {channel: ChannelInSubscriptionResponse, toggle: (string) => Promise<void>}): ReactElement {
   const [patching, setPatching] = useState(false)
 
   async function onClickToggle (): Promise<void> {
@@ -60,7 +62,7 @@ function Subscription ({ channel, toggle }: {channel: Channel, toggle: (string) 
 }
 
 function Subscriptions (): ReactElement {
-  const [subscriptions, setSubscriptions] = useState<SubscriptionsResponse>()
+  const [subscriptions, setSubscriptions] = useState<SubscriptionsGetResponse>()
   const [syncing, setSyncing] = useState(false)
 
   useEffect(() => {
@@ -80,13 +82,7 @@ function Subscriptions (): ReactElement {
     const targetChannel = subscriptions.channels.find(channel => channel.id === channelId)
     if (targetChannel === undefined) throw new Error('Channel not found')
 
-    const response = await (await fetch('/api/subscriptions', {
-      mode: 'cors',
-      credentials: 'include',
-      method: 'PATCH',
-      body: JSON.stringify({ channel: channelId, notification: !targetChannel.notification }),
-      headers: { 'Content-Type': 'application/json' }
-    })).json()
+    const response = await api.subscriptions.patch(channelId, !targetChannel.notification)
 
     const targetIndex = subscriptions.channels.findIndex(channel => channel.id === channelId)
 
@@ -126,18 +122,3 @@ function Subscriptions (): ReactElement {
 }
 
 export default Subscriptions
-export type {
-  SubscriptionsResponse
-}
-
-interface SubscriptionsResponse {
-  syncedAt?: number
-  updatedAt?: number
-  channels: Channel[]
-}
-interface Channel {
-  id: string
-  title: string
-  notification: boolean
-  thumbnail: string
-}

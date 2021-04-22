@@ -1,20 +1,9 @@
 import React, { ReactElement, useEffect, useState } from 'react'
 import { useLocation } from 'wouter'
-
-async function patchSubscriptions (channel: string, notification: boolean, token: string): Promise<any> {
-  return await (await fetch('/api/subscriptions', {
-    method: 'PATCH',
-    body: JSON.stringify({ channel, notification, token }),
-    headers: { 'Content-Type': 'application/json' }
-  })).json()
-}
+import { profile, subscriptions } from './api'
 
 async function patchProfile (notification: boolean, token: string): Promise<any> {
-  return await (await fetch('/api/profile', {
-    method: 'PATCH',
-    body: JSON.stringify({ notification, token }),
-    headers: { 'Content-Type': 'application/json' }
-  })).json()
+  return await profile.patch(notification, token)
 }
 
 interface ChannelProps {
@@ -31,7 +20,7 @@ function Channel ({ channel: { id, title }, token }: ChannelProps): ReactElement
 
   async function unsubscribe (): Promise<void> {
     setLoading(true)
-    await patchSubscriptions(id, false, token)
+    await subscriptions.patch(id, false, token)
     setResubscribed(false)
     setUnsubscribed(true)
     setLoading(false)
@@ -39,7 +28,7 @@ function Channel ({ channel: { id, title }, token }: ChannelProps): ReactElement
 
   async function subscribe (): Promise<void> {
     setLoading(true)
-    await patchSubscriptions(id, true, token)
+    await subscriptions.patch(id, true, token)
     setResubscribed(true)
     setUnsubscribed(false)
     setLoading(false)
@@ -48,7 +37,7 @@ function Channel ({ channel: { id, title }, token }: ChannelProps): ReactElement
   useEffect(() => {
     (async () => {
       setLoading(true)
-      await patchSubscriptions(id, false, token)
+      await subscriptions.patch(id, false, token)
       setUnsubscribed(true)
       setLoading(false)
     })().catch(console.error)
@@ -122,7 +111,6 @@ function Ytfm ({ token }: YtfmProps): ReactElement {
 
 interface UnsubscribeProps {
   channelId: string
-  token: string
 }
 function Unsubscribe ({ channelId }: UnsubscribeProps): ReactElement {
   const [, setLocation] = useLocation()

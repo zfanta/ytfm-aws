@@ -24,6 +24,7 @@ import cookie from 'cookie'
 import qs from 'query-string'
 import { useLocation } from 'wouter'
 import { clear } from './storage'
+import { cookie as cookieApi } from './api'
 
 function HideOnScroll ({ children }): ReactElement {
   const trigger = useScrollTrigger()
@@ -109,7 +110,7 @@ function CookieAcceptButton ({ setCookieAccepted }: {setCookieAccepted: Dispatch
   const [open, setOpen] = useState(false)
 
   async function getCookie (): Promise<void> {
-    await fetch('/api/cookie', { mode: 'cors' })
+    await cookieApi.get()
     setCookieAccepted(true)
     setOpen(false)
   }

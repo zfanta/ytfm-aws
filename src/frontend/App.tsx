@@ -7,13 +7,14 @@ import Profile from './Profile'
 import Header, { User } from './Header'
 import { setUser } from './storage'
 import Unsubscribe from './Unsubscribe'
+import { profile, signOut as signOutApi } from './api'
 
 async function getProfile (): Promise<User|undefined> {
   const SID: string|undefined = cookie.parse(document.cookie).SID
   if (SID === undefined) return undefined
 
   try {
-    const result = await (await fetch('/api/profile')).json()
+    const result = await profile.get()
     setUser(result)
     return result
   } catch (e) {
@@ -34,7 +35,7 @@ function App (): ReactElement {
 
   async function signOut (): Promise<void> {
     try {
-      await fetch('/api/signOut')
+      await signOutApi.get()
       setUser(undefined)
     } catch (e) {
       // TODO
