@@ -62,6 +62,21 @@ async function getSubscriptionsWithTitle (user: string): Promise<Array<{channel:
   }))
 }
 
+async function getSubscriptionWithTitle (user: string, channelId: string): Promise<undefined|{channel: string, notification: boolean, title: string, thumbnail: string|undefined}> {
+  const subscription = await getSubscription(channelId, user)
+  if (subscription === undefined) return undefined
+
+  const [channel] = await getChannels([subscription.channel])
+  if (channel === undefined) return undefined
+
+  return {
+    channel: subscription.channel,
+    notification: subscription.notification,
+    title: channel.information.title,
+    thumbnail: channel.information.thumbnails.default?.url
+  }
+}
+
 interface Channel {
   id: string
   expiresAt: number
@@ -431,6 +446,9 @@ export interface User {
   updatedAt?: number
   token: Token
   photos: string[]
+  permissions?: {
+    unsubscribe?: string
+  }
 }
 async function getUser (email: string): Promise<User| undefined> {
   const command = new GetItemCommand({
@@ -749,6 +767,7 @@ export {
   getSubscriptions,
   updateSubscription,
   getSubscriptionsWithTitle,
+  getSubscriptionWithTitle,
   syncChannels,
   updateChannelExpiry,
   updateUserSyncTime,

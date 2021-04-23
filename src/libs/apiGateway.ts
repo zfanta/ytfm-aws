@@ -17,3 +17,7 @@ interface Response {
   statusCode: number
   body: string
 }
+
+export type {
+  ValidatedAPIGatewayProxyEvent
+}

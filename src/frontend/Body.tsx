@@ -15,7 +15,12 @@ function Body ({ user, setUser }: BodyProps): ReactElement {
 
   return (
     <Switch>
-      <Route path="/subscriptions" component={Subscriptions} />
+      <Route path="/subscriptions">
+        <Subscriptions />
+      </Route>
+      <Route path="/subscriptions/:channelId">
+        {params => <Subscriptions channelId={params.channelId} />}
+      </Route>
       <Route path="/profile">
         <Profile user={user} setUser={setUser} />
       </Route>

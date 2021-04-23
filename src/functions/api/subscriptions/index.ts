@@ -6,6 +6,12 @@ const subscriptionsHttpGet = {
       method: 'get',
       path: 'api/subscriptions'
     }
+  }, {
+    http: {
+      cors: true,
+      method: 'get',
+      path: 'api/subscriptions/{channelId}'
+    }
   }]
 }
 
@@ -26,7 +32,7 @@ const subscriptionsHttpPatch = {
     http: {
       cors: true,
       method: 'patch',
-      path: 'api/subscriptions'
+      path: 'api/subscriptions/{channelId}'
     }
   }]
 }

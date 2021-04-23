@@ -4,7 +4,7 @@ import cookie from 'cookie'
 import { getSession, getUser, User } from '@libs/dynamodb'
 import { createSession } from '@libs/cookie'
 import { decryptUnsubscribeToken } from '@libs/crypto'
-import type { ValidatedEventAPIGatewayProxyEventWithUser } from '@libs/apiGateway'
+import type { ValidatedAPIGatewayProxyEvent, ValidatedEventAPIGatewayProxyEventWithUser } from '@libs/apiGateway'
 import Middy = middy.Middy
 
 function response (statusCode: number, body: string = '', headers?: Headers): {statusCode: number, body: string, headers?: Headers} {
@@ -28,21 +28,40 @@ const middyfy = (handler): Middy<any, any> => {
   return middy(handler).use(middyJsonBodyParser())
 }
 
+async function getUserFromUnsubscribeToken (event: ValidatedAPIGatewayProxyEvent<any>): Promise<User|undefined> {
+  async function decryptUserFromUnsubscribeToken (token: string): Promise<undefined|User> {
+    const unsubscribeData = await decryptUnsubscribeToken(token)
+    if (unsubscribeData === undefined) return undefined
+
+    const user = await getUser(unsubscribeData.user)
+    if (user === undefined) return undefined
+
+    user.permissions = {
+      unsubscribe: unsubscribeData.channelId
+    }
+    return user
+  }
+
+  if (event.queryStringParameters?.token !== undefined) {
+    if (event.queryStringParameters.action === 'unsubscribe') {
+      return await decryptUserFromUnsubscribeToken(event.queryStringParameters.token)
+    }
+  }
+
+  if (event.path.startsWith('/api/subscriptions') && event.httpMethod === 'PATCH' && event.body?.token !== undefined) {
+    return await decryptUserFromUnsubscribeToken(event.body.token)
+  }
+
+  if (event.path === '/api/profile' && event.httpMethod === 'PATCH' && event.body.token !== undefined) {
+    return await decryptUserFromUnsubscribeToken(event.body.token)
+  }
+}
+
 function injectUser (handler): ValidatedEventAPIGatewayProxyEventWithUser<any> {
   return async (event, context, callback) => {
     console.log('inject user =>')
-
-    if (
-      (event.path.startsWith('/api/subscriptions') || event.path.startsWith('/api/profile')) &&
-      event.httpMethod === 'PATCH' &&
-      event.body.token !== undefined
-    ) {
-      const unsubscribeData = await decryptUnsubscribeToken(event.body.token)
-      if (unsubscribeData === undefined) return response(401, '')
-
-      const user = await getUser(unsubscribeData.user)
-      if (user === undefined) return response(401, '')
-
+    let user = await getUserFromUnsubscribeToken(event)
+    if (user !== undefined) {
       event.user = user
       return handler(event, context, callback)
     }
@@ -70,7 +89,7 @@ function injectUser (handler): ValidatedEventAPIGatewayProxyEventWithUser<any> {
       return response(401, '')
     }
 
-    const user = await getUser(session.user)
+    user = await getUser(session.user)
     if (user === undefined) {
       return response(401, '')
     }

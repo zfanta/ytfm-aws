@@ -10,7 +10,11 @@ function sortSubscriptions (subscriptions: SubscriptionsGetResponse): Subscripti
   return subscriptions
 }
 
-async function getSubscriptions (): Promise<SubscriptionsGetResponse> {
+async function getSubscriptions (channelId?: string, token?: string, action?: string): Promise<SubscriptionsGetResponse> {
+  if (channelId !== undefined) {
+    return await api.subscriptions.get(channelId, token, action)
+  }
+
   const user = getUser()
   if (user !== undefined) {
     const subscriptions = getSubscriptionsFromStorage(user)
@@ -35,13 +39,66 @@ async function syncSubscriptions (): Promise<SubscriptionsGetResponse> {
   return sorted
 }
 
-function Subscription ({ channel, toggle }: {channel: ChannelInSubscriptionResponse, toggle: (string) => Promise<void>}): ReactElement {
+interface UnsubscribeYtfmProps {
+  token: string
+}
+function UnsubscribeYtfm ({ token }: UnsubscribeYtfmProps): ReactElement {
+  const [loading, setLoading] = useState(false)
+  const [unsubscribed, setUnsubscribed] = useState(false)
+  const [resubscribed, setResubscribed] = useState(false)
+
+  async function unsubscribe (): Promise<void> {
+    setLoading(true)
+    await api.profile.patch(false, token)
+    setResubscribed(false)
+    setUnsubscribed(true)
+    setLoading(false)
+  }
+
+  async function subscribe (): Promise<void> {
+    setLoading(true)
+    await api.profile.patch(true, token)
+    setResubscribed(true)
+    setUnsubscribed(false)
+    setLoading(false)
+  }
+
+  if (unsubscribed) {
+    return (
+      <div>
+        Successfully unsubscribed YTFM. {loading ? <span>TODO: loading</span> : <a onClick={async () => await subscribe()}>Resubscribe.</a>}
+      </div>
+    )
+  }
+
+  if (resubscribed) {
+    return (
+      <div>
+        Successfully resubscribed YTFM. {loading ? <span>TODO: loading</span> : <a onClick={async () => await unsubscribe()}>Unsubscribe.</a>}
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <a onClick={async () => await unsubscribe()}>Unsubscribe YTFM</a>
+    </div>
+  )
+}
+
+function Subscription ({ channel, toggle, unsubscribe }: {channel: ChannelInSubscriptionResponse, toggle: (string) => Promise<void>, unsubscribe: boolean}): ReactElement {
   const [patching, setPatching] = useState(false)
 
   async function onClickToggle (): Promise<void> {
     setPatching(true)
     await toggle(channel.id)
     setPatching(false)
+  }
+
+  if (unsubscribe && channel.notification && !patching) {
+    setTimeout(() => {
+      onClickToggle().catch(console.error)
+    }, 0)
   }
 
   return (
@@ -61,13 +118,39 @@ function Subscription ({ channel, toggle }: {channel: ChannelInSubscriptionRespo
   )
 }
 
-function Subscriptions (): ReactElement {
+interface SubscriptionsProps {
+  channelId?: string
+}
+function Subscriptions ({ channelId }: SubscriptionsProps): ReactElement {
   const [subscriptions, setSubscriptions] = useState<SubscriptionsGetResponse>()
   const [syncing, setSyncing] = useState(false)
 
+  const [unsubscribe, setUnsubscribe] = useState(false)
+  const [done, setDone] = useState(false)
+
+  const searchParams = new URLSearchParams(window.location.search)
+  const token = searchParams.get('token') ?? undefined
+  const action = searchParams.get('action') ?? undefined
+
   useEffect(() => {
-    getSubscriptions().then(setSubscriptions).catch(console.error)
+    getSubscriptions(channelId, token, action).then(setSubscriptions).catch(console.error)
   }, [])
+
+  useEffect(() => {
+    if (done) {
+      setUnsubscribe(false)
+      return
+    }
+    if (action !== 'unsubscribe') return
+    if (channelId === undefined) return
+    if (subscriptions === undefined) return
+    if (subscriptions.channels.length !== 1) return
+
+    if (subscriptions.channels[0].notification) {
+      setUnsubscribe(true)
+    }
+    setDone(true)
+  }, [subscriptions])
 
   async function onClickSync (): Promise<void> {
     setSyncing(true)
@@ -82,7 +165,7 @@ function Subscriptions (): ReactElement {
     const targetChannel = subscriptions.channels.find(channel => channel.id === channelId)
     if (targetChannel === undefined) throw new Error('Channel not found')
 
-    const response = await api.subscriptions.patch(channelId, !targetChannel.notification)
+    const response = await api.subscriptions.patch(channelId, !targetChannel.notification, token)
 
     const targetIndex = subscriptions.channels.findIndex(channel => channel.id === channelId)
 
@@ -115,7 +198,10 @@ function Subscriptions (): ReactElement {
       <Grid container spacing={3} alignItems="center">
         <Grid item xs={10}>Synced at: {subscriptions.syncedAt === undefined ? 'N/A' : new Date(subscriptions.syncedAt).toLocaleString()}</Grid>
         <Grid item xs={2}>{syncing ? <CircularProgress size="1rem" /> : <RefreshSharp onClick={onClickSync} />}</Grid>
-        {subscriptions.channels.map(channel => <Subscription key={channel.id} channel={channel} toggle={toggle} />)}
+        {subscriptions.channels.map(channel => (
+          <Subscription key={channel.id} channel={channel} toggle={toggle} unsubscribe={unsubscribe} />
+        ))}
+        {action === 'unsubscribe' && token !== undefined ? <UnsubscribeYtfm token={token} /> : null}
       </Grid>
     </>
   )

@@ -12,8 +12,12 @@ async function getProfile (): Promise<ProfileGetResponse|undefined> {
   const SID: string|undefined = cookie.parse(document.cookie).SID
   if (SID === undefined) return undefined
 
+  const searchParams = new URLSearchParams(window.location.search)
+  const token = searchParams.get('token') ?? undefined
+  const action = searchParams.get('action') ?? undefined
+
   try {
-    const result = await profile.get()
+    const result = await profile.get(token, action)
     setUser(result)
     return result
   } catch (e) {

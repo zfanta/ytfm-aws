@@ -1,3 +1,5 @@
+import qs from 'querystring'
+
 interface ProfileGetResponse {
   email: string
   notification: true
@@ -6,8 +8,13 @@ interface ProfileGetResponse {
 }
 type ProfilePatchResponse = ProfileGetResponse
 const profile = {
-  get: async (): Promise<ProfileGetResponse> => {
-    return await (await fetch('/api/profile')).json()
+  get: async (token?: string, action?: string): Promise<ProfileGetResponse> => {
+    let path = '/api/profile'
+    if (token !== undefined && action !== undefined) {
+      const query = qs.stringify({ token, action })
+      path += `?${query}`
+    }
+    return await (await fetch(path)).json()
   },
   patch: async (notification: boolean, token?: string): Promise<ProfilePatchResponse> => {
     return await (await fetch('/api/profile', {
@@ -48,17 +55,22 @@ interface SubscriptionsPatchResponse {
   updatedAt: number
 }
 const subscriptions = {
-  get: async (): Promise<SubscriptionsGetResponse> => {
-    return await (await fetch('/api/subscriptions', { credentials: 'include' })).json()
+  get: async (channelId?: string, token?: string, action?: string): Promise<SubscriptionsGetResponse> => {
+    let path = `/api/subscriptions${channelId === undefined ? '' : `/${channelId}`}`
+    if (token !== undefined && action !== undefined) {
+      const query = qs.stringify({ token, action })
+      path += `?${query}`
+    }
+    return await (await fetch(path, { credentials: 'include' })).json()
   },
   post: async (): Promise<SubscriptionsPostResponse> => {
     return await (await fetch('/api/subscriptions', { method: 'POST', credentials: 'include' })).json()
   },
   patch: async (channel: string, notification: boolean, token?: string): Promise<SubscriptionsPatchResponse> => {
-    return await (await fetch('/api/subscriptions', {
+    return await (await fetch(`/api/subscriptions/${channel}`, {
       credentials: 'include',
       method: 'PATCH',
-      body: JSON.stringify({ channel, notification, token }),
+      body: JSON.stringify({ notification, token }),
       headers: { 'Content-Type': 'application/json' }
     })).json()
   }
