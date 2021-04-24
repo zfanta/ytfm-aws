@@ -22,11 +22,7 @@ const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
 
   const video = {
     id: entry['yt:videoId'][0],
-    title: entry.title[0],
-    channelId: entry['yt:channelId'][0],
-    channelName: entry.author[0].name[0],
-    published: entry.published[0],
-    updated: entry.updated[0]
+    channelId: entry['yt:channelId'][0]
   }
 
   // Ignore if mail is sent

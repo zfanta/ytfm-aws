@@ -4,6 +4,10 @@ info:
   title: YTFM
   contact:
     url: https://github.com/zfanta/ytfm-aws
+
+servers:
+  - url: '/api'
+    description: Server description
 paths:
   /cookie:
     get:
@@ -118,9 +122,32 @@ paths:
       requestBody:
         content:
           application/atom+xml:
+            example: |
+              <?xml version='1.0' encoding='UTF-8'?>
+              <feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns="http://www.w3.org/2005/Atom">
+                <link rel="hub" href="https://pubsubhubbub.appspot.com"/>
+                <link rel="self" href="https://www.youtube.com/xml/feeds/videos.xml?channel_id=UCV0_nChmSVzdv4W1HDVvw1Q"/>
+                <title>YouTube video feed</title>
+                <updated>2021-04-24T14:32:03.748484548+00:00</updated>
+                <entry>
+                  <id>yt:video:kERzAFPGeZ4</id>
+                  <yt:videoId>kERzAFPGeZ4</yt:videoId>
+                  <yt:channelId>UCV0_nChmSVzdv4W1HDVvw1Q</yt:channelId>
+                  <title>[𝐿𝐼𝒱𝐸] 24/7 입구에서 '서시비' - 90-2000s K-City Pop, Dance Music</title>
+                  <link rel="alternate" href="https://www.youtube.com/watch?v=kERzAFPGeZ4"/>
+                  <author>
+                    <name>Seoul City BEAT</name>
+                    <uri>https://www.youtube.com/channel/UCV0_nChmSVzdv4W1HDVvw1Q</uri>
+                  </author>
+                  <published>2021-04-24T14:30:37+00:00</published>
+                  <updated>2021-04-24T14:32:03.748484548+00:00</updated>
+                </entry>
+              </feed>
             schema:
               type: object
               description: TODO
+              required:
+                - entry
               properties:
                 title:
                   type: string
@@ -128,6 +155,9 @@ paths:
                   type: string
                 entry:
                   type: object
+                  required:
+                    - 'yt:videoId'
+                    - 'yt:channelId'
                   properties:
                     id:
                       type: string

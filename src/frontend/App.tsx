@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from 'react'
+import React, { ReactElement, useEffect, useState, Suspense } from 'react'
 import cookie from 'cookie'
 import { Container } from '@material-ui/core'
 import { useLocation } from 'wouter'
@@ -7,6 +7,7 @@ import { setUser } from './storage'
 import { profile, signOut as signOutApi } from './api'
 import type { ProfileGetResponse } from './api'
 import Body from './Body'
+const SwaggerUI = React.lazy(async () => await import('./SwaggerUI'))
 
 async function getProfile (): Promise<ProfileGetResponse|undefined> {
   const SID: string|undefined = cookie.parse(document.cookie).SID
@@ -29,8 +30,14 @@ async function getProfile (): Promise<ProfileGetResponse|undefined> {
 function App (): ReactElement {
   const [user, setUser] = useState<ProfileGetResponse>()
   const [location, setLocation] = useLocation()
+  const [swagger, setSwagger] = useState(false)
 
   useEffect(() => {
+    if (location === '/swagger') {
+      setSwagger(true)
+      return
+    }
+
     (async () => {
       const user = await getProfile()
       setUser(user)
@@ -50,6 +57,14 @@ function App (): ReactElement {
       // TODO
       return undefined
     }
+  }
+
+  if (swagger) {
+    return (
+      <Suspense fallback={<div>Loading Swagger UI</div>}>
+        <SwaggerUI />
+      </Suspense>
+    )
   }
 
   return (
