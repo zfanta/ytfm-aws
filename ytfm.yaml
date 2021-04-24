@@ -1,0 +1,257 @@
+openapi: 3.0.0
+info:
+  version: 0.0.1
+  title: YTFM
+  contact:
+    url: https://github.com/zfanta/ytfm-aws
+paths:
+  /cookie:
+    get:
+      responses:
+        200:
+          description: Get Set-Cookie header
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: SID=NV9WM52F_cGEx-hkBGr06lZeEkYTnyBjWClE4VdROm-3YorxmcFEl8dkKud0VgsB; Max-age=31536000; Path=/
+              required: true
+  /oauth2:
+    get:
+      externalDocs:
+        url: https://developers.google.com/identity/protocols/oauth2
+      parameters:
+        - in: query
+          name: code
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: state
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: SID
+          schema:
+            type: string
+          required: true
+      responses:
+        400:
+          description: Code or state or SID is missing.
+        503:
+          description: Failed to get token from goole.
+        303:
+          description: Success
+          headers:
+            Location:
+              required: true
+              schema:
+                type: string
+                default: /
+  /signOut:
+    get:
+      responses:
+        303:
+          description: Sign out
+          headers:
+            Location:
+              required: true
+              schema:
+                type: string
+                default: /
+  /profile:
+    get:
+      responses:
+        200:
+          $ref: '#/components/responses/profile'
+    delete:
+      description: Delete account.
+      responses:
+        200:
+          description: Delete account.
+    patch:
+      description: Toggle YTFM email notification.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - notification
+              properties:
+                notification:
+                  type: boolean
+                token:
+                  type: string
+      responses:
+        200:
+          $ref: '#/components/responses/profile'
+  /pubsubhubbub:
+    get:
+      parameters:
+        - in: query
+          name: hub.topic
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: hub.challenge
+          schema:
+            type: string
+        - in: query
+          name: hub.mode
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: hub.lease_seconds
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+    post:
+      responses:
+        200:
+          description: Success
+      requestBody:
+        content:
+          application/atom+xml:
+            schema:
+              type: object
+              description: TODO
+              properties:
+                title:
+                  type: string
+                updated:
+                  type: string
+                entry:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    'yt:videoId':
+                      type: string
+                    'yt:channelId':
+                      type: string
+                    title:
+                      type: string
+                    author:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        uri:
+                          type: string
+                    published:
+                      type: string
+                    updated:
+                      type: string
+              xml:
+                name: feed
+                namespace: http://www.w3.org/2005/Atom
+                wrapped: true
+                attribute: true
+  /subscriptions:
+    get:
+      responses:
+        200:
+          $ref: '#/components/responses/subscriptions'
+    post:
+      responses:
+        200:
+          description: All subscriptions after sync.
+          $ref: '#/components/responses/subscriptions'
+  /subscriptions/{channelId}:
+    get:
+      parameters:
+        - in: path
+          name: channelId
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: One subscription.
+          $ref: '#/components/responses/subscriptions'
+    patch:
+      description: Toggle channel email notification.
+      parameters:
+        - in: path
+          required: true
+          schema:
+            description: Channel id
+          name: channelId
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - notification
+              properties:
+                notification:
+                  type: boolean
+                token:
+                  type: string
+      responses:
+        404:
+          description: User is not subscribing channel.
+        200:
+          description: Toggle result.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - notification
+                  - updatedAt
+                properties:
+                  notification:
+                    type: boolean
+                  updatedAt:
+                    type: number
+components:
+  responses:
+    profile:
+      description: User profile.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+              photos:
+                type: array
+                items:
+                  type: string
+              notification:
+                type: boolean
+              updatedAt:
+                description: Milliseconds between 1 January 1970 00:00:00 UTC and subscriptions updated date
+                type: number
+                example: 1619243011765
+    subscriptions:
+      description: Subscription list.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              syncedAt:
+                type: number
+              updatedAt:
+                type: number
+              channels:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  title:
+                    type: string
+                  notification:
+                    type: boolean
+                  thumbnail:
+                    type: string
