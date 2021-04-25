@@ -8,7 +8,7 @@ interface ProfileGetResponse {
 }
 type ProfilePatchResponse = ProfileGetResponse
 const profile = {
-  get: async (token?: string, action?: string): Promise<ProfileGetResponse> => {
+  get: async (token?: string, action?: 'unsubscribe'): Promise<ProfileGetResponse> => {
     let path = '/api/profile'
     if (token !== undefined && action !== undefined) {
       const query = qs.stringify({ token, action })
@@ -16,11 +16,11 @@ const profile = {
     }
     return await (await fetch(path)).json()
   },
-  patch: async (notification: boolean, token?: string): Promise<ProfilePatchResponse> => {
+  patch: async (notification: boolean, token?: string, action?: 'unsubscribe'): Promise<ProfilePatchResponse> => {
     return await (await fetch('/api/profile', {
       method: 'PATCH',
       credentials: 'include',
-      body: JSON.stringify({ notification, token }),
+      body: JSON.stringify({ notification, token, action }),
       headers: {
         'Content-Type': 'application/json'
       }
@@ -55,7 +55,7 @@ interface SubscriptionsPatchResponse {
   updatedAt: number
 }
 const subscriptions = {
-  get: async (channelId?: string, token?: string, action?: string): Promise<SubscriptionsGetResponse> => {
+  get: async (channelId?: string, token?: string, action?: 'unsubscribe'): Promise<SubscriptionsGetResponse> => {
     let path = `/api/subscriptions${channelId === undefined ? '' : `/${channelId}`}`
     if (token !== undefined && action !== undefined) {
       const query = qs.stringify({ token, action })
@@ -66,11 +66,11 @@ const subscriptions = {
   post: async (): Promise<SubscriptionsPostResponse> => {
     return await (await fetch('/api/subscriptions', { method: 'POST', credentials: 'include' })).json()
   },
-  patch: async (channel: string, notification: boolean, token?: string): Promise<SubscriptionsPatchResponse> => {
+  patch: async (channel: string, notification: boolean, token?: string, action?: 'unsubscribe'): Promise<SubscriptionsPatchResponse> => {
     return await (await fetch(`/api/subscriptions/${channel}`, {
       credentials: 'include',
       method: 'PATCH',
-      body: JSON.stringify({ notification, token }),
+      body: JSON.stringify({ notification, token, action }),
       headers: { 'Content-Type': 'application/json' }
     })).json()
   }

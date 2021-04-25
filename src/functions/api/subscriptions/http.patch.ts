@@ -5,6 +5,7 @@ import { middyfy, response, injectUser } from '@libs/lambda'
 import { updateSubscription } from '@libs/dynamodb'
 
 const patch: ValidatedEventAPIGatewayProxyEventWithUser<any> = async (event) => {
+  console.log(event)
   const { user, body } = event
   const channelId = event.pathParameters?.channelId
 

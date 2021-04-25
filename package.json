@@ -4,8 +4,8 @@
   "description": "Serverless aws-nodejs-typescript template",
   "scripts": {
     "test": "eslint src --ext .ts",
-    "parcel:serve": "parcel --target frontend --dist-dir dist/frontend/serve src/frontend/index.html",
-    "parcel:build": "parcel build --target frontend --dist-dir dist/frontend/build src/frontend/index.html",
+    "parcel:serve": "parcel --no-cache --target frontend --dist-dir dist/frontend/serve src/frontend/index.html",
+    "parcel:build": "parcel build --no-cache --no-source-maps --target frontend --dist-dir dist/frontend/build src/frontend/index.html",
     "run:get": "serverless invoke local -f pubsubhubbubHttpGet --path src/functions/api/pubsubhubbub/http.get.mock.json",
     "run:updateEmailTemplates": "sls invoke local -f updateEmailTemplates",
     "run:sendEmail": "sls invoke local -f sendEmail --path src/functions/email/send.mock.json",

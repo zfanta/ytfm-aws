@@ -4,8 +4,7 @@ import { getSubscriptionsWithTitle, getSubscriptionWithTitle } from '@libs/dynam
 import type { ValidatedEventAPIGatewayProxyEventWithUser } from '@libs/apiGateway'
 import { injectUser, middyfy, response } from '@libs/lambda'
 
-const get: ValidatedEventAPIGatewayProxyEventWithUser<any> = async (event, context) => {
-  console.log(context)
+const get: ValidatedEventAPIGatewayProxyEventWithUser<any> = async (event) => {
   const { user } = event
   const channelId = event.pathParameters?.channelId
 
@@ -19,6 +18,10 @@ const get: ValidatedEventAPIGatewayProxyEventWithUser<any> = async (event, conte
       subscriptions.push(subscription)
     }
   } else {
+    if (user.permissions?.unsubscribe !== undefined) {
+      return response(401)
+    }
+
     subscriptions = await getSubscriptionsWithTitle(user.email)
   }
 

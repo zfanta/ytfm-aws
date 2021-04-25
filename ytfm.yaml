@@ -66,6 +66,15 @@ paths:
                 default: /
   /profile:
     get:
+      parameters:
+        - in: query
+          name: token
+          schema:
+            type: string
+        - in: query
+          name: action
+          schema:
+            type: string
       responses:
         200:
           $ref: '#/components/responses/profile'
@@ -87,6 +96,8 @@ paths:
                 notification:
                   type: boolean
                 token:
+                  type: string
+                action:
                   type: string
       responses:
         200:
@@ -201,6 +212,14 @@ paths:
           required: true
           schema:
             type: string
+        - in: query
+          name: token
+          schema:
+            type: string
+        - in: query
+          name: action
+          schema:
+            type: string
       responses:
         200:
           description: One subscription.
@@ -224,6 +243,8 @@ paths:
                 notification:
                   type: boolean
                 token:
+                  type: string
+                action:
                   type: string
       responses:
         404:

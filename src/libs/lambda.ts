@@ -28,7 +28,7 @@ const middyfy = (handler): Middy<any, any> => {
   return middy(handler).use(middyJsonBodyParser())
 }
 
-async function getUserFromUnsubscribeToken (event: ValidatedAPIGatewayProxyEvent<any>): Promise<User|undefined> {
+async function getUserFromToken (event: ValidatedAPIGatewayProxyEvent<any>): Promise<User|undefined> {
   async function decryptUserFromUnsubscribeToken (token: string): Promise<undefined|User> {
     const unsubscribeData = await decryptUnsubscribeToken(token)
     if (unsubscribeData === undefined) return undefined
@@ -42,25 +42,27 @@ async function getUserFromUnsubscribeToken (event: ValidatedAPIGatewayProxyEvent
     return user
   }
 
-  if (event.queryStringParameters?.token !== undefined) {
-    if (event.queryStringParameters.action === 'unsubscribe') {
-      return await decryptUserFromUnsubscribeToken(event.queryStringParameters.token)
-    }
+  let token, action
+
+  if (event.queryStringParameters !== null) {
+    token = event.queryStringParameters.token
+    action = event.queryStringParameters.action
   }
 
-  if (event.path.startsWith('/api/subscriptions') && event.httpMethod === 'PATCH' && event.body?.token !== undefined) {
-    return await decryptUserFromUnsubscribeToken(event.body.token)
+  if (event.body !== null) {
+    token = event.body.token
+    action = event.body.action
   }
 
-  if (event.path === '/api/profile' && event.httpMethod === 'PATCH' && event.body.token !== undefined) {
-    return await decryptUserFromUnsubscribeToken(event.body.token)
+  if (action === 'unsubscribe') {
+    return token !== undefined ? await decryptUserFromUnsubscribeToken(token) : undefined
   }
 }
 
 function injectUser (handler): ValidatedEventAPIGatewayProxyEventWithUser<any> {
   return async (event, context, callback) => {
     console.log('inject user =>')
-    let user = await getUserFromUnsubscribeToken(event)
+    let user = await getUserFromToken(event)
     if (user !== undefined) {
       event.user = user
       return handler(event, context, callback)

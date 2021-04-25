@@ -18,7 +18,7 @@ async function getProfile (): Promise<ProfileGetResponse|undefined> {
   const action = searchParams.get('action') ?? undefined
 
   try {
-    const result = await profile.get(token, action)
+    const result = await profile.get(token, action === 'unsubscribe' ? 'unsubscribe' : undefined)
     setUser(result)
     return result
   } catch (e) {
