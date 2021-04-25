@@ -1,16 +1,15 @@
 // TODO: use etag
 import qs from 'querystring'
 import fetch from 'node-fetch'
-import { updateGoogleTokenAndPhotos, User } from '@libs/dynamodb'
-import { Token } from '@libs/types'
+import { updateGoogleTokenAndPhotos, User, getUser } from '@libs/dynamodb'
 import { refreshToken } from '@libs/oauth2'
 
 async function getSubscriptions (user: User, pageToken?: string): Promise<SubscriptionResponse[]> {
-  const token = await refreshGoogleToken(user)
+  const userRefreshed = await refreshGoogleToken(user)
 
   const url = 'https://www.googleapis.com/youtube/v3/subscriptions'
   const query = qs.stringify({
-    access_token: token.access_token,
+    access_token: userRefreshed.token.access_token,
     part: ['snippet'],
     mine: true,
     maxResults: 50,
@@ -24,19 +23,20 @@ async function getSubscriptions (user: User, pageToken?: string): Promise<Subscr
     return response.items
   }
 
-  return [...response.items, ...(await getSubscriptions(user, response.nextPageToken))]
+  return [...response.items, ...(await getSubscriptions(userRefreshed, response.nextPageToken))]
 }
 
-async function refreshGoogleToken (user: User): Promise<Token> {
-  let token = user.token
+async function refreshGoogleToken (user: User): Promise<User> {
+  const token = user.token
   // Refresh token if expired
   const currentTime = new Date()
-  if (user.expiresAt < currentTime.valueOf()) {
-    const newToken = await refreshToken(token.refresh_token as string)
-    token = await updateGoogleTokenAndPhotos(user.email, token, newToken)
+  if (currentTime.valueOf() < user.expiresAt) {
+    return user
   }
 
-  return token
+  const newToken = await refreshToken(token.refresh_token as string)
+  await updateGoogleTokenAndPhotos(user.email, token, newToken)
+  return await getUser(user.email) as User
 }
 
 async function sendToPubsubhubbub (channelIds: string[], mode: 'subscribe'|'unsubscribe'): Promise<void> {
