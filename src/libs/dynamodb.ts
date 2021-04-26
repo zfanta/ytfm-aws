@@ -698,7 +698,7 @@ async function deleteAccount (user: string): Promise<void> {
 
   await Promise.all([
     unsubscribeChannels(user, subscriptions.map(subscription => subscription.channel)),
-    deleteSessions(sessions.map(session => session.id)),
+    ...sessions.map(async session => await updateSessionUser(session.id, 'empty')),
     deleteUser(user)
   ])
 }
