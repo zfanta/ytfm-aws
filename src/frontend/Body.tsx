@@ -1,8 +1,8 @@
+import React, { Dispatch, ReactElement, SetStateAction, Suspense } from 'react'
 import { Route, Switch } from 'wouter'
-import Subscriptions from './Subscriptions'
-import Profile from './Profile'
-import React, { Dispatch, ReactElement, SetStateAction } from 'react'
 import { ProfileGetResponse } from './api'
+const Subscriptions = React.lazy(async () => await import('./Subscriptions'))
+const Profile = React.lazy(async () => await import('./Profile'))
 
 interface BodyProps {
   user: ProfileGetResponse|undefined
@@ -16,13 +16,21 @@ function Body ({ user, setUser }: BodyProps): ReactElement {
   return (
     <Switch>
       <Route path="/subscriptions">
-        <Subscriptions />
+        <Suspense fallback={<div>TODO: loading</div>}>
+          <Subscriptions />
+        </Suspense>
       </Route>
       <Route path="/subscriptions/:channelId">
-        {params => <Subscriptions channelId={params.channelId} />}
+        {params => (
+          <Suspense fallback={<div>TODO: loading</div>}>
+            <Subscriptions channelId={params.channelId} />
+          </Suspense>
+        )}
       </Route>
       <Route path="/profile">
-        <Profile user={user} setUser={setUser} />
+        <Suspense fallback={<div>TODO: loading</div>}>
+          <Profile user={user} setUser={setUser} />
+        </Suspense>
       </Route>
     </Switch>
   )
