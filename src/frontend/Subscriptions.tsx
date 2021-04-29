@@ -1,7 +1,12 @@
 import React, { ReactElement, useEffect, useMemo, useState } from 'react'
 import { Avatar, Grid, Box, Checkbox, CircularProgress } from '@material-ui/core'
 import { RefreshSharp } from '@material-ui/icons'
-import { getUser, getSubscriptions as getSubscriptionsFromStorage, setSubscriptions as setSubscriptionsInStorage } from './storage'
+import {
+  getUser,
+  getSubscriptions as getSubscriptionsFromStorage,
+  setSubscriptions as setSubscriptionsInStorage,
+  updateSubscriptions as updateSubscriptionsInStorage
+} from './storage'
 import * as api from './api'
 import type { SubscriptionsGetResponse, ChannelInSubscriptionResponse } from './api'
 
@@ -161,15 +166,15 @@ function Subscriptions ({ channelId }: SubscriptionsProps): ReactElement {
     setSyncing(false)
   }
 
-  async function toggle (channelId: string): Promise<void> {
+  async function toggle (channelIdToToggle: string): Promise<void> {
     if (subscriptions === undefined || subscriptions.channels === undefined) throw new Error('Channel not found')
 
-    const targetChannel = subscriptions.channels.find(channel => channel.id === channelId)
+    const targetChannel = subscriptions.channels.find(channel => channel.id === channelIdToToggle)
     if (targetChannel === undefined) throw new Error('Channel not found')
 
-    const response = await api.subscriptions.patch(channelId, !targetChannel.notification, token, 'unsubscribe')
+    const response = await api.subscriptions.patch(channelIdToToggle, !targetChannel.notification, token, 'unsubscribe')
 
-    const targetIndex = subscriptions.channels.findIndex(channel => channel.id === channelId)
+    const targetIndex = subscriptions.channels.findIndex(channel => channel.id === channelIdToToggle)
 
     const channels = [
       ...subscriptions.channels.slice(0, targetIndex),
@@ -187,7 +192,14 @@ function Subscriptions ({ channelId }: SubscriptionsProps): ReactElement {
     setSubscriptions(newSubscriptions)
     const user = getUser()
     if (user !== undefined) {
-      setSubscriptionsInStorage(user, newSubscriptions)
+      if (channelId !== undefined) {
+        updateSubscriptionsInStorage(user, {
+          ...targetChannel,
+          notification: !targetChannel.notification
+        }, response.updatedAt)
+      } else {
+        setSubscriptionsInStorage(user, newSubscriptions)
+      }
     }
     setDone(true)
   }

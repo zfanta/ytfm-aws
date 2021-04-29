@@ -1,4 +1,4 @@
-import type { ProfileGetResponse, SubscriptionsGetResponse } from './api'
+import type { ChannelInSubscriptionResponse, ProfileGetResponse, SubscriptionsGetResponse } from './api'
 // TODO: integrate with api.ts. call this in api.ts not in tsx.
 
 function setUser (user: ProfileGetResponse): void {
@@ -29,6 +29,26 @@ function setSubscriptions (user: ProfileGetResponse, subscriptions: Subscription
   }))
 }
 
+function updateSubscriptions (user: ProfileGetResponse, channel: ChannelInSubscriptionResponse, updatedAt: number): void {
+  const subscriptions = getSubscriptions(user) as SubscriptionsGetResponse
+  const targetIndex = subscriptions.channels.findIndex(_channel => _channel.id === channel.id)
+  const channels = [
+    ...subscriptions.channels.slice(0, targetIndex),
+    {
+      ...channel,
+      notification: channel.notification
+    },
+    ...subscriptions.channels.slice(targetIndex + 1)
+  ]
+
+  const newSubscriptions = Object.assign({}, subscriptions, {
+    channels,
+    updatedAt
+  })
+
+  setSubscriptions(user, newSubscriptions)
+}
+
 function getSubscriptions (user: ProfileGetResponse): SubscriptionsGetResponse|undefined {
   const allSubscriptions = localStorage.getItem('subscriptions')
   if (allSubscriptions === null) return undefined
@@ -45,5 +65,6 @@ export {
   setUser,
   getSubscriptions,
   setSubscriptions,
+  updateSubscriptions,
   clear
 }
