@@ -1,4 +1,4 @@
-import React, { ReactElement, useRef, useState, MouseEvent, KeyboardEvent, Dispatch, SetStateAction } from 'react'
+import React, { ReactElement, useRef, useState, MouseEvent, KeyboardEvent } from 'react'
 import {
   Button,
   ClickAwayListener,
@@ -107,13 +107,32 @@ function ButtonsAfterSignIn ({ email, photo, signOut }: SignOutButtonProps): Rea
   )
 }
 
-function CookieAcceptButton ({ setCookieAccepted }: {setCookieAccepted: Dispatch<SetStateAction<boolean>>}): ReactElement {
+function SignInButton (): ReactElement {
+  const [cookieAccepted, setCookieAccepted] = useState(cookie.parse(document.cookie).SID !== undefined)
   const [open, setOpen] = useState(false)
 
-  async function getCookie (): Promise<void> {
-    await cookieApi.get()
+  function makeQuery (): string {
+    const SID = cookie.parse(document.cookie).SID as string
+
+    return qs.stringify({
+      client_id: '969455847018-a7agkq11k0p97jumrronqnrtctfu45pp.apps.googleusercontent.com',
+      // TODO: replace dev to variable
+      redirect_uri: 'https://dev.ytfm.app/api/oauth2',
+      state: `SID=${SID}`,
+      response_type: 'code',
+      scope: 'email https://www.googleapis.com/auth/youtube.readonly profile',
+      approval_prompt: 'auto',
+      access_type: 'offline'
+    })
+  }
+
+  async function signIn (): Promise<void> {
+    if (!cookieAccepted) {
+      await cookieApi.get()
+    }
     setCookieAccepted(true)
     setOpen(false)
+    window.location.href = `https://accounts.google.com/o/oauth2/auth?${makeQuery()}`
   }
 
   return (
@@ -135,40 +154,10 @@ function CookieAcceptButton ({ setCookieAccepted }: {setCookieAccepted: Dispatch
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)} autoFocus>Decline</Button>
-          <Button onClick={getCookie}>Accept</Button>
+          <Button onClick={signIn}>Accept</Button>
         </DialogActions>
       </Dialog>
     </>
-  )
-}
-
-function SignInButton (): ReactElement {
-  const [cookieAccepted, setCookieAccepted] = useState(cookie.parse(document.cookie).SID !== undefined)
-
-  if (!cookieAccepted) return <CookieAcceptButton setCookieAccepted={setCookieAccepted} />
-
-  function makeQuery (): string {
-    const SID = cookie.parse(document.cookie).SID as string
-
-    return qs.stringify({
-      client_id: '969455847018-a7agkq11k0p97jumrronqnrtctfu45pp.apps.googleusercontent.com',
-      // TODO: replace dev to variable
-      redirect_uri: 'https://dev.ytfm.app/api/oauth2',
-      state: `SID=${SID}`,
-      response_type: 'code',
-      scope: 'email https://www.googleapis.com/auth/youtube.readonly profile',
-      approval_prompt: 'auto',
-      access_type: 'offline'
-    })
-  }
-
-  return (
-    <Button
-      variant="outlined"
-      onClick={() => { window.location.href = `https://accounts.google.com/o/oauth2/auth?${makeQuery()}` }}
-    >
-      Sign in
-    </Button>
   )
 }
 
