@@ -11,7 +11,6 @@ import {
   DialogTitle,
   DialogActions,
   DialogContent,
-  DialogContentText,
   Avatar,
   AppBar,
   Typography,
@@ -26,6 +25,7 @@ import { useLocation } from 'wouter'
 import { clear } from './storage'
 import { cookie as cookieApi } from './api'
 import type { ProfileGetResponse } from './api'
+import Policy from './Policy'
 
 function HideOnScroll ({ children }): ReactElement {
   const trigger = useScrollTrigger()
@@ -146,11 +146,14 @@ function SignInButton (): ReactElement {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">TODO: cookie</DialogTitle>
+        <DialogTitle id="alert-dialog-title">Sign in policy</DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            TODO: cookie
-          </DialogContentText>
+          <div
+            id="alert-dialog-description"
+            className="MuiTypography-root MuiDialogContentText-root MuiTypography-body1 MuiTypography-colorTextSecondary"
+          >
+            <Policy />
+          </div>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)} autoFocus>Decline</Button>

@@ -1,12 +1,13 @@
 import React, { ReactElement, useEffect, useState, Suspense } from 'react'
 import cookie from 'cookie'
-import { Container } from '@material-ui/core'
+import { Container, Divider } from '@material-ui/core'
 import { useLocation } from 'wouter'
 import Header from './Header'
 import { setUser } from './storage'
 import { profile, signOut as signOutApi } from './api'
 import type { ProfileGetResponse } from './api'
 import Body from './Body'
+import Footer from './Footer'
 const SwaggerUI = React.lazy(async () => await import('./SwaggerUI'))
 
 async function getProfile (): Promise<ProfileGetResponse|undefined> {
@@ -71,6 +72,8 @@ function App (): ReactElement {
     <Container maxWidth="sm">
       <Header user={user} signOut={signOut} />
       <Body user={user} setUser={setUser} />
+      <Divider/>
+      <Footer/>
     </Container>
   )
 }
