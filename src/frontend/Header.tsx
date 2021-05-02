@@ -52,9 +52,7 @@ function ButtonsAfterSignIn ({ email, photo, signOut }: SignOutButtonProps): Rea
   }
 
   function handleClose (event: MouseEvent<EventTarget>): void {
-    // TODO: parcel2 error: @parcel/optimizer-terser: Unexpected token: punc (.)
-    // if (anchorRef?.current !== null && anchorRef.current.contains(event.target as HTMLElement)) {
-    if (anchorRef !== null && anchorRef.current !== null && anchorRef.current.contains(event.target as HTMLElement)) {
+    if (anchorRef?.current !== null && anchorRef.current.contains(event.target as HTMLElement)) {
       return
     }
     setOpen(false)
