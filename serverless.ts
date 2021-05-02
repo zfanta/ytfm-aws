@@ -50,7 +50,6 @@ const serverlessConfiguration: AWS = {
       GOOGLE_CLIENT_ID: '${env:GOOGLE_CLIENT_ID}',
       GOOGLE_CLIENT_SECRET: '${env:GOOGLE_CLIENT_SECRET}',
       GOOGLE_API_KEY: '${env:GOOGLE_API_KEY}',
-      OAUTH2_REDIRECT_URL: 'https://${opt:stage, self:provider.stage}.ytfm.app/api/oauth2',
       STAGE: '${opt:stage, self:provider.stage}'
     },
     lambdaHashingVersion: '20201221',

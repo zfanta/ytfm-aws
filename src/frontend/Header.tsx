@@ -37,6 +37,24 @@ function HideOnScroll ({ children }): ReactElement {
   )
 }
 
+function makeOauth2Link (): string {
+  const SID = cookie.parse(document.cookie).SID as string
+
+  const redirectUri = `${window.location.origin}/api/oauth2`
+  const query = qs.stringify({
+    client_id: '969455847018-a7agkq11k0p97jumrronqnrtctfu45pp.apps.googleusercontent.com',
+    // TODO: replace dev to variable
+    redirect_uri: redirectUri,
+    state: `SID=${SID}&REDIRECT_URI=${redirectUri}`,
+    response_type: 'code',
+    scope: 'email https://www.googleapis.com/auth/youtube.readonly profile',
+    approval_prompt: 'auto',
+    access_type: 'offline'
+  })
+
+  return `https://accounts.google.com/o/oauth2/auth?${query}`
+}
+
 interface SignOutButtonProps {
   email: string
   photo: string
@@ -45,7 +63,7 @@ interface SignOutButtonProps {
 function ButtonsAfterSignIn ({ email, photo, signOut }: SignOutButtonProps): ReactElement {
   const [open, setOpen] = useState(false)
   const anchorRef = useRef<HTMLButtonElement>(null)
-  const [location, setLocation] = useLocation()
+  const [location] = useLocation()
 
   function handleToggle (): void {
     setOpen((pervOpen) => !pervOpen)
@@ -60,7 +78,13 @@ function ButtonsAfterSignIn ({ email, photo, signOut }: SignOutButtonProps): Rea
 
   function handleSignOut (): void {
     signOut().catch(console.error)
-    clear()
+    clear(['user', 'subscriptions'])
+  }
+
+  function handleSwitchAccount (): void {
+    signOut().catch(console.error)
+    clear(['user'])
+    window.location.href = makeOauth2Link()
   }
 
   function handleListKeyDown (event: KeyboardEvent): void {
@@ -91,9 +115,14 @@ function ButtonsAfterSignIn ({ email, photo, signOut }: SignOutButtonProps): Rea
               <ClickAwayListener onClickAway={handleClose}>
                 <MenuList autoFocusItem={open} id="menu-list-grow" onKeyDown={handleListKeyDown}>
                   <MenuItem onClick={e => { handleClose(e); handleSignOut() }}>Sign out</MenuItem>
+                  <MenuItem onClick={e => { handleClose(e); handleSwitchAccount() }}>Switch account</MenuItem>
                   {location.startsWith('/subscriptions')
-                    ? <MenuItem onClick={e => { handleClose(e); setLocation('/profile') }}>Profile</MenuItem>
-                    : <MenuItem onClick={e => { handleClose(e); setLocation('/subscriptions') }}>Subscriptions</MenuItem>
+                    ? <MenuItem onClick={e => { handleClose(e) }}>
+                        <Link href="/profile">Profile</Link>
+                      </MenuItem>
+                    : <MenuItem onClick={e => { handleClose(e) }}>
+                        <Link href="/subscriptions">Subscriptions</Link>
+                      </MenuItem>
                   }
                 </MenuList>
               </ClickAwayListener>
@@ -109,28 +138,13 @@ function SignInButton (): ReactElement {
   const [cookieAccepted, setCookieAccepted] = useState(cookie.parse(document.cookie).SID !== undefined)
   const [open, setOpen] = useState(false)
 
-  function makeQuery (): string {
-    const SID = cookie.parse(document.cookie).SID as string
-
-    return qs.stringify({
-      client_id: '969455847018-a7agkq11k0p97jumrronqnrtctfu45pp.apps.googleusercontent.com',
-      // TODO: replace dev to variable
-      redirect_uri: 'https://dev.ytfm.app/api/oauth2',
-      state: `SID=${SID}`,
-      response_type: 'code',
-      scope: 'email https://www.googleapis.com/auth/youtube.readonly profile',
-      approval_prompt: 'auto',
-      access_type: 'offline'
-    })
-  }
-
   async function signIn (): Promise<void> {
     if (!cookieAccepted) {
       await cookieApi.get()
     }
     setCookieAccepted(true)
     setOpen(false)
-    window.location.href = `https://accounts.google.com/o/oauth2/auth?${makeQuery()}`
+    window.location.href = makeOauth2Link()
   }
 
   return (

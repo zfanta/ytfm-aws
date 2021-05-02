@@ -56,8 +56,24 @@ function getSubscriptions (user: ProfileGetResponse): SubscriptionsGetResponse|u
   return allSubscriptionsParsed[user.email] ?? undefined
 }
 
-function clear (): void {
-  localStorage.clear()
+function clear (keys: Array<'user'|'subscriptions'>): void {
+  const user = getUser()
+
+  if (keys.includes('user')) {
+    localStorage.removeItem('user')
+  }
+
+  if (keys.includes('subscriptions')) {
+    if (user === undefined) return
+    const allSubscriptions = localStorage.getItem('subscriptions')
+    if (allSubscriptions === null) return undefined
+    const allSubscriptionsParsed = JSON.parse(allSubscriptions)
+    const result = Object.keys(allSubscriptionsParsed).filter(email => email !== user.email).reduce<any>((obj, key) => {
+      obj[key] = allSubscriptionsParsed[key]
+      return obj
+    }, {})
+    localStorage.setItem('subscriptions', JSON.stringify(result))
+  }
 }
 
 export {

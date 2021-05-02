@@ -3,11 +3,10 @@ import fetch from 'node-fetch'
 import qs from 'querystring'
 import { Token } from '@libs/types'
 
-async function getTokenFromGoogle (code: string): Promise<Token> {
-  const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, OAUTH2_REDIRECT_URL } = process.env
+async function getTokenFromGoogle (code: string, redirectUri: string): Promise<Token> {
+  const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = process.env
   if (GOOGLE_CLIENT_ID === undefined) throw new Error('GOOGLE_CLIENT_ID is undefined')
   if (GOOGLE_CLIENT_SECRET === undefined) throw new Error('GOOGLE_CLIENT_SECRET is undefined')
-  if (OAUTH2_REDIRECT_URL === undefined) throw new Error('OAUTH2_REDIRECT_URL is undefined')
 
   const headers = {
     'Content-Type': 'application/x-www-form-urlencoded'
@@ -17,7 +16,7 @@ async function getTokenFromGoogle (code: string): Promise<Token> {
   urlencoded.append('code', code)
   urlencoded.append('client_id', GOOGLE_CLIENT_ID)
   urlencoded.append('client_secret', GOOGLE_CLIENT_SECRET)
-  urlencoded.append('redirect_uri', OAUTH2_REDIRECT_URL)
+  urlencoded.append('redirect_uri', redirectUri)
   urlencoded.append('grant_type', 'authorization_code')
 
   const requestOptions = {

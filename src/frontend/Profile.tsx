@@ -57,7 +57,7 @@ function DeleteAccount ({ callback }: DeleteAccountProps): ReactElement {
   const [, setLocation] = useLocation()
 
   async function deleteAccount (): Promise<void> {
-    clear()
+    clear(['user', 'subscriptions'])
     setDeleting(true)
     await profile.delete()
     setDeleting(false)

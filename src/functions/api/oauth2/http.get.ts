@@ -24,15 +24,17 @@ const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   if (code === undefined) return response(400, 'code is undefined')
   const state = event.queryStringParameters?.state
   if (state === undefined) return response(400, 'state is undefined')
-  const { SID } = parseState(state)
+  const { SID, REDIRECT_URI } = parseState(state)
   if (SID === undefined) return response(400, 'SID is undefined')
+
+  if (REDIRECT_URI === undefined) return response(400, 'REDIRECT_URI is invalid')
 
   // Check cookie
   if (await getSession(SID) === undefined) return response(400, 'Cookie is invalid')
 
   let token
   try {
-    token = await getTokenFromGoogle(code)
+    token = await getTokenFromGoogle(code, REDIRECT_URI)
   } catch (e) {
     return response(503, e.message)
   }
