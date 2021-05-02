@@ -21,7 +21,7 @@ import {
 } from '@material-ui/core'
 import cookie from 'cookie'
 import qs from 'query-string'
-import { useLocation } from 'wouter'
+import { useLocation, Link } from 'wouter'
 import { clear } from './storage'
 import { cookie as cookieApi } from './api'
 import type { ProfileGetResponse } from './api'
@@ -177,7 +177,9 @@ function Header ({ user, signOut }: HeaderProps): ReactElement {
         <AppBar color="transparent" style={{ backgroundColor: 'white' }}>
           <Container maxWidth="sm" style={{ padding: 0 }}>
             <Toolbar>
-              <Typography variant="h6" style={{ flexGrow: 1 }}>YTFM</Typography>
+              <Typography variant="h6" style={{ flexGrow: 1 }}>
+                <Link href={user !== undefined ? '/subscriptions' : '/'}>YTFM</Link>
+              </Typography>
               {location.startsWith('/unsubscribe')
                 ? null
                 : user === undefined

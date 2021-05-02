@@ -72,7 +72,7 @@ function App (): ReactElement {
     <Container maxWidth="sm">
       <Header user={user} signOut={signOut} />
       <Body user={user} setUser={setUser} />
-      <Divider/>
+      <Divider style={{ marginTop: '1rem', marginBottom: '1rem' }}/>
       <Footer/>
     </Container>
   )

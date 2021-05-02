@@ -216,9 +216,14 @@ function Subscriptions ({ channelId }: SubscriptionsProps): ReactElement {
               <Grid item xs={2}>{syncing ? <CircularProgress size="1rem" /> : <RefreshSharp onClick={onClickSync} />}</Grid>
             </>
         }
-        {subscriptions.channels.map(channel => (
-          <Subscription key={channel.id} channel={channel} toggle={toggle} unsubscribe={unsubscribe} />
-        ))}
+        {channelId !== undefined
+          ? subscriptions.channels.filter(channel => channel.id === channelId).map(channel =>
+              <Subscription key={channel.id} channel={channel} toggle={toggle} unsubscribe={unsubscribe} />
+          )
+          : subscriptions.channels.map(channel => (
+              <Subscription key={channel.id} channel={channel} toggle={toggle} unsubscribe={unsubscribe} />
+          ))
+        }
         {action === 'unsubscribe' && token !== undefined ? <UnsubscribeYtfm token={token} /> : null}
       </Grid>
     </>
