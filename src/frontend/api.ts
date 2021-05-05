@@ -37,6 +37,60 @@ const cookie = {
   }
 }
 
+interface VideoFromGoogleApis {
+  'kind': string
+  'etag': string
+  'id': string
+  'snippet': {
+    'publishedAt': string
+    'channelId': string
+    'title': string
+    'description': string
+    'thumbnails': {
+      [key: string]: {
+        'url': string
+        'width': number
+        'height': number
+      }
+    }
+    'channelTitle': string
+    'tags': string[]
+    'categoryId': string
+    'liveBroadcastContent': 'live' | 'none' | 'upcoming'
+    'defaultLanguage': string
+    'localized': {
+      'title': string
+      'description': string
+    }
+    'defaultAudioLanguage': string
+  }
+  'contentDetails': {
+    'duration': string // https://en.wikipedia.org/wiki/ISO_8601#Durations
+    'dimension': string
+    'definition': string
+    'caption': string
+    'licensedContent': boolean
+    'contentRating': {}
+    'projection': string
+  }
+  'status': {
+    'uploadStatus': string
+    'privacyStatus': string
+    'license': string
+    'embeddable': boolean
+    'publicStatsViewable': boolean
+    'madeForKids': boolean
+  }
+  'player': {
+    'embedHtml': string
+  }
+}
+const video = {
+  get: async (videoId: string): Promise<VideoFromGoogleApis> => {
+    return await (await fetch(`/api/video/${videoId}`)).json()
+  }
+}
+
 interface SubscriptionsGetResponse {
   syncedAt?: number
   updatedAt?: number
@@ -86,7 +140,8 @@ export {
   profile,
   cookie,
   subscriptions,
-  signOut
+  signOut,
+  video
 }
 
 export type {

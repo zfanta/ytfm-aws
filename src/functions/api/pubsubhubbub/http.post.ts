@@ -29,9 +29,9 @@ const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   if (await getVideo(video.id) === undefined) {
     logger.info('new video:', video.id)
 
-    await putVideo(video.id)
-
     const videoFromGoogleApi = await getVideoInformation(video.id, video.channelId)
+
+    await putVideo(videoFromGoogleApi)
 
     const subscribers = await getChannelSubscribers(video.channelId)
     const users = new Set((await getUsers(subscribers)).filter(user => user.notification).map(user => user.email))

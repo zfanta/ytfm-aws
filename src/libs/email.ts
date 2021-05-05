@@ -113,6 +113,8 @@ async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to:
 }
 
 function getHtml (data: MailData): string {
+  if (process.env.STAGE === undefined) throw new Error('STAGE is undefined')
+
   const {
     videoTitle,
     videoId,
@@ -124,6 +126,7 @@ function getHtml (data: MailData): string {
     description,
     unsubscribeLink
   } = data
+
   return `
 <html>
 <head>
@@ -236,7 +239,7 @@ function getHtml (data: MailData): string {
                   <table class="video-spotlight-width" width="600" align="center" cellspacing="0" cellpadding="0" border="0">
                     <tr style="mso-hide:all">
                       <td colspan="3">
-                        <a href="https://www.youtube.com/watch?v=${videoId}" style="text-decoration:none; display:block;" class="nonplayable">
+                        <a href="https://${process.env.STAGE}.ytfm.app/watch/${videoId}" style="text-decoration:none; display:block;" class="nonplayable">
                           <table aria-label="${videoTitle}" class="video-spotlight-width" width="600" align="center" background="${thumbnail}"  style="background-repeat:no-repeat;background-size:cover;background-position:center;mso-hide:all" height="338" cellspacing="0" cellpadding="0" border="0">
                             <tr aria-label="${videoTitle}" scope="row" style="mso-hide:all">
                               <td  aria-label="${videoTitle}" class="footer-font" style="color:#fff; text-align:right; font-size: 12px;" valign="bottom" width="600">
@@ -268,7 +271,7 @@ function getHtml (data: MailData): string {
                                   <table class="content-container-width" cellspacing="0" cellpadding="0" border="0" style="table-layout:fixed;">
                                     <tr>
                                       <td style="padding-bottom:4px">
-                                        <a href="https://www.youtube.com/watch?v=${videoId}" style="text-decoration:none;">
+                                        <a href="https://${process.env.STAGE}.ytfm.app/watch/${videoId}" style="text-decoration:none;">
 <span class="video-title-font-class" valign="center" style="font-family:Roboto,sans-serif; font-size:14px; color:#212121; line-height:20px; -webkit-text-size-adjust:none;">
   ${videoTitle}
 </span>

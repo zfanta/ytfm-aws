@@ -4,6 +4,7 @@ import { ProfileGetResponse } from './api'
 const Subscriptions = React.lazy(async () => await import('./Subscriptions'))
 const Profile = React.lazy(async () => await import('./Profile'))
 const Policy = React.lazy(async () => await import('./Policy'))
+const Watch = React.lazy(async () => await import('./Watch'))
 
 interface BodyProps {
   user: ProfileGetResponse|undefined
@@ -12,7 +13,8 @@ interface BodyProps {
 function Body ({ user, setUser }: BodyProps): ReactElement {
   const [location] = useLocation()
 
-  if (user === undefined && location !== '/policy') {
+  // TODO: 404
+  if (user === undefined && !['/policy', '/watch'].includes(location)) {
     return <div>TODO: main</div>
   }
 
@@ -39,6 +41,13 @@ function Body ({ user, setUser }: BodyProps): ReactElement {
         <Suspense fallback={<div>TODO: loading</div>}>
           <Policy />
         </Suspense>
+      </Route>
+      <Route path="/watch/:videoId">
+        {params =>
+          <Suspense fallback={<div>TODO: loading</div>}>
+            <Watch videoId={params.videoId} />
+          </Suspense>
+        }
       </Route>
     </Switch>
   )

@@ -263,6 +263,17 @@ paths:
                     type: boolean
                   updatedAt:
                     type: number
+  /video/{videoId}:
+    get:
+      parameters:
+        - in: path
+          required: true
+          name: videoId
+          schema:
+            type: string
+      responses:
+        200:
+          description: Returns [youtube video resource representation](https://developers.google.com/youtube/v3/docs/videos#resource).
 components:
   responses:
     profile:

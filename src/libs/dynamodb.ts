@@ -14,7 +14,7 @@ import {
   UpdateItemCommand
 } from '@aws-sdk/client-dynamodb'
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb'
-import { Token } from '@libs/types'
+import { Token, VideoFromGoogleApis } from '@libs/types'
 import dayjs from 'dayjs'
 import { sendToPubsubhubbub } from '@libs/youtube'
 import sodium from 'libsodium-wrappers'
@@ -616,10 +616,7 @@ async function deleteSessions (ids: string[]): Promise<void> {
   }))
 }
 
-interface Video {
-  id: string
-}
-async function getVideo (videoId: string): Promise<Video|undefined> {
+async function getVideo (videoId: string): Promise<VideoFromGoogleApis|undefined> {
   const command = new GetItemCommand({
     TableName: process.env.VIDEOS_TABLE_NAME,
     Key: { id: { S: videoId } }
@@ -627,15 +624,18 @@ async function getVideo (videoId: string): Promise<Video|undefined> {
 
   const response = await client.send(command)
 
-  if (response.Item === undefined) return undefined
+  if (response.Item?.information === undefined) return undefined
 
-  return unmarshall(response.Item) as Video
+  return unmarshall(response.Item).information as VideoFromGoogleApis
 }
 
-async function putVideo (videoId: string): Promise<void> {
+async function putVideo (video: VideoFromGoogleApis): Promise<void> {
   const command = new PutItemCommand({
     TableName: process.env.VIDEOS_TABLE_NAME,
-    Item: { id: { S: videoId } }
+    Item: marshall({
+      id: video.id,
+      information: video
+    })
   })
 
   await client.send(command)
