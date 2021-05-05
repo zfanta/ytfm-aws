@@ -784,6 +784,7 @@ export {
   getOldEmptySessions,
   deleteSessions,
 
+  getChannels,
   getVideo,
   putVideo,
   getChannelSubscribers,

@@ -31,13 +31,13 @@ function getDuration (video: VideoFromGoogleApis): string {
   return duration
 }
 
-async function sendNotificationEmail (notifications: Notification[]): Promise<Array<PromiseSettledResult<any>>> {
+async function sendNotificationEmail (notifications: Notification[], channelThumbnail: string): Promise<Array<PromiseSettledResult<any>>> {
   console.log('sendNotificationEmail =>')
   const promises = notifications.map(async notification => {
     const command = new SendEmailCommand({
       Content: {
         Raw: {
-          Data: await getRaw(notification.video, notification.subscriber)
+          Data: await getRaw(notification.video, channelThumbnail, notification.subscriber)
         }
       }
     })
@@ -64,9 +64,10 @@ interface MailData {
   duration: string
   channelId: string
   channelTitle: string
+  channelThumbnail: string
   unsubscribeLink: string
 }
-async function getRaw (video: VideoFromGoogleApis, to: string): Promise<Buffer> {
+async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to: string): Promise<Buffer> {
   if (process.env.STAGE === undefined) throw new Error('STAGE is undefined')
 
   const largestThumbnail = Object.keys(video.snippet.thumbnails).sort((a, b) => {
@@ -98,6 +99,7 @@ async function getRaw (video: VideoFromGoogleApis, to: string): Promise<Buffer> 
       videoTitle: video.snippet.title,
       channelId: video.snippet.channelId,
       channelTitle: video.snippet.channelTitle,
+      channelThumbnail,
       thumbnail: video.snippet.thumbnails[largestThumbnail].url,
       duration,
       unsubscribeLink
@@ -107,7 +109,7 @@ async function getRaw (video: VideoFromGoogleApis, to: string): Promise<Buffer> 
 }
 
 function getHtml (data: MailData): string {
-  const { videoTitle, videoId, thumbnail, duration, channelId, channelTitle, unsubscribeLink } = data
+  const { videoTitle, videoId, thumbnail, duration, channelId, channelTitle, channelThumbnail, unsubscribeLink } = data
   return `
 <html>
 <head>
@@ -242,6 +244,10 @@ function getHtml (data: MailData): string {
                       <td>
                         <table class="content-container-width" width="600" cellspacing="0" cellpadding="0" border="0" style="table-layout:fixed;">
                           <tr>
+                            <td width="32px">
+                              <img style="border-radius: 50%" src="${channelThumbnail}" width="32px"/>
+                            </td>
+                            <td width="12px"></td>
                             <td >
                               <table class="content-container-width" width="600" cellspacing="0" cellpadding="0" border="0" style="table-layout:fixed;">
                                 <td valign="center" >
@@ -262,16 +268,16 @@ function getHtml (data: MailData): string {
                                         </a>
                                       </td>
                                     </tr>
-                                    <tr style="height: 40px">
-                                      <td style="width: 600px">
-                                        <a class="video-link-font-class" href="${unsubscribeLink}" style="font-family:Roboto,sans-serif;font-size:12px; color: #757575;; line-height:16px; letter-spacing:0px; -webkit-text-size-adjust:none; text-decoration:none;">
-                                          Unsubscribe channel
-                                        </a>
-                                      </td>
-                                    </tr>
                                   </table>
                                 </td>
                               </table>
+                            </td>
+                          </tr>
+                          <tr style="height: 40px">
+                            <td style="width: 600px" colspan="3">
+                              <a class="video-link-font-class" href="${unsubscribeLink}" style="font-family:Roboto,sans-serif;font-size:12px; color: #757575;; line-height:16px; letter-spacing:0px; -webkit-text-size-adjust:none; text-decoration:none;">
+                                Unsubscribe channel notification
+                              </a>
                             </td>
                           </tr>
                         </table>
