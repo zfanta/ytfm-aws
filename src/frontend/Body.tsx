@@ -1,25 +1,38 @@
-import React, { Dispatch, ReactElement, SetStateAction, Suspense } from 'react'
+import React, { Dispatch, ReactElement, SetStateAction, Suspense, useEffect } from 'react'
 import { Route, Switch, useLocation } from 'wouter'
 import { ProfileGetResponse } from './api'
 const Subscriptions = React.lazy(async () => await import('./Subscriptions'))
 const Profile = React.lazy(async () => await import('./Profile'))
 const Policy = React.lazy(async () => await import('./Policy'))
 const Watch = React.lazy(async () => await import('./Watch'))
+const Main = React.lazy(async () => await import('./Main'))
 
 interface BodyProps {
   user: ProfileGetResponse|undefined
   setUser: Dispatch<SetStateAction<ProfileGetResponse | undefined>>
 }
 function Body ({ user, setUser }: BodyProps): ReactElement {
-  const [location] = useLocation()
+  const [location, setLocation] = useLocation()
 
   // TODO: 404
-  if (user === undefined && !['/policy', '/watch'].includes(location)) {
-    return <div>TODO: main</div>
-  }
+  useEffect(() => {
+    if (user !== undefined && location === '/') {
+      setLocation('/subscriptions')
+    } else if (
+      user === undefined &&
+      (location.startsWith('/subscriptions') || location.startsWith('/profile'))
+    ) {
+      setLocation('/')
+    }
+  }, [location, user])
 
   return (
     <Switch>
+      <Route path="/">
+        <Suspense fallback={<div>TODO: loading</div>}>
+          <Main />
+        </Suspense>
+      </Route>
       <Route path="/subscriptions">
         <Suspense fallback={<div>TODO: loading</div>}>
           <Subscriptions />

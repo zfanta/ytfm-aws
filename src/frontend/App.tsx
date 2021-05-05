@@ -30,7 +30,7 @@ async function getProfile (): Promise<ProfileGetResponse|undefined> {
 
 function App (): ReactElement {
   const [user, setUser] = useState<ProfileGetResponse>()
-  const [location, setLocation] = useLocation()
+  const [location] = useLocation()
   const [swagger, setSwagger] = useState(false)
 
   useEffect(() => {
@@ -42,11 +42,6 @@ function App (): ReactElement {
     (async () => {
       const user = await getProfile()
       setUser(user)
-      if (user === undefined && location !== '/') {
-        setLocation('/')
-      } else if (user !== undefined && location === '/') {
-        setLocation('/subscriptions')
-      }
     })().catch(console.error)
   }, [])
 
