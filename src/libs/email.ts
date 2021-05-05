@@ -65,6 +65,7 @@ interface MailData {
   channelId: string
   channelTitle: string
   channelThumbnail: string
+  description: string
   unsubscribeLink: string
 }
 async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to: string): Promise<Buffer> {
@@ -102,6 +103,7 @@ async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to:
       channelThumbnail,
       thumbnail: video.snippet.thumbnails[largestThumbnail].url,
       duration,
+      description: video.snippet.description.replace(/\n/g, '<br/>'),
       unsubscribeLink
     })
   })
@@ -109,7 +111,17 @@ async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to:
 }
 
 function getHtml (data: MailData): string {
-  const { videoTitle, videoId, thumbnail, duration, channelId, channelTitle, channelThumbnail, unsubscribeLink } = data
+  const {
+    videoTitle,
+    videoId,
+    thumbnail,
+    duration,
+    channelId,
+    channelTitle,
+    channelThumbnail,
+    description,
+    unsubscribeLink
+  } = data
   return `
 <html>
 <head>
@@ -272,6 +284,9 @@ function getHtml (data: MailData): string {
                                 </td>
                               </table>
                             </td>
+                          </tr>
+                          <tr>
+                            <td colspan="3" style="padding-top: 1rem;font-family:Roboto,sans-serif;font-size:12px; color: #757575;; line-height:16px; letter-spacing:0px; -webkit-text-size-adjust:none; text-decoration:none;">${description}</td>
                           </tr>
                           <tr style="height: 40px">
                             <td style="width: 600px" colspan="3">
