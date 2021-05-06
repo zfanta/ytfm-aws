@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from 'react'
+import React, { CSSProperties, ReactElement, useEffect, useState } from 'react'
 import { video } from './api'
 import { useMediaQuery, useTheme } from '@material-ui/core'
 
@@ -6,45 +6,69 @@ interface WatchProps {
   videoId: string
 }
 function Watch ({ videoId }: WatchProps): ReactElement {
-  const [iframe, setIframe] = useState<string>()
-  const [iframeOriginal, setIframeOriginal] = useState<string>()
+  const [embedHtml, setEmbedHtml] = useState<string>()
+  const [style, setStyle] = useState<CSSProperties>()
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm')) // 960
 
   useEffect(() => {
     (async () => {
-      try {
-        const videoInformation = await video.get(videoId)
-        setIframeOriginal(videoInformation.player.embedHtml)
-      } catch (e) {
-        setIframe(e.message)
-        throw e
-      }
+      // TODO: error
+      const videoInformation = await video.get(videoId)
+      setEmbedHtml(videoInformation.player.embedHtml)
     })().catch(console.error)
   }, [])
 
   useEffect(() => {
-    if (iframeOriginal === undefined) return
-    if (isMobile) {
-      const doc = new DOMParser().parseFromString(iframeOriginal, 'text/html')
-      const iframeElement = doc.querySelector('iframe')
-      if (iframeElement === null) throw new Error('Failed to get player')
-      const { width, height } = iframeElement
-      const style = `position: absolute; left: 0; width: 100vw; height: ${100 * (parseInt(height) / parseInt(width))}vw`
-      iframeElement.setAttribute('style', style)
-      setIframe(`${iframeElement.outerHTML}<div style="width: 100vw; height: ${100 * (parseInt(height) / parseInt(width))}vw"></divs>`)
-    } else {
-      // TODO: optimize size
-      setIframe(iframeOriginal)
-    }
-  }, [iframeOriginal, isMobile])
+    if (embedHtml === undefined) return
 
-  if (iframe === undefined) {
+    const doc = new DOMParser().parseFromString(embedHtml, 'text/html')
+    const iframeElement = doc.querySelector('iframe')
+    if (iframeElement === null) throw new Error('Failed to get player')
+    const width = parseInt(iframeElement.width)
+    const height = parseInt(iframeElement.height)
+
+    if (isMobile) {
+      setStyle({
+        position: 'absolute',
+        left: '0',
+        width: '100vw',
+        height: `${100 * (height / width)}vw`
+      })
+    } else {
+      setStyle({
+        position: 'absolute',
+        left: '50%',
+        marginLeft: 'calc(-1 * (var(--video-width) / 2))',
+        height: 'var(--video-height)',
+        width: 'var(--video-width)',
+        // @ts-expect-error
+        '--video-width': 'max(calc(100vw * (2/3)), 960px)',
+        '--video-height': `calc(var(--video-width) * (${height}/${width}))`
+      })
+    }
+  }, [embedHtml, isMobile])
+
+  if (style === undefined) {
     return <div>TODO: loading</div>
   }
 
   return (
-    <div style={{ textAlign: 'center' }} dangerouslySetInnerHTML={{ __html: iframe }}>
+    <div>
+      <iframe
+        style={style}
+        src={`https://www.youtube.com/embed/${videoId}`}
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      />
+      <div style={{
+        height: style?.height,
+        minHeight: style.minHeight,
+        // @ts-expect-error
+        '--video-width': 'max(calc(100vw * (2/3)), 960px)',
+        '--video-height': style['--video-height']
+      }}/>
     </div>
   )
 }
