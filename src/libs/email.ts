@@ -59,7 +59,7 @@ interface Notification {
 }
 interface MailData {
   videoTitle: string
-  videoId: string
+  videoLink: string
   thumbnail: string
   duration: string
   channelId: string
@@ -82,6 +82,9 @@ async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to:
   const channelId = video.snippet.channelId
   const unsubscribeToken = await generateUnsubscribeToken(to, channelId)
   const unsubscribeLink = `https://${process.env.STAGE}.ytfm.app/subscriptions/${channelId}?token=${unsubscribeToken}&action=unsubscribe`
+  const videoLink = video.status.embeddable
+    ? `https://${process.env.STAGE}.ytfm.app/watch/${video.id}`
+    : `https://www.youtube.com/watch?v=${video.id}`
 
   const duration = getDuration(video)
   const mail = new MailComposer({
@@ -96,7 +99,7 @@ async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to:
     subject: video.snippet.title,
     text: `[${duration}] ${video.snippet.title}`,
     html: getHtml({
-      videoId: video.id,
+      videoLink,
       videoTitle: video.snippet.title,
       channelId: video.snippet.channelId,
       channelTitle: video.snippet.channelTitle,
@@ -117,7 +120,7 @@ function getHtml (data: MailData): string {
 
   const {
     videoTitle,
-    videoId,
+    videoLink,
     thumbnail,
     duration,
     channelId,
@@ -239,7 +242,7 @@ function getHtml (data: MailData): string {
                   <table class="video-spotlight-width" width="600" align="center" cellspacing="0" cellpadding="0" border="0">
                     <tr style="mso-hide:all">
                       <td colspan="3">
-                        <a href="https://${process.env.STAGE}.ytfm.app/watch/${videoId}" style="text-decoration:none; display:block;" class="nonplayable">
+                        <a href="${videoLink}" style="text-decoration:none; display:block;" class="nonplayable">
                           <table aria-label="${videoTitle}" class="video-spotlight-width" width="600" align="center" background="${thumbnail}"  style="background-repeat:no-repeat;background-size:cover;background-position:center;mso-hide:all" height="338" cellspacing="0" cellpadding="0" border="0">
                             <tr aria-label="${videoTitle}" scope="row" style="mso-hide:all">
                               <td  aria-label="${videoTitle}" class="footer-font" style="color:#fff; text-align:right; font-size: 12px;" valign="bottom" width="600">
@@ -271,7 +274,7 @@ function getHtml (data: MailData): string {
                                   <table class="content-container-width" cellspacing="0" cellpadding="0" border="0" style="table-layout:fixed;">
                                     <tr>
                                       <td style="padding-bottom:4px">
-                                        <a href="https://${process.env.STAGE}.ytfm.app/watch/${videoId}" style="text-decoration:none;">
+                                        <a href="${videoLink}" style="text-decoration:none;">
 <span class="video-title-font-class" valign="center" style="font-family:Roboto,sans-serif; font-size:14px; color:#212121; line-height:20px; -webkit-text-size-adjust:none;">
   ${videoTitle}
 </span>

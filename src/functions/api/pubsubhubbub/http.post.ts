@@ -54,7 +54,7 @@ async function getVideoInformation (videoId: string, channelId: string): Promise
 
   const query = qs.stringify({
     id: videoId,
-    part: 'id,snippet,contentDetails,player',
+    part: 'id,snippet,contentDetails,player,status',
     key: process.env.GOOGLE_API_KEY
   })
 
