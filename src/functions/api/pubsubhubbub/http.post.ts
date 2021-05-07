@@ -18,7 +18,10 @@ const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
     logger.info(`Received\n${event.body}`)
   }
 
-  const entry = (await xml2js.parseStringPromise(event.body)).feed.entry[0]
+  const { feed } = await xml2js.parseStringPromise(event.body)
+  if (feed['at:deleted-entry'] !== undefined) return response(200)
+
+  const entry = feed.entry[0]
 
   const video = {
     id: entry['yt:videoId'][0],
