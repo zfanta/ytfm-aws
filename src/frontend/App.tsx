@@ -64,7 +64,7 @@ function App (): ReactElement {
   }
 
   return (
-    <Container maxWidth="sm">
+    <Container maxWidth={location.startsWith('/tools') ? false : 'sm'}>
       <Header user={user} signOut={signOut} />
       <Body user={user} setUser={setUser} />
       <Divider style={{ marginTop: '1rem', marginBottom: '1rem' }}/>

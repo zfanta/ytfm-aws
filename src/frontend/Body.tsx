@@ -6,6 +6,7 @@ const Profile = React.lazy(async () => await import('./Profile'))
 const Policy = React.lazy(async () => await import('./Policy'))
 const Watch = React.lazy(async () => await import('./Watch'))
 const Main = React.lazy(async () => await import('./Main'))
+const Tools = React.lazy(async () => await import('./Tools'))
 
 interface BodyProps {
   user: ProfileGetResponse|undefined
@@ -61,6 +62,11 @@ function Body ({ user, setUser }: BodyProps): ReactElement {
             <Watch videoId={params.videoId} />
           </Suspense>
         }
+      </Route>
+      <Route path="/tools">
+        <Suspense fallback={<div>TODO: loading</div>}>
+          <Tools />
+        </Suspense>
       </Route>
     </Switch>
   )
