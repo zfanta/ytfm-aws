@@ -45,7 +45,11 @@ const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
       subscriber
     }))
     logger.info(`Send notification\n${JSON.stringify(videoFromGoogleApi)}`)
-    await sendNotificationEmail(notifications, channel.information.thumbnails.default?.url ?? 'https://yt3.ggpht.com/ytc/AAUvwnjkjfwolT7enHlIsv2kSn17Ei6Vte8cKIuvVIUtug=s88-c-k-c0x00ffffff-no-rj')
+    await sendNotificationEmail(
+      notifications,
+      channel.information.thumbnails.default?.url ?? 'https://yt3.ggpht.com/ytc/AAUvwnjkjfwolT7enHlIsv2kSn17Ei6Vte8cKIuvVIUtug=s88-c-k-c0x00ffffff-no-rj',
+      event.body
+    )
   }
 
   logger.debug('<=')

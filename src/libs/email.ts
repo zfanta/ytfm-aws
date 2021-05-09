@@ -31,13 +31,13 @@ function getDuration (video: VideoFromGoogleApis): string {
   return duration
 }
 
-async function sendNotificationEmail (notifications: Notification[], channelThumbnail: string): Promise<Array<PromiseSettledResult<any>>> {
+async function sendNotificationEmail (notifications: Notification[], channelThumbnail: string, xml: string /* debug */): Promise<Array<PromiseSettledResult<any>>> {
   console.log('sendNotificationEmail =>')
   const promises = notifications.map(async notification => {
     const command = new SendEmailCommand({
       Content: {
         Raw: {
-          Data: await getRaw(notification.video, channelThumbnail, notification.subscriber)
+          Data: await getRaw(notification.video, channelThumbnail, notification.subscriber, xml)
         }
       }
     })
@@ -67,8 +67,9 @@ interface MailData {
   channelThumbnail: string
   description: string
   unsubscribeLink: string
+  debug: string
 }
-async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to: string): Promise<Buffer> {
+async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to: string, xml: string /* debug */): Promise<Buffer> {
   if (process.env.STAGE === undefined) throw new Error('STAGE is undefined')
 
   const largestThumbnail = Object.keys(video.snippet.thumbnails).sort((a, b) => {
@@ -109,7 +110,8 @@ async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to:
       description: video.snippet.description
         .replace(/#([^\s^#]+)/g, '<a href="https://www.youtube.com/hashtag/$1">#$1</a>')
         .replace(/\n/g, '<br/>'),
-      unsubscribeLink
+      unsubscribeLink,
+      debug: JSON.stringify({ video, xml })
     })
   })
   return await mail.compile().build()
@@ -127,7 +129,8 @@ function getHtml (data: MailData): string {
     channelTitle,
     channelThumbnail,
     description,
-    unsubscribeLink
+    unsubscribeLink,
+    debug
   } = data
 
   return `
@@ -265,7 +268,9 @@ function getHtml (data: MailData): string {
                         <table class="content-container-width" width="600" cellspacing="0" cellpadding="0" border="0" style="table-layout:fixed;">
                           <tr>
                             <td width="32px">
-                              <img style="border-radius: 50%" src="${channelThumbnail}" width="32px"/>
+                              <a class="video-link-font-class" href="https://www.youtube.com/channel/${channelId}" style="font-family:Roboto,sans-serif;font-size:12px; color: #757575;; line-height:16px; letter-spacing:0px; -webkit-text-size-adjust:none; text-decoration:none;">
+                                <img style="border-radius: 50%" src="${channelThumbnail}" width="32px"/>
+                              </a>
                             </td>
                             <td width="12px"></td>
                             <td >
@@ -316,6 +321,9 @@ function getHtml (data: MailData): string {
     </td>
   </tr>
 </table>
+<div style="display: none">
+  <pre>${debug}</pre>
+</div>
 </body>
 </html>
 `
