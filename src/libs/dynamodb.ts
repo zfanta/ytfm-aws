@@ -644,8 +644,10 @@ async function putVideo (video: VideoFromGoogleApis): Promise<void> {
 async function getChannelSubscribers (channelId: string, ExclusiveStartKey?: any): Promise<string[]> {
   const command = new QueryCommand({
     TableName: process.env.SUBSCRIPTIONS_TABLE_NAME,
-    KeyConditionExpression: 'channel = :channelId',
-    ExpressionAttributeValues: { ':channelId': { S: channelId } },
+    KeyConditionExpression: '#channel = :channel',
+    FilterExpression: '#notification = :notification',
+    ExpressionAttributeNames: { '#notification': 'notification', '#channel': 'channel' },
+    ExpressionAttributeValues: { ':notification': { BOOL: true }, ':channel': { S: channelId } },
     ExclusiveStartKey
   })
 
