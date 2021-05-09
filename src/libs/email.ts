@@ -107,7 +107,7 @@ async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to:
       thumbnail: video.snippet.thumbnails[largestThumbnail].url,
       duration,
       description: video.snippet.description
-        .replace(/#([^\s]+)/g, '<a href="https://www.youtube.com/hashtag/$1">#$1</a>')
+        .replace(/#([^\s^#]+)/g, '<a href="https://www.youtube.com/hashtag/$1">#$1</a>')
         .replace(/\n/g, '<br/>'),
       unsubscribeLink
     })
