@@ -1,5 +1,5 @@
 import React, { ReactElement, useEffect, useMemo, useState } from 'react'
-import { Avatar, Grid, Box, Checkbox, CircularProgress } from '@material-ui/core'
+import { Avatar, Grid, Box, Checkbox, CircularProgress, NativeSelect } from '@material-ui/core'
 import { RefreshSharp } from '@material-ui/icons'
 import {
   getUser,
@@ -116,7 +116,7 @@ function Subscription ({ channel, toggle, unsubscribe }: {channel: ChannelInSubs
       <Grid item xs={8}>
         <Box component="span"><a href={`https://www.youtube.com/channel/${channel.id}`} target="_blank">{channel.title}</a></Box>
       </Grid>
-      <Grid item xs={2} onClick={onClickToggle}>
+      <Grid item xs={2} onClick={onClickToggle} style={{ textAlign: 'right' }}>
         {patching ? <CircularProgress size="1rem" /> : <Checkbox checked={channel.notification} color="primary" />}
       </Grid>
     </>
@@ -148,6 +148,8 @@ function Subscriptions ({ channelId }: SubscriptionsProps): ReactElement {
   const [subscriptions, setSubscriptions] = useState<SubscriptionsGetResponse>()
   const [syncing, setSyncing] = useState(false)
 
+  const [filter, setFilter] = useState<'all'|'enabled'|'disabled'>('all')
+
   const [done, setDone] = useState(false)
   const unsubscribe = useMemo(() => done ? false : useUnsubscribe(subscriptions, channelId), [subscriptions, done])
 
@@ -158,6 +160,12 @@ function Subscriptions ({ channelId }: SubscriptionsProps): ReactElement {
   useEffect(() => {
     getSubscriptions(channelId, token, action === 'unsubscribe' ? 'unsubscribe' : undefined).then(setSubscriptions).catch(console.error)
   }, [])
+
+  function handleFilterChange ({ target: { value } }: React.ChangeEvent<{ value: string }>): void {
+    if (value === 'all' || value === 'enabled' || value === 'disabled') {
+      setFilter(value)
+    }
+  }
 
   async function onClickSync (): Promise<void> {
     setSyncing(true)
@@ -213,15 +221,31 @@ function Subscriptions ({ channelId }: SubscriptionsProps): ReactElement {
           ? null
           : <>
               <Grid item xs={10}>Synced at: {subscriptions.syncedAt === undefined ? 'N/A' : new Date(subscriptions.syncedAt).toLocaleString()}</Grid>
-              <Grid item xs={2}>{syncing ? <CircularProgress size="1rem" /> : <RefreshSharp onClick={onClickSync} />}</Grid>
+              <Grid item xs={2} style={{ textAlign: 'right' }}>{syncing ? <CircularProgress size="1rem" /> : <RefreshSharp onClick={onClickSync} />}</Grid>
             </>
+        }
+        {channelId === undefined &&
+          <Grid item xs={12} style={{ textAlign: 'right' }}>
+            <NativeSelect
+              value={filter}
+              onChange={handleFilterChange}
+            >
+              <option value="all">all</option>
+              <option value="enabled">enabled</option>
+              <option value="disabled">disabled</option>
+            </NativeSelect>
+          </Grid>
         }
         {channelId !== undefined
           ? subscriptions.channels.filter(channel => channel.id === channelId).map(channel =>
               <Subscription key={channel.id} channel={channel} toggle={toggle} unsubscribe={unsubscribe} />
           )
-          : subscriptions.channels.map(channel => (
-              <Subscription key={channel.id} channel={channel} toggle={toggle} unsubscribe={unsubscribe} />
+          : subscriptions.channels.filter(channel => {
+            if (filter === 'all') return true
+            if (filter === 'enabled') return channel.notification
+            return !channel.notification
+          }).map(channel => (
+            <Subscription key={channel.id} channel={channel} toggle={toggle} unsubscribe={unsubscribe} />
           ))
         }
         {action === 'unsubscribe' && token !== undefined ? <UnsubscribeYtfm token={token} /> : null}
