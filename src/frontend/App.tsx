@@ -29,7 +29,7 @@ async function getProfile (): Promise<ProfileGetResponse|undefined> {
 }
 
 function App (): ReactElement {
-  const [user, setUser] = useState<ProfileGetResponse>()
+  const [user, setUser] = useState<ProfileGetResponse|null>()
   const [location] = useLocation()
   const [swagger, setSwagger] = useState(false)
 
@@ -40,7 +40,7 @@ function App (): ReactElement {
     }
 
     (async () => {
-      const user = await getProfile()
+      const user = (await getProfile()) ?? null
       setUser(user)
     })().catch(console.error)
   }, [])

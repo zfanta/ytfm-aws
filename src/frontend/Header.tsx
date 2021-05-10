@@ -177,7 +177,7 @@ function SignInButton (): ReactElement {
 }
 
 interface HeaderProps {
-  user: ProfileGetResponse|undefined
+  user: ProfileGetResponse|undefined|null
   signOut: () => Promise<void>
 }
 function Header ({ user, signOut }: HeaderProps): ReactElement {
@@ -194,7 +194,7 @@ function Header ({ user, signOut }: HeaderProps): ReactElement {
               </Typography>
               {location.startsWith('/unsubscribe')
                 ? null
-                : user === undefined
+                : user === undefined || user === null
                   ? <SignInButton />
                   : <ButtonsAfterSignIn signOut={signOut} email={user.email} photo={user.photos[0]} />
               }

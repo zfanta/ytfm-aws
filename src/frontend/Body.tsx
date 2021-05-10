@@ -9,7 +9,7 @@ const Main = React.lazy(async () => await import('./Main'))
 const Tools = React.lazy(async () => await import('./Tools'))
 
 interface BodyProps {
-  user: ProfileGetResponse|undefined
+  user: ProfileGetResponse|undefined|null
   setUser: Dispatch<SetStateAction<ProfileGetResponse | undefined>>
 }
 function Body ({ user, setUser }: BodyProps): ReactElement {
@@ -17,10 +17,11 @@ function Body ({ user, setUser }: BodyProps): ReactElement {
 
   // TODO: 404
   useEffect(() => {
-    if (user !== undefined && location === '/') {
+    if (user === undefined) return
+    if (user !== null && location === '/') {
       setLocation('/subscriptions')
     } else if (
-      user === undefined &&
+      user === null &&
       (location.startsWith('/subscriptions') || location.startsWith('/profile'))
     ) {
       setLocation('/')
