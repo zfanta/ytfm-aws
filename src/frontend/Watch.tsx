@@ -44,7 +44,7 @@ function Watch ({ videoId }: WatchProps): ReactElement {
         width: 'var(--video-width)',
         // @ts-expect-error
         '--video-width': 'max(calc(100vw * (2/3)), 960px)',
-        '--video-height': `calc(var(--video-width) * (${height}/${width}))`
+        '--video-height': `min(calc(var(--video-width) * (${height}/${width})), 80vh)`
       })
     }
   }, [embedHtml, isMobile])
@@ -66,7 +66,7 @@ function Watch ({ videoId }: WatchProps): ReactElement {
         height: style?.height,
         minHeight: style.minHeight,
         // @ts-expect-error
-        '--video-width': 'max(calc(100vw * (2/3)), 960px)',
+        '--video-width': style['--video-width'],
         '--video-height': style['--video-height']
       }}/>
     </div>
