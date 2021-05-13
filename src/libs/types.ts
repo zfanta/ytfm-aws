@@ -64,6 +64,14 @@ interface VideoFromGoogleApis {
   'player': {
     'embedHtml': string
   }
+  'liveStreamingDetails'?: {
+    'actualStartTime': string
+    'actualEndTime': string
+    'scheduledStartTime': string
+    'scheduledEndTime': string
+    'concurrentViewers': number
+    'activeLiveChatId': string
+  }
 }
 
 interface Token {

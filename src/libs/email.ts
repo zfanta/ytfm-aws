@@ -1,23 +1,29 @@
 import { SendEmailCommand, SESv2Client } from '@aws-sdk/client-sesv2'
 import { parse } from 'iso8601-duration'
+import ical, { ICalCalendarMethod } from 'ical-generator'
+import dayjs from 'dayjs'
 import { VideoFromGoogleApis } from '@libs/types'
 import MailComposer from 'nodemailer/lib/mail-composer'
+import { IcalAttachment } from 'nodemailer/lib/mailer'
 import { generateUnsubscribeToken } from '@libs/crypto'
 
 // TODO: region name
 const client = new SESv2Client({ region: 'us-east-1' })
 
 function getDuration (video: VideoFromGoogleApis): string {
-  const { liveBroadcastContent } = video.snippet
-  if (liveBroadcastContent === 'live') {
-    return 'LIVE'
-  }
-  if (liveBroadcastContent === 'upcoming') {
-    return 'PREMIERE'
+  let duration: string
+  let premieres = false
+
+  const { liveStreamingDetails } = video
+  if (liveStreamingDetails !== undefined) {
+    const end = liveStreamingDetails.scheduledEndTime ?? liveStreamingDetails.actualEndTime
+    if (end === undefined) {
+      return 'LIVE'
+    }
+    premieres = true
   }
 
   // https://en.wikipedia.org/wiki/ISO_8601#Durations
-  let duration: string
   let { hours, minutes, seconds } = parse(video.contentDetails.duration)
   hours ??= 0
   minutes ??= 0
@@ -28,7 +34,40 @@ function getDuration (video: VideoFromGoogleApis): string {
   } else {
     duration = `${minutes}` + ':' + duration
   }
-  return duration
+  return `${premieres ? 'PREMIERES<br/>' : ''}${duration}`
+}
+
+interface Ical {
+  start: string|undefined
+  duration: string
+  summary: string
+  url: string
+}
+function getIcalEvent ({ start, duration, summary, url }: Ical): IcalAttachment|undefined {
+  if (start === undefined) return undefined
+
+  let { hours, minutes, seconds } = parse(duration)
+  hours ??= 0
+  minutes ??= 0
+  seconds ??= 0
+
+  const calendar = ical({
+    method: ICalCalendarMethod.PUBLISH,
+    events: [{
+      start: dayjs(start),
+      end: dayjs(start).add(hours, 'hours').add(minutes, 'minutes').add(seconds, 'seconds'),
+      summary,
+      url,
+      description: {
+        plain: summary,
+        html: `<html><body><a href="${url}">${summary}</a></body></html>`
+      }
+    }]
+  })
+
+  return {
+    content: calendar.toString()
+  }
 }
 
 async function sendNotificationEmail (notifications: Notification[], channelThumbnail: string, xml: string /* debug */): Promise<Array<PromiseSettledResult<any>>> {
@@ -88,6 +127,14 @@ async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to:
     : `https://www.youtube.com/watch?v=${video.id}`
 
   const duration = getDuration(video)
+
+  const icalEvent = getIcalEvent({
+    start: video.liveStreamingDetails?.scheduledStartTime ?? video.liveStreamingDetails?.actualStartTime,
+    duration: video.contentDetails.duration,
+    url: videoLink,
+    summary: video.snippet.title
+  })
+
   const mail = new MailComposer({
     from: {
       address: 'noreply@ytfm.app',
@@ -112,7 +159,8 @@ async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to:
         .replace(/\n/g, '<br/>'),
       unsubscribeLink,
       debug: JSON.stringify({ video, xml })
-    })
+    }),
+    icalEvent
   })
   return await mail.compile().build()
 }
@@ -136,6 +184,7 @@ function getHtml (data: MailData): string {
   return `
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no,viewport-fit=cover">
   <title>
     ${videoTitle}
   </title>
