@@ -2,6 +2,7 @@ import { SendEmailCommand, SESv2Client } from '@aws-sdk/client-sesv2'
 import { parse } from 'iso8601-duration'
 import ical, { ICalCalendarMethod } from 'ical-generator'
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
 import { VideoFromGoogleApis } from '@libs/types'
 import MailComposer from 'nodemailer/lib/mail-composer'
 import { IcalAttachment } from 'nodemailer/lib/mailer'
@@ -46,6 +47,8 @@ interface Ical {
 function getIcalEvent ({ start, duration, summary, url }: Ical): IcalAttachment|undefined {
   if (start === undefined) return undefined
 
+  dayjs.extend(utc)
+
   let { hours, minutes, seconds } = parse(duration)
   hours ??= 0
   minutes ??= 0
@@ -54,8 +57,8 @@ function getIcalEvent ({ start, duration, summary, url }: Ical): IcalAttachment|
   const calendar = ical({
     method: ICalCalendarMethod.PUBLISH,
     events: [{
-      start: dayjs(start),
-      end: dayjs(start).add(hours, 'hours').add(minutes, 'minutes').add(seconds, 'seconds'),
+      start: dayjs.utc(start),
+      end: dayjs.utc(start).add(hours, 'hours').add(minutes, 'minutes').add(seconds, 'seconds'),
       summary,
       url,
       description: {
@@ -84,8 +87,14 @@ async function sendNotificationEmail (notifications: Notification[], channelThum
     return await client.send(command)
   })
 
+  const result = await Promise.allSettled(promises)
+  result.filter(promise => promise.status === 'rejected').forEach(rejected => {
+    console.error(rejected)
+  })
+
   console.log('<= sendNotificationEmail')
-  return await Promise.allSettled(promises)
+
+  return result
 }
 
 export {
