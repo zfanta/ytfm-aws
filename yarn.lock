@@ -2581,12 +2581,10 @@
     prop-types "^15.7.2"
     react-is "^16.8.0 || ^17.0.0"
 
-"@middy/core@^1.5.0":
-  version "1.5.2"
-  resolved "https://registry.yarnpkg.com/@middy/core/-/core-1.5.2.tgz#41e09c541ad13fd7acc48a63a72a211206ce2f2b"
-  integrity sha512-ja9hE3BheH9brkpFvNZ8bEQjopTT6ldGSbCPSGZk3UVgC9i9SdhoPOoFetrl3sOBO/sG6L8kKPxxUWeo1aO9Ug==
-  dependencies:
-    once "^1.4.0"
+"@middy/core@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@middy/core/-/core-2.2.0.tgz#39145c194ee4984962594048e75b232ebfc1e9a4"
+  integrity sha512-IbeUDpBGxLww5Ts+JaxAE3Kr1kVNGMnTpPAjEL+ReHylXvlzEUO/2VOqhPDHrMxZAgJ89CJ1RwF30CyFBQpyPA==
 
 "@middy/http-json-body-parser@^2.2.0":
   version "2.2.0"
