@@ -65,7 +65,7 @@
     "fullstack-serverless": "^0.8.0",
     "js-yaml": "^4.1.0",
     "json-schema-to-ts": "^1.6.4",
-    "parcel": "2.0.0-beta.1",
+    "parcel": "2.0.0-beta.2",
     "pre-commit": "^1.2.2",
     "serverless": "^2.41.2",
     "serverless-offline": "^7.0.0",
