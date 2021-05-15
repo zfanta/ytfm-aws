@@ -47,12 +47,14 @@ interface Ical {
 function getIcalEvent ({ start, duration, summary, url }: Ical): IcalAttachment|undefined {
   if (start === undefined) return undefined
 
-  dayjs.extend(utc)
-
   let { hours, minutes, seconds } = parse(duration)
   hours ??= 0
   minutes ??= 0
   seconds ??= 0
+
+  if (hours + minutes + seconds === 0) return undefined
+
+  dayjs.extend(utc)
 
   const calendar = ical({
     method: ICalCalendarMethod.PUBLISH,
