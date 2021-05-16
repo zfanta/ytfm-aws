@@ -15,20 +15,20 @@ function getDuration (video: VideoFromGoogleApis): string {
   let duration: string
   let premieres = false
 
-  const { liveStreamingDetails } = video
-  if (liveStreamingDetails !== undefined) {
-    const end = liveStreamingDetails.scheduledEndTime ?? liveStreamingDetails.actualEndTime
-    if (end === undefined) {
-      return 'LIVE'
-    }
-    premieres = true
-  }
-
   // https://en.wikipedia.org/wiki/ISO_8601#Durations
   let { hours, minutes, seconds } = parse(video.contentDetails.duration)
   hours ??= 0
   minutes ??= 0
   seconds ??= 0
+
+  const { liveStreamingDetails } = video
+  if (liveStreamingDetails !== undefined) {
+    if (hours + minutes + seconds === 0) {
+      return 'LIVE'
+    }
+    premieres = true
+  }
+
   duration = `0${seconds}`.slice(-2)
   if (hours !== 0) {
     duration = `${hours}` + ':' + `0${minutes}`.slice(-2) + ':' + duration
