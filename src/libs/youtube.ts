@@ -70,9 +70,46 @@ async function sendToPubsubhubbub (channelIds: string[], mode: 'subscribe'|'unsu
   }))
 }
 
+interface GetRegionsResponse {
+  kind: 'youtube#i18nRegionListResponse'
+  etag: string
+  items: Array<{
+    kind: 'youtube#i18nRegion'
+    etag: string
+    id: string
+    snippet: {
+      gl: string
+      name: string
+    }
+  }>
+}
+async function getRegions (language: string): Promise<GetRegionsResponse>
+async function getRegions (language: string, etag: string): Promise<GetRegionsResponse|'Not Modified'>
+async function getRegions (language: string, etag?: string): Promise<GetRegionsResponse|'Not Modified'> {
+  const query = qs.stringify({
+    part: 'snippet',
+    hl: language,
+    key: process.env.GOOGLE_API_KEY
+  })
+
+  const url = `https://www.googleapis.com/youtube/v3/i18nRegions?${query}`
+
+  if (etag !== undefined) {
+    const headers = {
+      'If-None-Match': etag
+    }
+    const response = await fetch(url, { headers })
+    if (response.status === 304) return 'Not Modified'
+    return await response.json() as GetRegionsResponse
+  } else {
+    return await (await fetch(url)).json() as GetRegionsResponse
+  }
+}
+
 export {
   getSubscriptions,
-  sendToPubsubhubbub
+  sendToPubsubhubbub,
+  getRegions
 }
 
 interface SubscriptionListResponse {

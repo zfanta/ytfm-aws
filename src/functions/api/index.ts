@@ -4,6 +4,7 @@ import cookie from './cookie'
 import subscriptions from './subscriptions'
 import profile from './profile'
 import video from './video'
+import regions from './regions'
 
 export default {
   ...oauth2,
@@ -11,5 +12,6 @@ export default {
   ...cookie,
   ...subscriptions,
   ...profile,
-  ...video
+  ...video,
+  ...regions
 }

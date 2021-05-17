@@ -765,6 +765,43 @@ async function getKeys (type: 'unsubscribe', ExclusiveStartKey?: any): Promise<U
   }
 }
 
+interface Region {
+  id: string
+  name: string
+}
+interface Regions {
+  language: string
+  etag: string
+  regions: Region[]
+}
+async function getRegions (language: string): Promise<Regions|undefined> {
+  const command = new GetItemCommand({
+    TableName: process.env.REGIONS_TABLE_NAME,
+    Key: marshall({ language })
+  })
+
+  const response = await client.send(command)
+
+  if (response.Item === undefined) return undefined
+
+  return unmarshall(response.Item) as Regions
+}
+
+async function setRegions (language: string, etag: string, regions: Region[]): Promise<void> {
+  const Item = marshall({
+    language,
+    etag,
+    regions
+  })
+
+  const putItemCommand = new PutItemCommand(({
+    TableName: process.env.REGIONS_TABLE_NAME,
+    Item
+  }))
+
+  await client.send(putItemCommand)
+}
+
 export {
   getSubscriptions,
   updateSubscription,
@@ -796,5 +833,8 @@ export {
   deleteAccount,
 
   putNewKey,
-  getKeys
+  getKeys,
+
+  getRegions,
+  setRegions
 }

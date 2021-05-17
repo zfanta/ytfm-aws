@@ -47,6 +47,7 @@ const serverlessConfiguration: AWS = {
       VIDEOS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-videos',
       SESSIONS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-sessions',
       KEYS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-keys',
+      REGIONS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-regions',
       GOOGLE_CLIENT_ID: '${env:GOOGLE_CLIENT_ID}',
       GOOGLE_CLIENT_SECRET: '${env:GOOGLE_CLIENT_SECRET}',
       GOOGLE_API_KEY: '${env:GOOGLE_API_KEY}',
@@ -242,6 +243,21 @@ const serverlessConfiguration: AWS = {
           }, {
             AttributeName: 'createdAt',
             KeyType: 'RANGE'
+          }]
+        }
+      },
+      regions: {
+        Type: 'AWS::DynamoDB::Table',
+        Properties: {
+          BillingMode: 'PAY_PER_REQUEST',
+          TableName: '${self:provider.environment.REGIONS_TABLE_NAME}',
+          AttributeDefinitions: [{
+            AttributeName: 'language',
+            AttributeType: 'S'
+          }],
+          KeySchema: [{
+            AttributeName: 'language',
+            KeyType: 'HASH'
           }]
         }
       }
