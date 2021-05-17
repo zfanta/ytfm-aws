@@ -100,8 +100,10 @@ async function getRegions (language: string, etag?: string): Promise<GetRegionsR
     }
     const response = await fetch(url, { headers })
     if (response.status === 304) return 'Not Modified'
+    // TODO: sort
     return await response.json() as GetRegionsResponse
   } else {
+    // TODO: sort
     return await (await fetch(url)).json() as GetRegionsResponse
   }
 }

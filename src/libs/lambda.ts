@@ -16,7 +16,8 @@ function responseProfile (user: User): {statusCode: number, body: string, header
     email: user.email,
     photos: user.photos,
     notification: user.notification,
-    updatedAt: user.updatedAt
+    updatedAt: user.updatedAt,
+    region: user.region
   })
   return {
     statusCode: 200,

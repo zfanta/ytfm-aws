@@ -2,7 +2,7 @@ import 'source-map-support/register'
 
 import type { ValidatedEventAPIGatewayProxyEventWithUser } from '@libs/apiGateway'
 import { injectUser, middyfy, response, responseProfile } from '@libs/lambda'
-import { getUser, updateUserNotification } from '@libs/dynamodb'
+import { getUser, updateUserNotification, updateUserRegion } from '@libs/dynamodb'
 import schema from './http.patch.schema'
 
 const get: ValidatedEventAPIGatewayProxyEventWithUser<typeof schema> = async (event) => {
@@ -11,6 +11,11 @@ const get: ValidatedEventAPIGatewayProxyEventWithUser<typeof schema> = async (ev
 
   if (body.notification !== undefined && body.notification !== user.notification) {
     await updateUserNotification(user.email, body.notification)
+    updated = true
+  }
+
+  if (body.region !== undefined) {
+    await updateUserRegion(user.email, body.region)
     updated = true
   }
 

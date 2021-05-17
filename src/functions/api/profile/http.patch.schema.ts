@@ -1,6 +1,7 @@
 export default {
   type: 'object',
   properties: {
-    notification: { type: 'boolean' }
+    notification: { type: 'boolean' },
+    region: { type: 'string' }
   }
 } as const

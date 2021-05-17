@@ -332,6 +332,21 @@ async function updateUserNotification (email: string, notification: boolean): Pr
   return currentTime
 }
 
+async function updateUserRegion (email: string, region: string): Promise<Date> {
+  const currentTime = new Date()
+  const command = new UpdateItemCommand({
+    TableName: process.env.USERS_TABLE_NAME,
+    Key: marshall({ email }),
+    UpdateExpression: 'SET #region = :region',
+    ExpressionAttributeNames: { '#region': 'region' },
+    ExpressionAttributeValues: { ':region': { S: region } }
+  })
+
+  await client.send(command)
+
+  return currentTime
+}
+
 async function getSubscription (channel: string, user: string): Promise<Subscription|undefined> {
   const command = new GetItemCommand({
     TableName: process.env.SUBSCRIPTIONS_TABLE_NAME,
@@ -449,6 +464,7 @@ export interface User {
   permissions?: {
     unsubscribe?: string
   }
+  region?: string
 }
 async function getUser (email: string): Promise<User| undefined> {
   const command = new GetItemCommand({
@@ -811,6 +827,7 @@ export {
   updateChannelExpiry,
   updateUserSyncTime,
   updateUserNotification,
+  updateUserRegion,
   updateGoogleTokenAndPhotos,
   getUser,
   getUsers,
