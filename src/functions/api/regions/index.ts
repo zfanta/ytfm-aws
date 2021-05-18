@@ -13,4 +13,4 @@ const regionsHttpGet = {
   }]
 }
 
-export default { videoHttpGet: regionsHttpGet }
+export default { regionsHttpGet }
