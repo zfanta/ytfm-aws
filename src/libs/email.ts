@@ -133,7 +133,7 @@ async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to:
   const channelId = video.snippet.channelId
   const unsubscribeToken = await generateUnsubscribeToken(to, channelId)
   const unsubscribeLink = `https://${process.env.STAGE}.ytfm.app/subscriptions/${channelId}?token=${unsubscribeToken}&action=unsubscribe`
-  const videoLink = video.status.embeddable
+  const videoLink = video.status.embeddable && video.contentDetails.contentRating.ytRating !== 'ytAgeRestricted'
     ? `https://${process.env.STAGE}.ytfm.app/watch/${video.id}`
     : `https://www.youtube.com/watch?v=${video.id}`
 
