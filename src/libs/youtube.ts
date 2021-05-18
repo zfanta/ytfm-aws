@@ -94,18 +94,21 @@ async function getRegions (language: string, etag?: string): Promise<GetRegionsR
 
   const url = `https://www.googleapis.com/youtube/v3/i18nRegions?${query}`
 
+  let regions: GetRegionsResponse
   if (etag !== undefined) {
     const headers = {
       'If-None-Match': etag
     }
     const response = await fetch(url, { headers })
     if (response.status === 304) return 'Not Modified'
-    // TODO: sort
-    return await response.json() as GetRegionsResponse
+    regions = await response.json() as GetRegionsResponse
   } else {
-    // TODO: sort
-    return await (await fetch(url)).json() as GetRegionsResponse
+    regions = await (await fetch(url)).json() as GetRegionsResponse
   }
+
+  regions.items = regions.items.sort((a, b) => a.snippet.name.localeCompare(b.snippet.name))
+
+  return regions
 }
 
 export {
