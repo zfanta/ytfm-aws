@@ -5,8 +5,15 @@ interface ProfileGetResponse {
   notification: true
   photos: string[]
   updatedAt: number
+  region: string|undefined
 }
 type ProfilePatchResponse = ProfileGetResponse
+interface ProfileFetchProps {
+  region?: string
+  notification?: boolean
+  token?: string
+  action?: string
+}
 const profile = {
   get: async (token?: string, action?: 'unsubscribe'): Promise<ProfileGetResponse> => {
     let path = '/api/profile'
@@ -16,11 +23,13 @@ const profile = {
     }
     return await (await fetch(path)).json()
   },
-  patch: async (notification: boolean, token?: string, action?: 'unsubscribe'): Promise<ProfilePatchResponse> => {
+  patch: async (props: ProfileFetchProps): Promise<ProfilePatchResponse> => {
+    const { region, notification, token, action } = props
+
     return await (await fetch('/api/profile', {
       method: 'PATCH',
       credentials: 'include',
-      body: JSON.stringify({ notification, token, action }),
+      body: JSON.stringify({ region, notification, token, action }),
       headers: {
         'Content-Type': 'application/json'
       }
@@ -136,16 +145,29 @@ const signOut = {
   }
 }
 
+interface Region {
+  id: string
+  name: string
+}
+const regions = {
+  // TODO: etag, cache
+  get: async (language: string): Promise<Region[]> => {
+    return await (await fetch(`/api/regions/${language}`)).json()
+  }
+}
+
 export {
   profile,
   cookie,
   subscriptions,
   signOut,
-  video
+  video,
+  regions
 }
 
 export type {
   SubscriptionsGetResponse,
   ChannelInSubscriptionResponse,
-  ProfileGetResponse
+  ProfileGetResponse,
+  Region
 }

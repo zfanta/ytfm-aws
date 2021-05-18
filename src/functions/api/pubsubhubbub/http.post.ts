@@ -36,11 +36,23 @@ const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
 
     await putVideo(videoFromGoogleApi)
 
-    const subscribers = await getChannelSubscribers(video.channelId)
-    const users = new Set((await getUsers(subscribers)).filter(user => user.notification).map(user => user.email))
-    const channel = (await getChannels([video.channelId]))[0]
+    const subscriberEmails = await getChannelSubscribers(video.channelId)
+    let users = (await getUsers(subscriberEmails)).filter(user => user.notification)
 
-    const notifications = subscribers.filter(subscriber => users.has(subscriber) !== undefined).map(subscriber => ({
+    // filter region
+    const allowed = videoFromGoogleApi.contentDetails.regionRestriction?.allowed
+    const blocked = videoFromGoogleApi.contentDetails.regionRestriction?.blocked
+    if (blocked !== undefined) {
+      users = users.filter(user => user.region === undefined || !blocked.includes(user.region))
+    }
+    if (allowed !== undefined) {
+      users = users.filter(user => user.region === undefined || allowed.includes(user.region))
+    }
+
+    const channel = (await getChannels([video.channelId]))[0]
+    const userSet = new Set(users.map(user => user.email))
+
+    const notifications = subscriberEmails.filter(subscriber => userSet.has(subscriber) !== undefined).map(subscriber => ({
       video: videoFromGoogleApi,
       subscriber
     }))

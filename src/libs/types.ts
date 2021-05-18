@@ -52,6 +52,10 @@ interface VideoFromGoogleApis {
     'licensedContent': boolean
     'contentRating': {}
     'projection': string
+    'regionRestriction'?: {
+      'blocked'?: string[]
+      'allowed'?: string[]
+    }
   }
   'status': {
     'uploadStatus': string

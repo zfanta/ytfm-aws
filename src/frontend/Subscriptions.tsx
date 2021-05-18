@@ -54,7 +54,11 @@ function UnsubscribeYtfm ({ token }: UnsubscribeYtfmProps): ReactElement {
 
   async function unsubscribe (): Promise<void> {
     setLoading(true)
-    await api.profile.patch(false, token, 'unsubscribe')
+    await api.profile.patch({
+      notification: false,
+      token,
+      action: 'unsubscribe'
+    })
     setResubscribed(false)
     setUnsubscribed(true)
     setLoading(false)
@@ -62,7 +66,11 @@ function UnsubscribeYtfm ({ token }: UnsubscribeYtfmProps): ReactElement {
 
   async function subscribe (): Promise<void> {
     setLoading(true)
-    await api.profile.patch(true, token, 'unsubscribe')
+    await api.profile.patch({
+      notification: true,
+      token,
+      action: 'unsubscribe'
+    })
     setResubscribed(true)
     setUnsubscribed(false)
     setLoading(false)

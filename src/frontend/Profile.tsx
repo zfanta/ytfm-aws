@@ -1,4 +1,4 @@
-import React, { Dispatch, ReactElement, SetStateAction, useState } from 'react'
+import React, { Dispatch, ReactElement, SetStateAction, useEffect, useState } from 'react'
 import {
   Button,
   CircularProgress,
@@ -7,13 +7,13 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Grid
+  Grid, NativeSelect
 } from '@material-ui/core'
 import { NotificationsOffSharp, NotificationsActiveSharp } from '@material-ui/icons'
 import { useLocation } from 'wouter'
 import { clear } from './storage'
-import { profile } from './api'
-import type { ProfileGetResponse } from './api'
+import { profile, regions as regionsApi } from './api'
+import type { Region as RegionType, ProfileGetResponse } from './api'
 
 interface EmailNotificationProps {
   email: string
@@ -25,7 +25,9 @@ function EmailNotification ({ email, notification, callback }: EmailNotification
 
   async function updateNotification (): Promise<void> {
     setPatching(true)
-    const result = await profile.patch(!notification)
+    const result = await profile.patch({
+      notification: !notification
+    })
     callback(result)
     setPatching(false)
   }
@@ -66,7 +68,7 @@ function DeleteAccount ({ callback }: DeleteAccountProps): ReactElement {
   }
 
   return (
-    <>
+    <Grid item xs={12}>
       <Button
         variant="outlined"
         color="secondary"
@@ -94,6 +96,40 @@ function DeleteAccount ({ callback }: DeleteAccountProps): ReactElement {
           </Button>
         </DialogActions>
       </Dialog>
+    </Grid>
+  )
+}
+
+interface RegionProps {
+  region: string|undefined
+  regions: RegionType[]
+  callback: (result: ProfileGetResponse) => void
+}
+function Region ({ region, regions, callback }: RegionProps): ReactElement {
+  const [regionValue, setRegionValue] = useState(region)
+
+  function handleChange ({ target: { value } }: React.ChangeEvent<{value: string}>): void {
+    setRegionValue(value)
+    profile.patch({ region: value }).then(callback).catch(console.error)
+  }
+
+  const deviceRegion = regions.find(region => region.id === navigator.language.split('-')[1])?.id ?? 'US'
+
+  return (
+    <>
+      <Grid item xs={2}>
+        Region
+      </Grid>
+      <Grid item xs={10}>
+        <NativeSelect
+          value={regionValue}
+          onChange={handleChange}
+        >
+          <option value={undefined}>None</option>
+          {regions.filter(region => region.id === deviceRegion).map(region => <option value={region.id} key={region.id}>{region.name}</option>)}
+          {regions.filter(region => region.id !== deviceRegion).map(region => <option value={region.id} key={region.id}>{region.name}</option>)}
+        </NativeSelect>
+      </Grid>
     </>
   )
 }
@@ -103,6 +139,19 @@ interface ProfileProps {
   setUser: Dispatch<SetStateAction<ProfileGetResponse | undefined>>
 }
 function Profile ({ user, setUser }: ProfileProps): ReactElement {
+  const [regions, setRegions] = useState<RegionType[]>()
+
+  useEffect(() => {
+    (async () => {
+      const regions = await regionsApi.get(navigator.language)
+      setRegions(regions)
+    })().catch(console.error)
+  }, [])
+
+  if (regions === undefined) {
+    return <div>TODO: loading</div>
+  }
+
   return (
     <Grid container spacing={3} alignItems="center">
       <EmailNotification
@@ -110,6 +159,7 @@ function Profile ({ user, setUser }: ProfileProps): ReactElement {
         notification={user.notification}
         callback={setUser}
       />
+      <Region region={user.region} regions={regions} callback={setUser} />
       <DeleteAccount callback={setUser} />
     </Grid>
   )
