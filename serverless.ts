@@ -132,10 +132,29 @@ const serverlessConfiguration: AWS = {
           AttributeDefinitions: [{
             AttributeName: 'id',
             AttributeType: 'S'
+          }, {
+            AttributeName: 'channel',
+            AttributeType: 'S'
+          }, {
+            AttributeName: 'publishedAt',
+            AttributeType: 'N'
           }],
           KeySchema: [{
             AttributeName: 'id',
             KeyType: 'HASH'
+          }],
+          GlobalSecondaryIndexes: [{
+            IndexName: 'channel-idx',
+            KeySchema: [{
+              AttributeName: 'channel',
+              KeyType: 'HASH'
+            }, {
+              AttributeName: 'publishedAt',
+              KeyType: 'RANGE'
+            }],
+            Projection: {
+              ProjectionType: 'ALL'
+            }
           }]
         }
       },

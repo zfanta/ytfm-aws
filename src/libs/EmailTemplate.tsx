@@ -78,8 +78,8 @@ interface EmailTemplateProps {
   channelTitle: string
   channelThumbnail: string
   description: string
-  unsubscribeLink: string
-  debug: string
+  unsubscribeLink?: string
+  debug?: string
 }
 function EmailTemplate (props: EmailTemplateProps): ReactElement {
   return (
@@ -109,15 +109,19 @@ function EmailTemplate (props: EmailTemplateProps): ReactElement {
 
       <div className="description" dangerouslySetInnerHTML={{ __html: props.description }}/>
 
-      <div className="unsubscribe">
-        <a href={props.unsubscribeLink}>
-          Unsubscribe channel notification
-        </a>
-      </div>
+      {props.unsubscribeLink !== undefined &&
+        <div className="unsubscribe">
+          <a href={props.unsubscribeLink}>
+            Unsubscribe channel notification
+          </a>
+        </div>
+      }
 
-      <div className="debug">
-        <pre dangerouslySetInnerHTML={{ __html: props.debug }}/>
-      </div>
+      {props.debug !== undefined &&
+        <div className="debug" style={{ display: 'none' }}>
+          <pre dangerouslySetInnerHTML={{ __html: props.debug }}/>
+        </div>
+      }
     </>
   )
 }
