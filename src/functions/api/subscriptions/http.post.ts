@@ -12,7 +12,6 @@ const post: ValidatedEventAPIGatewayProxyEventWithUser<any> = async (event) => {
   const subscriptions = (await getSubscriptions(user)).map(subscription => ({
     id: subscription.snippet.resourceId.channelId,
     expiresAt: 0,
-    etag: subscription.etag,
     information: {
       publishedAt: subscription.snippet.publishedAt,
       title: subscription.snippet.title,

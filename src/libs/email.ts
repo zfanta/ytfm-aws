@@ -101,8 +101,7 @@ async function sendNotificationEmail (notifications: Notification[], channelThum
 }
 
 export {
-  sendNotificationEmail,
-  getDuration
+  sendNotificationEmail
 }
 
 interface Notification {

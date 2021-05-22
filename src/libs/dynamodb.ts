@@ -79,7 +79,6 @@ async function getSubscriptionWithTitle (user: string, channelId: string): Promi
 
 interface Channel {
   id: string
-  etag: string
   expiresAt: number
   information: ChannelInformation
 }
@@ -93,19 +92,6 @@ interface ChannelInformation {
     'height': number
   }>>
 }
-async function getChannel (channelId: string): Promise<Channel|undefined> {
-  const command = new GetItemCommand({
-    TableName: process.env.CHANNELS_TABLE_NAME,
-    Key: marshall({ id: channelId })
-  })
-
-  const response = await client.send(command)
-
-  if (response.Item === undefined) return undefined
-
-  return unmarshall(response.Item) as Channel
-}
-
 async function getChannels (channelIds: string[]): Promise<Channel[]> {
   if (process.env.CHANNELS_TABLE_NAME === undefined) throw new Error('CHANNELS_TABLE_NAME is undefined')
 
@@ -134,17 +120,13 @@ async function getChannels (channelIds: string[]): Promise<Channel[]> {
   return result
 }
 
-function informationEquals (channel1: Channel, channel2: Channel): boolean {
-  if (channel1.etag !== channel2.etag) return false
-
-  const information = [channel1.information, channel2.information]
-
-  if (information[0].publishedAt !== information[1].publishedAt) return false
-  if (information[0].description !== information[1].description) return false
-  if (information[0].title !== information[1].title) return false
-  if (information[0].thumbnails.default?.url !== information[1].thumbnails.default?.url) return false
-  if (information[0].thumbnails.medium?.url !== information[1].thumbnails.medium?.url) return false
-  return information[0].thumbnails.high?.url === information[1].thumbnails.high?.url
+function informationEquals (o1: ChannelInformation, o2: ChannelInformation): boolean {
+  if (o1.publishedAt !== o2.publishedAt) return false
+  if (o1.description !== o2.description) return false
+  if (o1.title !== o2.title) return false
+  if (o1.thumbnails.default?.url !== o2.thumbnails.default?.url) return false
+  if (o1.thumbnails.medium?.url !== o2.thumbnails.medium?.url) return false
+  return o1.thumbnails.high?.url === o2.thumbnails.high?.url
 }
 
 async function updateChannels (channelsFromDB: Channel[], channelsFromYoutube: Channel[]): Promise<void> {
@@ -160,7 +142,7 @@ async function updateChannels (channelsFromDB: Channel[], channelsFromYoutube: C
   // put
   const puts = channelsFromYoutube.filter(channelFromYoutube => {
     if (channelsFromDbObject[channelFromYoutube.id] === undefined) return true
-    return !informationEquals(channelFromYoutube, channelsFromDbObject[channelFromYoutube.id])
+    return !informationEquals(channelFromYoutube.information, channelsFromDbObject[channelFromYoutube.id].information)
   })
 
   // 25 limit
@@ -650,23 +632,6 @@ async function deleteSessions (ids: string[]): Promise<void> {
   }))
 }
 
-async function getVideosInChannel (channelId: string): Promise<VideoFromGoogleApis[]> {
-  const command = new QueryCommand({
-    TableName: 'ytfm-dev-videos',
-    IndexName: 'channel-idx',
-    KeyConditionExpression: '#channel = :channel',
-    ScanIndexForward: false,
-    ExpressionAttributeNames: { '#channel': 'channel' },
-    ExpressionAttributeValues: { ':channel': { S: channelId } }
-  })
-
-  const response = await client.send(command)
-
-  if (response.Items === undefined) return []
-
-  return response.Items.map(item => unmarshall(item).information) as VideoFromGoogleApis[]
-}
-
 async function getVideo (videoId: string): Promise<VideoFromGoogleApis|undefined> {
   const command = new GetItemCommand({
     TableName: process.env.VIDEOS_TABLE_NAME,
@@ -685,8 +650,6 @@ async function putVideo (video: VideoFromGoogleApis): Promise<void> {
     TableName: process.env.VIDEOS_TABLE_NAME,
     Item: marshall({
       id: video.id,
-      channel: video.snippet.channelId,
-      publishedAt: new Date(video.snippet.publishedAt).valueOf(),
       information: video
     })
   })
@@ -877,9 +840,7 @@ export {
   getOldEmptySessions,
   deleteSessions,
 
-  getChannel,
   getChannels,
-  getVideosInChannel,
   getVideo,
   putVideo,
   getChannelSubscribers,

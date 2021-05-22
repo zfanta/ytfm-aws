@@ -16,8 +16,8 @@ interface EmailTemplateProps {
   channelTitle: string
   channelThumbnail: string
   description: string
-  unsubscribeLink?: string
-  debug?: string
+  unsubscribeLink: string
+  debug: string
 }
 function EmailTemplate (props: EmailTemplateProps): ReactElement {
   const thumbnailHeight = 640 * (props.thumbnail.height / props.thumbnail.width)
