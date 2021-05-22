@@ -13,9 +13,12 @@ function Watch ({ videoId }: WatchProps): ReactElement {
 
   useEffect(() => {
     (async () => {
-      // TODO: error
-      const videoInformation = await video.get(videoId)
-      setEmbedHtml(videoInformation.player.embedHtml)
+      try {
+        const videoInformation = await video.get(videoId)
+        setEmbedHtml(videoInformation.player.embedHtml)
+      } catch (e) {
+        window.location.href = `https://www.youtube.com/watch?v=${videoId}`
+      }
     })().catch(console.error)
   }, [])
 
