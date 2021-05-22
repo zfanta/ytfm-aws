@@ -12,9 +12,7 @@ const cookieHttpGet = {
 const pruneCookie = {
   handler: 'src/functions/api/cookie/prune.handler',
   events: [{
-    eventBridge: {
-      schedule: 'rate(1 day)'
-    }
+    schedule: 'rate(1 day)'
   }]
 }
 

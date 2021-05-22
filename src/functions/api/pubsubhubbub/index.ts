@@ -31,9 +31,7 @@ const pubsubhubbubHttpPost = {
 const pubsubhubbubResubscribe = {
   handler: 'src/functions/api/pubsubhubbub/resubscribe.handler',
   events: [{
-    eventBridge: {
-      schedule: 'rate(1 hour)'
-    }
+    schedule: 'rate(1 hour)'
   }]
 }
 

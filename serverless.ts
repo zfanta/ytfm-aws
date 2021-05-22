@@ -16,7 +16,7 @@ const serverlessConfiguration: AWS = {
       stages: ['dev']
     },
     fullstack: {
-      domain: '${opt:stage, self:provider.stage}.ytfm.app',
+      domain: "${opt:stage, 'dev'}.ytfm.app",
       allowCache: false,
       // TODO:
       certificate: 'arn:aws:acm:us-east-1:756346208077:certificate/8e69b6f6-ff85-4c76-b203-9902da44bd7a',
@@ -41,42 +41,46 @@ const serverlessConfiguration: AWS = {
     },
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
-      CHANNELS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-channels',
-      USERS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-users',
-      SUBSCRIPTIONS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-subscriptions',
-      VIDEOS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-videos',
-      SESSIONS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-sessions',
-      KEYS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-keys',
-      REGIONS_TABLE_NAME: 'ytfm-${opt:stage, self:provider.stage}-regions',
+      CHANNELS_TABLE_NAME: "ytfm-${opt:stage, 'dev'}-channels",
+      USERS_TABLE_NAME: "ytfm-${opt:stage, 'dev'}-users",
+      SUBSCRIPTIONS_TABLE_NAME: "ytfm-${opt:stage, 'dev'}-subscriptions",
+      VIDEOS_TABLE_NAME: "ytfm-${opt:stage, 'dev'}-videos",
+      SESSIONS_TABLE_NAME: "ytfm-${opt:stage, 'dev'}-sessions",
+      KEYS_TABLE_NAME: "ytfm-${opt:stage, 'dev'}-keys",
+      REGIONS_TABLE_NAME: "ytfm-${opt:stage, 'dev'}-regions",
       GOOGLE_CLIENT_ID: '${env:GOOGLE_CLIENT_ID}',
       GOOGLE_CLIENT_SECRET: '${env:GOOGLE_CLIENT_SECRET}',
       GOOGLE_API_KEY: '${env:GOOGLE_API_KEY}',
-      STAGE: '${opt:stage, self:provider.stage}'
+      STAGE: "${opt:stage, 'dev'}"
     },
     lambdaHashingVersion: '20201221',
-    iamRoleStatements: [{
-      Effect: 'Allow',
-      Action: [
-        'dynamodb:Query',
-        'dynamodb:Scan',
-        'dynamodb:GetItem',
-        'dynamodb:PutItem',
-        'dynamodb:UpdateItem',
-        'dynamodb:DeleteItem',
-        'dynamodb:BatchWriteItem',
-        'dynamodb:PartiQLSelect',
-        'dynamodb:BatchGetItem'
-      ],
-      Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/*'
-    }, {
-      Effect: 'Allow',
-      Action: ['ses:SendCustomVerificationEmail'],
-      Resource: 'arn:aws:ses:${opt:region, self:provider.region}:*:identity/*'
-    }, {
-      Effect: 'Allow',
-      Action: ['ses:SendTemplatedEmail', 'ses:SendRawEmail'],
-      Resource: 'arn:aws:ses:${opt:region, self:provider.region}:*:identity/*'
-    }]
+    iam: {
+      role: {
+        statements: [{
+          Effect: 'Allow',
+          Action: [
+            'dynamodb:Query',
+            'dynamodb:Scan',
+            'dynamodb:GetItem',
+            'dynamodb:PutItem',
+            'dynamodb:UpdateItem',
+            'dynamodb:DeleteItem',
+            'dynamodb:BatchWriteItem',
+            'dynamodb:PartiQLSelect',
+            'dynamodb:BatchGetItem'
+          ],
+          Resource: "arn:aws:dynamodb:${opt:region, 'us-east-1'}:*:table/*"
+        }, {
+          Effect: 'Allow',
+          Action: ['ses:SendCustomVerificationEmail'],
+          Resource: "arn:aws:ses:${opt:region, 'dev'}:*:identity/*"
+        }, {
+          Effect: 'Allow',
+          Action: ['ses:SendTemplatedEmail', 'ses:SendRawEmail'],
+          Resource: "arn:aws:ses:${opt:region, 'dev'}:*:identity/*"
+        }]
+      }
+    },
   },
   functions,
   resources: {

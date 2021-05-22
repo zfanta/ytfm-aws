@@ -27,7 +27,7 @@ const profileHttpPatch = {
       method: 'patch',
       path: 'api/profile',
       request: {
-        schema: {
+        schemas: {
           'application/json': profileHttpPatchSchema
         }
       }
