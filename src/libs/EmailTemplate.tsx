@@ -2,77 +2,15 @@ import 'source-map-support/register'
 
 import React, { ReactElement } from 'react'
 import ReactDOMServer from 'react-dom/server'
-import { Helmet } from 'react-helmet'
-
-function Head (): ReactElement {
-  return (
-    <Helmet>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no,viewport-fit=cover"/>
-      <meta charSet="utf-8"/>
-      <style type="text/css">{`
-        * {
-          font-family: arial, Arial, sans-serif;
-        }
-
-        #template { margin: 0 auto; width: 70%; max-width: 640px; }
-        .thumbnail > a { position: relative; }
-        .thumbnail img { width: 100%; }
-        .duration {
-          position: absolute;
-          bottom: 0.5rem;
-          right: 0.5rem;
-          color: white;
-          background-color: #212121;
-          padding: 0.2rem 0.5rem;
-          border-radius: 2px;
-        }
-
-        /* information */
-        .information {
-          display: flex;
-          flex-direction: row;
-          margin-top: 1rem;
-        }
-        .information .thumbnail {
-          border-radius: 50%;
-          width: 2.5rem;
-          height: 2.5rem;
-        }
-        .title {
-          display: flex;
-          flex-direction: column;
-          margin-left: 0.8rem;
-        }
-        .title .channel {
-          margin-top: 0.2rem
-        }
-        .title a {
-          text-decoration: none;
-          color: black;
-        }
-
-        /* description */
-        .description {
-          margin-top: 1rem;
-        }
-        
-        /* unsubscribe */
-        .unsubscribe {
-          margin-top: 1rem;
-        }
-        
-        .debug {
-          display: none;
-        }
-      `}</style>
-    </Helmet>
-  )
-}
 
 interface EmailTemplateProps {
   videoTitle: string
   videoLink: string
-  thumbnail: string
+  thumbnail: {
+    width: number
+    height: number
+    url: string
+  }
   duration: string
   channelId: string
   channelTitle: string
@@ -82,59 +20,98 @@ interface EmailTemplateProps {
   debug?: string
 }
 function EmailTemplate (props: EmailTemplateProps): ReactElement {
+  const thumbnailHeight = 640 * (props.thumbnail.height / props.thumbnail.width)
+
   return (
-    <>
-      <Head/>
+    <div style={{
+      fontFamily: 'arial, Arial, sans-serif',
+      margin: '0 auto',
+      width: '640px'
+    }}>
+      {/* video thumbnail */}
+      <a href={props.videoLink}>
+        <table cellPadding="0" cellSpacing="0" width="100%" style={{
+          border: 0,
+          backgroundImage: `url(${props.thumbnail.url})`,
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: `640px ${thumbnailHeight}px`,
+          width: '640px',
+          height: `${thumbnailHeight}px`
+        }}>
+          <tr>
+            <td valign="bottom" style={{ textAlign: 'right' }}>
+              <div style={{
+                display: 'inline-block',
+                color: 'white',
+                backgroundColor: '#212121',
+                marginBottom: '0.5rem',
+                marginRight: '0.5rem',
+                padding: '0.2rem 0.5rem'
+              }} dangerouslySetInnerHTML={{ __html: props.duration }}/>
+            </td>
+          </tr>
+        </table>
+      </a>
 
-      <div className="thumbnail">
-        <a href={props.videoLink}>
-          <img src={props.thumbnail} alt={props.videoTitle}/>
-          <div className="duration" dangerouslySetInnerHTML={{ __html: props.duration }}/>
-        </a>
-      </div>
+      {/* titles */}
+      <table cellPadding="0" cellSpacing="0" width="100%" style={{
+        border: 0,
+        width: '640px',
+        marginTop: '1rem'
+      }}>
+        <tr>
+          <td rowSpan={3} width="50px">
+            <a href={`https://youtube.com/channel/${props.channelId}`}>
+              <img src={props.channelThumbnail} alt={props.channelTitle} style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%'
+              }}/>
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <a href={props.videoLink} style={{ textDecoration: 'none', color: 'black' }}>
+              {props.videoTitle}
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <a href={`https://youtube.com/channel/${props.channelId}`} style={{ textDecoration: 'none', color: 'black' }}>
+              {props.channelTitle}
+            </a>
+          </td>
+        </tr>
+      </table>
 
-      <div className="information">
-        <a href={`https://youtube.com/channel/${props.channelId}`}>
-          <img className="thumbnail" src={props.channelThumbnail} alt={props.channelTitle}/>
-        </a>
-        <div className="title">
-          <a className="video" href={props.videoLink}>
-            <span>{props.videoTitle}</span>
-          </a>
-          <a className="channel" href={`https://youtube.com/channel/${props.channelId}`}>
-            <span>{props.channelTitle}</span>
-          </a>
-        </div>
-      </div>
-
-      <div className="description" dangerouslySetInnerHTML={{ __html: props.description }}/>
+      <div dangerouslySetInnerHTML={{ __html: props.description }} style={{ marginTop: '1rem' }}/>
 
       {props.unsubscribeLink !== undefined &&
-        <div className="unsubscribe">
-          <a href={props.unsubscribeLink}>
-            Unsubscribe channel notification
-          </a>
+        <div style={{ margin: '1rem 0' }}>
+          <a href={props.unsubscribeLink}>Unsubscribe channel notification</a>
         </div>
       }
 
       {props.debug !== undefined &&
-        <div className="debug" style={{ display: 'none' }}>
+        <div style={{ display: 'none' }} >
           <pre dangerouslySetInnerHTML={{ __html: props.debug }}/>
         </div>
       }
-    </>
+    </div>
   )
 }
 
 function renderToStaticMarkup (props: EmailTemplateProps): string {
   const body = ReactDOMServer.renderToStaticMarkup(<EmailTemplate {...props}/>)
-  const helmet = Helmet.renderStatic()
 
   return `
-  <html>
+  <html lang="en">
     <head>
-      ${helmet.meta.toString()}
-      ${helmet.style.toString()}
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no,viewport-fit=cover"/>
+      <meta charSet="utf-8"/>
+      <title>${props.videoTitle}</title>
     </head>
     <body id="template">
       ${body}

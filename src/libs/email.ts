@@ -112,7 +112,11 @@ interface Notification {
 interface MailData {
   videoTitle: string
   videoLink: string
-  thumbnail: string
+  thumbnail: {
+    width: number
+    height: number
+    url: string
+  }
   duration: string
   channelId: string
   channelTitle: string
@@ -165,7 +169,7 @@ async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to:
       channelId: video.snippet.channelId,
       channelTitle: video.snippet.channelTitle,
       channelThumbnail,
-      thumbnail: video.snippet.thumbnails[largestThumbnail].url,
+      thumbnail: video.snippet.thumbnails[largestThumbnail],
       duration,
       description: video.snippet.description
         .replace(/#([^\s^#]+)/g, '<a href="https://www.youtube.com/hashtag/$1">#$1</a>')

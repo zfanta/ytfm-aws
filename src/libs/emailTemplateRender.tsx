@@ -8,7 +8,11 @@ const props = {
   channelId: 'UC4QobU6STFB0P71PMvOGN5A',
   channelTitle: 'jawed',
   channelThumbnail: 'https://yt3.ggpht.com/ytc/AAUvwni3r7liUF18s1wqRK_rrHKzb508s9mQWxI-3g=s88-c-k-c0x00ffffff-no-rj',
-  thumbnail: 'https://i.ytimg.com/vi/jNQXAC9IVRw/hqdefault.jpg',
+  thumbnail: {
+    width: 480,
+    height: 360,
+    url: 'https://i.ytimg.com/vi/jNQXAC9IVRw/hqdefault.jpg'
+  },
   duration: '0:19',
   description: 'The first video on YouTube. While you wait for Part 2, listen to this great song: https://www.youtube.com/watch?v=zj82_v2R6ts',
   unsubscribeLink: 'https://dev.ytfm.app/subscriptions/UC4QobU6STFB0P71PMvOGN5A?token=ujmSrXpT16UUom2ppOthDeoZ9ycV-8erawR_5a3W_9P5V7MYPdlFnH7ItwQNEbVg6Qu-LQUlSfm480GBA5tkCy3dpmZ1_th0sYjE0XI2iR9NYNq-iZZS81h2uwXjfnSQ_ECxu1s1BDLzKkmwWywpJSW7OP4&action=unsubscribe',

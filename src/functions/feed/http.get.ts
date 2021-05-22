@@ -77,7 +77,7 @@ const getHandler: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
         debug: undefined,
         unsubscribeLink: undefined,
         channelTitle: channel.information.title,
-        thumbnail: video.snippet.thumbnails[thumbnailKey].url,
+        thumbnail: video.snippet.thumbnails[thumbnailKey],
         duration: getDuration(video),
         videoTitle: video.snippet.title,
         channelId: channel.id,
