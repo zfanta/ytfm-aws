@@ -73,14 +73,14 @@ const serverlessConfiguration: AWS = {
         }, {
           Effect: 'Allow',
           Action: ['ses:SendCustomVerificationEmail'],
-          Resource: "arn:aws:ses:${opt:region, 'dev'}:*:identity/*"
+          Resource: "arn:aws:ses:${opt:region, 'us-east-1'}:*:identity/*"
         }, {
           Effect: 'Allow',
           Action: ['ses:SendTemplatedEmail', 'ses:SendRawEmail'],
-          Resource: "arn:aws:ses:${opt:region, 'dev'}:*:identity/*"
+          Resource: "arn:aws:ses:${opt:region, 'us-east-1'}:*:identity/*"
         }]
       }
-    },
+    }
   },
   functions,
   resources: {
