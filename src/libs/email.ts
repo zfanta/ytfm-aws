@@ -53,9 +53,9 @@ function getIcalEvent ({ start, duration, summary, url }: Ical): IcalAttachment|
   minutes ??= 0
   seconds ??= 0
 
-  if (hours + minutes + seconds === 0) return undefined
-
   dayjs.extend(utc)
+
+  if (dayjs.utc(start).valueOf() < new Date().valueOf()) return undefined
 
   const calendar = ical({
     method: ICalCalendarMethod.PUBLISH,
