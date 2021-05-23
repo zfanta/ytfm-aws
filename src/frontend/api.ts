@@ -15,13 +15,17 @@ interface ProfileFetchProps {
   action?: string
 }
 const profile = {
-  get: async (token?: string, action?: 'unsubscribe'): Promise<ProfileGetResponse> => {
+  get: async (token?: string, action?: 'unsubscribe'): Promise<ProfileGetResponse|null> => {
     let path = '/api/profile'
     if (token !== undefined && action !== undefined) {
       const query = qs.stringify({ token, action })
       path += `?${query}`
     }
-    return await (await fetch(path)).json()
+    try {
+      return await (await fetch(path)).json()
+    } catch (e) {
+      return null
+    }
   },
   patch: async (props: ProfileFetchProps): Promise<ProfilePatchResponse> => {
     const { region, notification, token, action } = props

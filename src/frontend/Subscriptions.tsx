@@ -1,12 +1,9 @@
-import React, { ReactElement, useEffect, useMemo, useState } from 'react'
+import React, { ReactElement, useMemo, useState } from 'react'
 import { Avatar, Grid, Box, Checkbox, CircularProgress, NativeSelect } from '@material-ui/core'
 import { RefreshSharp } from '@material-ui/icons'
-import {
-  getUser,
-  getSubscriptions as getSubscriptionsFromStorage,
-  setSubscriptions as setSubscriptionsInStorage,
-  updateSubscriptions as updateSubscriptionsInStorage
-} from './storage'
+import { useLocation } from 'wouter'
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
+import { userState, subscriptionsState } from './recoil'
 import * as api from './api'
 import type { SubscriptionsGetResponse, ChannelInSubscriptionResponse } from './api'
 
@@ -15,50 +12,23 @@ function sortSubscriptions (subscriptions: SubscriptionsGetResponse): Subscripti
   return subscriptions
 }
 
-async function getSubscriptions (channelId?: string, token?: string, action?: 'unsubscribe'): Promise<SubscriptionsGetResponse> {
-  if (channelId !== undefined) {
-    return await api.subscriptions.get(channelId, token, action)
-  }
-
-  const user = getUser()
-  if (user !== undefined) {
-    const subscriptions = getSubscriptionsFromStorage(user)
-    if (subscriptions !== undefined && subscriptions.updatedAt === user.updatedAt) return subscriptions
-  }
-
-  const subscriptions = await api.subscriptions.get()
-  const sorted = sortSubscriptions(subscriptions)
-  if (user !== undefined) {
-    setSubscriptionsInStorage(user, sorted)
-  }
-  return sorted
-}
-
-async function syncSubscriptions (): Promise<SubscriptionsGetResponse> {
-  const subscriptions = await api.subscriptions.post()
-  const sorted = sortSubscriptions(subscriptions)
-  const user = getUser()
-  if (user !== undefined) {
-    setSubscriptionsInStorage(user, sorted)
-  }
-  return sorted
-}
-
 interface UnsubscribeYtfmProps {
   token: string
 }
 function UnsubscribeYtfm ({ token }: UnsubscribeYtfmProps): ReactElement {
+  const setUser = useSetRecoilState(userState)
   const [loading, setLoading] = useState(false)
   const [unsubscribed, setUnsubscribed] = useState(false)
   const [resubscribed, setResubscribed] = useState(false)
 
   async function unsubscribe (): Promise<void> {
     setLoading(true)
-    await api.profile.patch({
+    const user = await api.profile.patch({
       notification: false,
       token,
       action: 'unsubscribe'
     })
+    setUser(user)
     setResubscribed(false)
     setUnsubscribed(true)
     setLoading(false)
@@ -66,11 +36,12 @@ function UnsubscribeYtfm ({ token }: UnsubscribeYtfmProps): ReactElement {
 
   async function subscribe (): Promise<void> {
     setLoading(true)
-    await api.profile.patch({
+    const user = await api.profile.patch({
       notification: true,
       token,
       action: 'unsubscribe'
     })
+    setUser(user)
     setResubscribed(true)
     setUnsubscribed(false)
     setLoading(false)
@@ -153,21 +124,24 @@ interface SubscriptionsProps {
   channelId?: string
 }
 function Subscriptions ({ channelId }: SubscriptionsProps): ReactElement {
-  const [subscriptions, setSubscriptions] = useState<SubscriptionsGetResponse>()
+  const searchParams = new URLSearchParams(window.location.search)
+  const token = searchParams.get('token') ?? undefined
+  const action = searchParams.get('action') ?? undefined
+
+  const user = useRecoilValue(userState)
+  const [, setLocation] = useLocation()
+  const [subscriptions, setSubscriptions] = useRecoilState(subscriptionsState({
+    user,
+    channelId,
+    token,
+    action: action === 'unsubscribe' ? 'unsubscribe' : undefined
+  }))
   const [syncing, setSyncing] = useState(false)
 
   const [filter, setFilter] = useState<'all'|'enabled'|'disabled'>('all')
 
   const [done, setDone] = useState(false)
   const unsubscribe = useMemo(() => done ? false : useUnsubscribe(subscriptions, channelId), [subscriptions, done])
-
-  const searchParams = new URLSearchParams(window.location.search)
-  const token = searchParams.get('token') ?? undefined
-  const action = searchParams.get('action') ?? undefined
-
-  useEffect(() => {
-    getSubscriptions(channelId, token, action === 'unsubscribe' ? 'unsubscribe' : undefined).then(setSubscriptions).catch(console.error)
-  }, [])
 
   function handleFilterChange ({ target: { value } }: React.ChangeEvent<{ value: string }>): void {
     if (value === 'all' || value === 'enabled' || value === 'disabled') {
@@ -176,9 +150,11 @@ function Subscriptions ({ channelId }: SubscriptionsProps): ReactElement {
   }
 
   async function onClickSync (): Promise<void> {
+    if (user === undefined || user === null) return
     setSyncing(true)
-    const result = await syncSubscriptions()
-    setSubscriptions(result)
+    const subscriptions = await api.subscriptions.post()
+    const sorted = sortSubscriptions(subscriptions)
+    setSubscriptions(sorted)
     setSyncing(false)
   }
 
@@ -206,20 +182,13 @@ function Subscriptions ({ channelId }: SubscriptionsProps): ReactElement {
       updatedAt: response.updatedAt
     })
     setSubscriptions(newSubscriptions)
-    const user = getUser()
-    if (user !== undefined) {
-      if (channelId !== undefined) {
-        updateSubscriptionsInStorage(user, {
-          ...targetChannel,
-          notification: !targetChannel.notification
-        }, response.updatedAt)
-      } else {
-        setSubscriptionsInStorage(user, newSubscriptions)
-      }
-    }
     setDone(true)
   }
 
+  if (user === null) {
+    setLocation('/')
+    return <></>
+  }
   if (subscriptions === undefined) return <div>TODO: loading</div>
 
   return (

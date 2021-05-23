@@ -1,6 +1,5 @@
-import React, { Dispatch, ReactElement, SetStateAction, Suspense, useEffect } from 'react'
-import { Route, Switch, useLocation } from 'wouter'
-import { ProfileGetResponse } from './api'
+import React, { ReactElement, Suspense } from 'react'
+import { Route, Switch } from 'wouter'
 const Subscriptions = React.lazy(async () => await import('./Subscriptions'))
 const Profile = React.lazy(async () => await import('./Profile'))
 const Policy = React.lazy(async () => await import('./Policy'))
@@ -8,26 +7,7 @@ const Watch = React.lazy(async () => await import('./Watch'))
 const Main = React.lazy(async () => await import('./Main'))
 const Tools = React.lazy(async () => await import('./Tools'))
 
-interface BodyProps {
-  user: ProfileGetResponse|undefined|null
-  setUser: Dispatch<SetStateAction<ProfileGetResponse | undefined>>
-}
-function Body ({ user, setUser }: BodyProps): ReactElement {
-  const [location, setLocation] = useLocation()
-
-  // TODO: 404
-  useEffect(() => {
-    if (user === undefined) return
-    if (user !== null && location === '/') {
-      setLocation('/subscriptions')
-    } else if (
-      user === null &&
-      (location.startsWith('/subscriptions') || location.startsWith('/profile'))
-    ) {
-      setLocation('/')
-    }
-  }, [location, user])
-
+function Body (): ReactElement {
   return (
     <Switch>
       <Route path="/">
@@ -49,7 +29,7 @@ function Body ({ user, setUser }: BodyProps): ReactElement {
       </Route>
       <Route path="/profile">
         <Suspense fallback={<div>TODO: loading</div>}>
-          <Profile user={user as ProfileGetResponse} setUser={setUser} />
+          <Profile/>
         </Suspense>
       </Route>
       <Route path="/policy">

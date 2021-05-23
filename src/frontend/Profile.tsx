@@ -1,4 +1,4 @@
-import React, { Dispatch, ReactElement, SetStateAction, useEffect, useState } from 'react'
+import React, { ReactElement, useEffect, useState } from 'react'
 import {
   Button,
   CircularProgress,
@@ -11,16 +11,17 @@ import {
 } from '@material-ui/core'
 import { NotificationsOffSharp, NotificationsActiveSharp } from '@material-ui/icons'
 import { useLocation } from 'wouter'
-import { clear } from './storage'
+import { useRecoilValue, useSetRecoilState } from 'recoil'
+import { signOutSelector, userState } from './recoil'
 import { profile, regions as regionsApi } from './api'
-import type { Region as RegionType, ProfileGetResponse } from './api'
+import type { Region as RegionType } from './api'
 
 interface EmailNotificationProps {
   email: string
   notification: boolean
-  callback: (result: ProfileGetResponse) => void
 }
-function EmailNotification ({ email, notification, callback }: EmailNotificationProps): ReactElement {
+function EmailNotification ({ email, notification }: EmailNotificationProps): ReactElement {
+  const setUser = useSetRecoilState(userState)
   const [patching, setPatching] = useState(false)
 
   async function updateNotification (): Promise<void> {
@@ -28,7 +29,8 @@ function EmailNotification ({ email, notification, callback }: EmailNotification
     const result = await profile.patch({
       notification: !notification
     })
-    callback(result)
+
+    setUser(result)
     setPatching(false)
   }
 
@@ -50,20 +52,17 @@ function EmailNotification ({ email, notification, callback }: EmailNotification
   )
 }
 
-interface DeleteAccountProps {
-  callback: (result: undefined) => void
-}
-function DeleteAccount ({ callback }: DeleteAccountProps): ReactElement {
+function DeleteAccount (): ReactElement {
+  const signOut = useSetRecoilState(signOutSelector)
   const [open, setOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [, setLocation] = useLocation()
 
   async function deleteAccount (): Promise<void> {
-    clear(['user', 'subscriptions'])
     setDeleting(true)
     await profile.delete()
     setDeleting(false)
-    callback(undefined)
+    signOut(null)
     setLocation('/')
   }
 
@@ -103,14 +102,14 @@ function DeleteAccount ({ callback }: DeleteAccountProps): ReactElement {
 interface RegionProps {
   region: string|undefined
   regions: RegionType[]
-  callback: (result: ProfileGetResponse) => void
 }
-function Region ({ region, regions, callback }: RegionProps): ReactElement {
+function Region ({ region, regions }: RegionProps): ReactElement {
+  const setUser = useSetRecoilState(userState)
   const [regionValue, setRegionValue] = useState(region)
 
   function handleChange ({ target: { value } }: React.ChangeEvent<{value: string}>): void {
     setRegionValue(value)
-    profile.patch({ region: value }).then(callback).catch(console.error)
+    profile.patch({ region: value }).then(setUser).catch(console.error)
   }
 
   const deviceRegion = regions.find(region => region.id === navigator.language.split('-')[1])?.id ?? 'US'
@@ -134,12 +133,10 @@ function Region ({ region, regions, callback }: RegionProps): ReactElement {
   )
 }
 
-interface ProfileProps {
-  user: ProfileGetResponse
-  setUser: Dispatch<SetStateAction<ProfileGetResponse | undefined>>
-}
-function Profile ({ user, setUser }: ProfileProps): ReactElement {
+function Profile (): ReactElement {
+  const user = useRecoilValue(userState)
   const [regions, setRegions] = useState<RegionType[]>()
+  const [, setLocation] = useLocation()
 
   useEffect(() => {
     (async () => {
@@ -152,15 +149,19 @@ function Profile ({ user, setUser }: ProfileProps): ReactElement {
     return <div>TODO: loading</div>
   }
 
+  if (user === undefined || user === null) {
+    setLocation('/')
+    return <></>
+  }
+
   return (
     <Grid container spacing={3} alignItems="center">
       <EmailNotification
         email={user.email}
         notification={user.notification}
-        callback={setUser}
       />
-      <Region region={user.region} regions={regions} callback={setUser} />
-      <DeleteAccount callback={setUser} />
+      <Region region={user.region} regions={regions} />
+      <DeleteAccount />
     </Grid>
   )
 }

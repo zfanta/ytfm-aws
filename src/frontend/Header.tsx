@@ -22,9 +22,9 @@ import {
 import cookie from 'cookie'
 import qs from 'query-string'
 import { useLocation, Link } from 'wouter'
-import { clear } from './storage'
+import { useRecoilValue, useSetRecoilState } from 'recoil'
+import { signOutSelector, switchAccountSelector, userState } from './recoil'
 import { cookie as cookieApi } from './api'
-import type { ProfileGetResponse } from './api'
 import Policy from './Policy'
 
 function HideOnScroll ({ children }): ReactElement {
@@ -58,9 +58,10 @@ function makeOauth2Link (): string {
 interface SignOutButtonProps {
   email: string
   photo: string
-  signOut: () => Promise<void>
 }
-function ButtonsAfterSignIn ({ email, photo, signOut }: SignOutButtonProps): ReactElement {
+function ButtonsAfterSignIn ({ email, photo }: SignOutButtonProps): ReactElement {
+  const signOut = useSetRecoilState(signOutSelector)
+  const switchAccount = useSetRecoilState(switchAccountSelector)
   const [open, setOpen] = useState(false)
   const anchorRef = useRef<HTMLButtonElement>(null)
   const [location] = useLocation()
@@ -77,13 +78,11 @@ function ButtonsAfterSignIn ({ email, photo, signOut }: SignOutButtonProps): Rea
   }
 
   function handleSignOut (): void {
-    signOut().catch(console.error)
-    clear(['user', 'subscriptions'])
+    signOut(null)
   }
 
   function handleSwitchAccount (): void {
-    signOut().catch(console.error)
-    clear(['user'])
+    switchAccount(null)
     window.location.href = makeOauth2Link()
   }
 
@@ -117,12 +116,20 @@ function ButtonsAfterSignIn ({ email, photo, signOut }: SignOutButtonProps): Rea
                   <MenuItem onClick={e => { handleClose(e); handleSignOut() }}>Sign out</MenuItem>
                   <MenuItem onClick={e => { handleClose(e); handleSwitchAccount() }}>Switch account</MenuItem>
                   {location.startsWith('/subscriptions')
-                    ? <MenuItem onClick={e => { handleClose(e) }}>
-                        <Link href="/profile">Profile</Link>
-                      </MenuItem>
-                    : <MenuItem onClick={e => { handleClose(e) }}>
-                        <Link href="/subscriptions">Subscriptions</Link>
-                      </MenuItem>
+                    ? <Link href="/profile">
+                        <a href="/profile">
+                          <MenuItem onClick={e => { handleClose(e) }}>
+                            Profile
+                          </MenuItem>
+                        </a>
+                      </Link>
+                    : <Link href="/subscriptions">
+                        <a href="/subscriptions">
+                          <MenuItem onClick={e => { handleClose(e) }}>
+                            Subscriptions
+                          </MenuItem>
+                        </a>
+                      </Link>
                   }
                 </MenuList>
               </ClickAwayListener>
@@ -176,11 +183,8 @@ function SignInButton (): ReactElement {
   )
 }
 
-interface HeaderProps {
-  user: ProfileGetResponse|undefined|null
-  signOut: () => Promise<void>
-}
-function Header ({ user, signOut }: HeaderProps): ReactElement {
+function Header (): ReactElement {
+  const user = useRecoilValue(userState)
   const [location] = useLocation()
 
   return (
@@ -196,7 +200,7 @@ function Header ({ user, signOut }: HeaderProps): ReactElement {
                 ? null
                 : user === undefined || user === null
                   ? <SignInButton />
-                  : <ButtonsAfterSignIn signOut={signOut} email={user.email} photo={user.photos[0]} />
+                  : <ButtonsAfterSignIn email={user.email} photo={user.photos[0]} />
               }
           </Toolbar>
           </Container>

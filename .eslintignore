@@ -1,0 +1,8 @@
+/.cache
+/.dynamodb
+/.github
+/.parcel-cache
+/.serverless
+/.webpack
+/dist
+/node_modules

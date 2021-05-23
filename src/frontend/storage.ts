@@ -1,5 +1,4 @@
 import type { ChannelInSubscriptionResponse, ProfileGetResponse, SubscriptionsGetResponse } from './api'
-// TODO: integrate with api.ts. call this in api.ts not in tsx.
 
 function setUser (user: ProfileGetResponse): void {
   localStorage.setItem('user', JSON.stringify(user))
@@ -24,7 +23,7 @@ function setSubscriptions (user: ProfileGetResponse, subscriptions: Subscription
     })))
   }
 
-  setUser(Object.assign(user, {
+  setUser(Object.assign({}, user, {
     updatedAt: subscriptions.updatedAt
   }))
 }
