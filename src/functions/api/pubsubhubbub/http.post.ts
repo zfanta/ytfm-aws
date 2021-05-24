@@ -9,6 +9,7 @@ import fetch from 'node-fetch'
 import { getChannelSubscribers, getUsers, getVideo, putVideo, getChannels } from '@libs/dynamodb'
 import { sendNotificationEmail } from '@libs/email'
 import createLogger from '@libs/createLogger'
+import dayjs from 'dayjs'
 
 const logger = createLogger('/api/pubsubhubbub/http.post.ts')
 
@@ -28,11 +29,21 @@ const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
     channelId: entry['yt:channelId'][0]
   }
 
+  // Ignore if video is updated
+  if (dayjs(entry.published[0]).add(1, 'day').valueOf() < dayjs().valueOf()) {
+    return response(200)
+  }
+
   // Ignore if mail is sent
   if (await getVideo(video.id) === undefined) {
     logger.info('new video:', video.id)
 
     const videoFromGoogleApi = await getVideoInformation(video.id, video.channelId)
+
+    // Double check if video is updated
+    if (dayjs(videoFromGoogleApi.snippet.publishedAt).add(1, 'day').valueOf() < dayjs().valueOf()) {
+      return response(200)
+    }
 
     await putVideo(videoFromGoogleApi)
 
