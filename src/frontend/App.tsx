@@ -4,6 +4,7 @@ import { useLocation } from 'wouter'
 import Header from './Header'
 import Body from './Body'
 import Footer from './Footer'
+import ErrorDialog from './ErrorDialog'
 const SwaggerUI = React.lazy(async () => await import('./SwaggerUI'))
 
 function App (): ReactElement {
@@ -30,6 +31,7 @@ function App (): ReactElement {
       <Body/>
       <Divider style={{ marginTop: '1rem', marginBottom: '1rem' }}/>
       <Footer/>
+      <ErrorDialog/>
     </Container>
   )
 }

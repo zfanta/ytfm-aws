@@ -1,6 +1,8 @@
 import React, { CSSProperties, ReactElement, useEffect, useState } from 'react'
 import { video } from './api'
 import { useMediaQuery, useTheme } from '@material-ui/core'
+import { useSetRecoilState } from 'recoil'
+import { errorState } from './recoil'
 
 interface WatchProps {
   videoId: string
@@ -10,16 +12,18 @@ function Watch ({ videoId }: WatchProps): ReactElement {
   const [style, setStyle] = useState<CSSProperties>()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm')) // 960
+  const setError = useSetRecoilState(errorState)
 
   useEffect(() => {
-    (async () => {
-      try {
-        const videoInformation = await video.get(videoId)
+    video.get(videoId)
+      .then(videoInformation => {
+        if (videoInformation === undefined) {
+          window.location.href = `https://www.youtube.com/watch?v=${videoId}`
+          return
+        }
         setEmbedHtml(videoInformation.player.embedHtml)
-      } catch (e) {
-        window.location.href = `https://www.youtube.com/watch?v=${videoId}`
-      }
-    })().catch(console.error)
+      })
+      .catch(e => setError(e.toString()))
   }, [])
 
   useEffect(() => {

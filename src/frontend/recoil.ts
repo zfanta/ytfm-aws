@@ -9,26 +9,23 @@ const userState = atom<ProfileGetResponse|undefined|null>({
   default: undefined,
   effects_UNSTABLE: [
     function loadUser ({ setSelf }) {
-      (async () => {
-        const searchParams = new URLSearchParams(window.location.search)
-        const token = searchParams.get('token') ?? undefined
-        const action = searchParams.get('action') ?? undefined
+      const searchParams = new URLSearchParams(window.location.search)
+      const token = searchParams.get('token') ?? undefined
+      const action = searchParams.get('action') ?? undefined
 
-        const SID: string|undefined = cookie.parse(document.cookie).SID
-        if (SID === undefined) setSelf(null)
+      const SID: string|undefined = cookie.parse(document.cookie).SID
+      if (SID === undefined) setSelf(null)
 
-        try {
-          const user = await profile.get(token, action === 'unsubscribe' ? 'unsubscribe' : undefined)
+      profile.get(token, action === 'unsubscribe' ? 'unsubscribe' : undefined)
+        .then(user => {
           setSelf(user)
           if (user !== null) {
             setUser(user)
           }
-        } catch (e) {
+        }).catch(e => {
           setSelf(null)
-          // TODO
           console.error(e)
-        }
-      })().catch(console.error)
+        })
     }
   ]
 })
@@ -42,7 +39,9 @@ const signOutSelector = selector<null>({
         clear(['user', 'subscriptions'])
         set(userState, null)
       })
-      .catch(console.error)
+      .catch(e => {
+        set(errorState, e.toString())
+      })
   }
 })
 
@@ -55,7 +54,7 @@ const switchAccountSelector = selector<null>({
         clear(['user'])
         set(userState, null)
       })
-      .catch(console.error)
+      .catch(e => set(errorState, e.toString()))
   }
 })
 
@@ -108,9 +107,15 @@ const subscriptionsState = atomFamily<SubscriptionsGetResponse|undefined, {
   ]
 })
 
+const errorState = atom<string>({
+  key: 'errorState',
+  default: ''
+})
+
 export {
   userState,
   signOutSelector,
   switchAccountSelector,
-  subscriptionsState
+  subscriptionsState,
+  errorState
 }

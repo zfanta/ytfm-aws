@@ -21,11 +21,10 @@ const profile = {
       const query = qs.stringify({ token, action })
       path += `?${query}`
     }
-    try {
-      return await (await fetch(path)).json()
-    } catch (e) {
-      return null
-    }
+
+    const response = await fetch(path)
+    if (response.status === 400 || response.status === 401) return null
+    return await response.json()
   },
   patch: async (props: ProfileFetchProps): Promise<ProfilePatchResponse> => {
     const { region, notification, token, action } = props
@@ -99,8 +98,10 @@ interface VideoFromGoogleApis {
   }
 }
 const video = {
-  get: async (videoId: string): Promise<VideoFromGoogleApis> => {
-    return await (await fetch(`/api/video/${videoId}`)).json()
+  get: async (videoId: string): Promise<VideoFromGoogleApis|undefined> => {
+    const response = await fetch(`/api/video/${videoId}`)
+    if (response.status === 404) return undefined
+    return await (response).json()
   }
 }
 

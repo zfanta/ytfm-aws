@@ -12,7 +12,7 @@ import {
 import { NotificationsOffSharp, NotificationsActiveSharp } from '@material-ui/icons'
 import { useLocation } from 'wouter'
 import { useRecoilValue, useSetRecoilState } from 'recoil'
-import { signOutSelector, userState } from './recoil'
+import { errorState, signOutSelector, userState } from './recoil'
 import { profile, regions as regionsApi } from './api'
 import type { Region as RegionType } from './api'
 
@@ -106,10 +106,11 @@ interface RegionProps {
 function Region ({ region, regions }: RegionProps): ReactElement {
   const setUser = useSetRecoilState(userState)
   const [regionValue, setRegionValue] = useState(region)
+  const setError = useSetRecoilState(errorState)
 
   function handleChange ({ target: { value } }: React.ChangeEvent<{value: string}>): void {
     setRegionValue(value)
-    profile.patch({ region: value }).then(setUser).catch(console.error)
+    profile.patch({ region: value }).then(setUser).catch(e => setError(e.toString()))
   }
 
   const deviceRegion = regions.find(region => region.id === navigator.language.split('-')[1])?.id ?? 'US'
@@ -137,12 +138,13 @@ function Profile (): ReactElement {
   const user = useRecoilValue(userState)
   const [regions, setRegions] = useState<RegionType[]>()
   const [, setLocation] = useLocation()
+  const setError = useSetRecoilState(errorState)
 
   useEffect(() => {
     (async () => {
       const regions = await regionsApi.get(navigator.language)
       setRegions(regions)
-    })().catch(console.error)
+    })().catch(e => setError(e.toString()))
   }, [])
 
   if (regions === undefined) {

@@ -3,7 +3,7 @@ import { Avatar, Grid, Box, Checkbox, CircularProgress, NativeSelect } from '@ma
 import { RefreshSharp } from '@material-ui/icons'
 import { useLocation } from 'wouter'
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
-import { userState, subscriptionsState } from './recoil'
+import { userState, subscriptionsState, errorState } from './recoil'
 import * as api from './api'
 import type { SubscriptionsGetResponse, ChannelInSubscriptionResponse } from './api'
 
@@ -72,6 +72,7 @@ function UnsubscribeYtfm ({ token }: UnsubscribeYtfmProps): ReactElement {
 
 function Subscription ({ channel, toggle, unsubscribe }: {channel: ChannelInSubscriptionResponse, toggle: (string) => Promise<void>, unsubscribe: boolean}): ReactElement {
   const [patching, setPatching] = useState(false)
+  const setError = useSetRecoilState(errorState)
 
   async function onClickToggle (): Promise<void> {
     setPatching(true)
@@ -81,7 +82,7 @@ function Subscription ({ channel, toggle, unsubscribe }: {channel: ChannelInSubs
 
   if (unsubscribe && channel.notification && !patching) {
     setTimeout(() => {
-      onClickToggle().catch(console.error)
+      onClickToggle().catch(e => setError(e.toString()))
     }, 0)
   }
 
