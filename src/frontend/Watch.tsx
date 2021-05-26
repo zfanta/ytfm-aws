@@ -17,10 +17,6 @@ function Watch ({ videoId }: WatchProps): ReactElement {
   useEffect(() => {
     video.get(videoId)
       .then(videoInformation => {
-        if (videoInformation === undefined) {
-          window.location.href = `https://www.youtube.com/watch?v=${videoId}`
-          return
-        }
         setEmbedHtml(videoInformation.player.embedHtml)
       })
       .catch(e => setError(e.toString()))

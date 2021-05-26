@@ -98,9 +98,9 @@ interface VideoFromGoogleApis {
   }
 }
 const video = {
-  get: async (videoId: string): Promise<VideoFromGoogleApis|undefined> => {
+  get: async (videoId: string): Promise<VideoFromGoogleApis> => {
     const response = await fetch(`/api/video/${videoId}`)
-    if (response.status === 404) return undefined
+    if (response.status === 404) throw new Error('Cannot find video')
     return await (response).json()
   }
 }

@@ -3,13 +3,11 @@ import 'source-map-support/register'
 import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/apiGateway'
 import { middyfy, response } from '@libs/lambda'
 import xml2js from 'xml2js'
-import { VideoFromGoogleApis, VideoResponse } from '@libs/types'
-import qs from 'querystring'
-import fetch from 'node-fetch'
 import { getChannelSubscribers, getUsers, getVideo, putVideo, getChannels } from '@libs/dynamodb'
 import { sendNotificationEmail } from '@libs/email'
 import createLogger from '@libs/createLogger'
 import dayjs from 'dayjs'
+import { getVideoInformation } from '@libs/youtube'
 
 const logger = createLogger('/api/pubsubhubbub/http.post.ts')
 
@@ -38,7 +36,10 @@ const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   if (await getVideo(video.id) === undefined) {
     logger.info('new video:', video.id)
 
-    const videoFromGoogleApi = await getVideoInformation(video.id, video.channelId)
+    const videoFromGoogleApi = await getVideoInformation(video.id)
+    if (videoFromGoogleApi === undefined) return response(400)
+
+    if (videoFromGoogleApi.snippet.channelId !== video.channelId) throw new Error('Invalid video')
 
     // Double check if video is updated
     if (dayjs(videoFromGoogleApi.snippet.publishedAt).add(1, 'day').valueOf() < dayjs().valueOf()) {
@@ -77,23 +78,6 @@ const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
 
   logger.debug('<=')
   return response(200, '')
-}
-
-async function getVideoInformation (videoId: string, channelId: string): Promise<VideoFromGoogleApis> {
-  if (process.env.GOOGLE_API_KEY === undefined) throw new Error('GOOGLE_API_KEY is undefined')
-
-  const query = qs.stringify({
-    id: videoId,
-    part: 'id,snippet,contentDetails,player,status,liveStreamingDetails',
-    key: process.env.GOOGLE_API_KEY
-  })
-
-  const response: VideoResponse = await (await fetch(`https://www.googleapis.com/youtube/v3/videos?${query}`)).json()
-
-  if (response.items.length === 0) throw new Error('Invalid video')
-  if (response.items[0].snippet.channelId !== channelId) throw new Error('Invalid video')
-
-  return response.items[0]
 }
 
 export const handler = middyfy(post)

@@ -3,6 +3,7 @@ import qs from 'querystring'
 import fetch from 'node-fetch'
 import { updateGoogleTokenAndPhotos, User, getUser } from '@libs/dynamodb'
 import { refreshToken } from '@libs/oauth2'
+import { VideoFromGoogleApis, VideoResponse } from '@libs/types'
 
 async function getSubscriptions (user: User, pageToken?: string): Promise<SubscriptionResponse[]> {
   const userRefreshed = await refreshGoogleToken(user)
@@ -111,10 +112,27 @@ async function getRegions (language: string, etag?: string): Promise<GetRegionsR
   return regions
 }
 
+async function getVideoInformation (videoId: string): Promise<VideoFromGoogleApis|undefined> {
+  if (process.env.GOOGLE_API_KEY === undefined) throw new Error('GOOGLE_API_KEY is undefined')
+
+  const query = qs.stringify({
+    id: videoId,
+    part: 'id,snippet,contentDetails,player,status,liveStreamingDetails',
+    key: process.env.GOOGLE_API_KEY
+  })
+
+  const response: VideoResponse = await (await fetch(`https://www.googleapis.com/youtube/v3/videos?${query}`)).json()
+
+  if (response.items.length === 0) return undefined
+
+  return response.items[0]
+}
+
 export {
   getSubscriptions,
   sendToPubsubhubbub,
-  getRegions
+  getRegions,
+  getVideoInformation
 }
 
 interface SubscriptionListResponse {
