@@ -155,7 +155,6 @@ interface Region {
   name: string
 }
 const regions = {
-  // TODO: etag, cache
   get: async (language: string): Promise<Region[]> => {
     return await (await fetch(`/api/regions/${language}`)).json()
   }

@@ -1,4 +1,3 @@
-// TODO: use etag
 import qs from 'querystring'
 import fetch from 'node-fetch'
 import { updateGoogleTokenAndPhotos, User, getUser } from '@libs/dynamodb'

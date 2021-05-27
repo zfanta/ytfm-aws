@@ -13,7 +13,6 @@ const deleteHandler: ValidatedEventAPIGatewayProxyEventWithUser<any> = async (ev
   ])
 
   return response(200, '')
-  // TODO: revoke google token
 }
 
 export const handler = middyfy(injectUser(deleteHandler))

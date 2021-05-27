@@ -6,6 +6,7 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
 import { userState, subscriptionsState, errorState } from './recoil'
 import * as api from './api'
 import type { SubscriptionsGetResponse, ChannelInSubscriptionResponse } from './api'
+import Loading from './Loading'
 
 function sortSubscriptions (subscriptions: SubscriptionsGetResponse): SubscriptionsGetResponse {
   subscriptions.channels.sort((a, b) => a.title.localeCompare(b.title))
@@ -50,7 +51,7 @@ function UnsubscribeYtfm ({ token }: UnsubscribeYtfmProps): ReactElement {
   if (unsubscribed) {
     return (
       <div>
-        Successfully unsubscribed YTFM. {loading ? <span>TODO: loading</span> : <a onClick={async () => await subscribe()}>Resubscribe.</a>}
+        Successfully unsubscribed YTFM. {loading ? <CircularProgress size="1rem"/> : <a onClick={async () => await subscribe()}>Resubscribe.</a>}
       </div>
     )
   }
@@ -58,7 +59,7 @@ function UnsubscribeYtfm ({ token }: UnsubscribeYtfmProps): ReactElement {
   if (resubscribed) {
     return (
       <div>
-        Successfully resubscribed YTFM. {loading ? <span>TODO: loading</span> : <a onClick={async () => await unsubscribe()}>Unsubscribe.</a>}
+        Successfully resubscribed YTFM. {loading ? <CircularProgress size="1rem"/> : <a onClick={async () => await unsubscribe()}>Unsubscribe.</a>}
       </div>
     )
   }
@@ -190,7 +191,7 @@ function Subscriptions ({ channelId }: SubscriptionsProps): ReactElement {
     setLocation('/')
     return <></>
   }
-  if (subscriptions === undefined) return <div>TODO: loading</div>
+  if (subscriptions === undefined) return <Loading/>
 
   return (
     <>

@@ -1,5 +1,6 @@
-import React, { ReactElement, Suspense } from 'react'
+import React, { ReactElement, ReactNode, Suspense } from 'react'
 import { Route, Switch } from 'wouter'
+import Loading from './Loading'
 const Subscriptions = React.lazy(async () => await import('./Subscriptions'))
 const Profile = React.lazy(async () => await import('./Profile'))
 const Policy = React.lazy(async () => await import('./Policy'))
@@ -7,47 +8,55 @@ const Watch = React.lazy(async () => await import('./Watch'))
 const Main = React.lazy(async () => await import('./Main'))
 const Tools = React.lazy(async () => await import('./Tools'))
 
+function SuspenseWithLoading ({ children }: {children: ReactNode}): ReactElement {
+  return (
+    <Suspense fallback={<Loading/>}>
+      {children}
+    </Suspense>
+  )
+}
+
 function Body (): ReactElement {
   return (
     <Switch>
       <Route path="/">
-        <Suspense fallback={<div>TODO: loading</div>}>
+        <SuspenseWithLoading>
           <Main />
-        </Suspense>
+        </SuspenseWithLoading>
       </Route>
       <Route path="/subscriptions">
-        <Suspense fallback={<div>TODO: loading</div>}>
+        <SuspenseWithLoading>
           <Subscriptions />
-        </Suspense>
+        </SuspenseWithLoading>
       </Route>
       <Route path="/subscriptions/:channelId">
         {params => (
-          <Suspense fallback={<div>TODO: loading</div>}>
+          <SuspenseWithLoading>
             <Subscriptions channelId={params.channelId} />
-          </Suspense>
+          </SuspenseWithLoading>
         )}
       </Route>
       <Route path="/profile">
-        <Suspense fallback={<div>TODO: loading</div>}>
+        <SuspenseWithLoading>
           <Profile/>
-        </Suspense>
+        </SuspenseWithLoading>
       </Route>
       <Route path="/policy">
-        <Suspense fallback={<div>TODO: loading</div>}>
+        <SuspenseWithLoading>
           <Policy />
-        </Suspense>
+        </SuspenseWithLoading>
       </Route>
       <Route path="/watch/:videoId">
         {params =>
-          <Suspense fallback={<div>TODO: loading</div>}>
+          <SuspenseWithLoading>
             <Watch videoId={params.videoId} />
-          </Suspense>
+          </SuspenseWithLoading>
         }
       </Route>
       <Route path="/tools">
-        <Suspense fallback={<div>TODO: loading</div>}>
+        <SuspenseWithLoading>
           <Tools />
-        </Suspense>
+        </SuspenseWithLoading>
       </Route>
     </Switch>
   )

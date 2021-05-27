@@ -3,6 +3,7 @@ import { video } from './api'
 import { useMediaQuery, useTheme } from '@material-ui/core'
 import { useSetRecoilState } from 'recoil'
 import { errorState } from './recoil'
+import Loading from './Loading'
 
 interface WatchProps {
   videoId: string
@@ -53,7 +54,7 @@ function Watch ({ videoId }: WatchProps): ReactElement {
   }, [embedHtml, isMobile])
 
   if (style === undefined) {
-    return <div>TODO: loading</div>
+    return <Loading/>
   }
 
   return (

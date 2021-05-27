@@ -9,7 +9,6 @@ import { IcalAttachment } from 'nodemailer/lib/mailer'
 import { generateUnsubscribeToken } from '@libs/crypto'
 import { renderToStaticMarkup } from '@libs/EmailTemplate'
 
-// TODO: region name
 const client = new SESv2Client({ region: 'us-east-1' })
 
 function getDuration (video: VideoFromGoogleApis): string {

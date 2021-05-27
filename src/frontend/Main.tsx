@@ -12,7 +12,28 @@ function Main (): ReactElement {
     return <></>
   }
 
-  return <div>TODO: main</div>
+  function handleClickSignInButton (): void {
+    const element = document.getElementById('sign-in')
+    if (element !== null) {
+      element.click()
+    }
+  }
+
+  return (
+    <>
+      <p>
+        YTFM sends you an email notification for new video uploads from your subscriptions.
+        YTFM supports this via <a href="https://developers.goog`le.com/youtube/v3/guides/push_notifications">PubSubHubbub</a>.<br/>
+        If you want to be notified from YTFM, click <a style={{ cursor: 'pointer' }} onClick={handleClickSignInButton}>SIGN IN</a> button.
+      </p>
+      <p>
+        See also:<br/>
+        <a href="https://support.google.com/youtube/thread/63269933/changes-to-emails-you-receive-for-new-video-uploads-from-your-subscriptions">
+          Changes to emails you receive for new video uploads from your subscriptions
+        </a>
+      </p>
+    </>
+  )
 }
 
 export default Main

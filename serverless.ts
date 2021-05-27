@@ -18,7 +18,6 @@ const serverlessConfiguration: AWS = {
     fullstack: {
       domain: "${opt:stage, 'dev'}.ytfm.app",
       allowCache: false,
-      // TODO:
       certificate: 'arn:aws:acm:us-east-1:756346208077:certificate/8e69b6f6-ff85-4c76-b203-9902da44bd7a',
       bucketName: 'web',
       distributionFolder: 'dist/frontend/build',

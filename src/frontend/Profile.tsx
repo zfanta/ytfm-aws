@@ -15,6 +15,7 @@ import { useRecoilValue, useSetRecoilState } from 'recoil'
 import { errorState, signOutSelector, userState } from './recoil'
 import { profile, regions as regionsApi } from './api'
 import type { Region as RegionType } from './api'
+import Loading from './Loading'
 
 interface EmailNotificationProps {
   email: string
@@ -82,10 +83,10 @@ function DeleteAccount (): ReactElement {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">TODO: cookie</DialogTitle>
+        <DialogTitle id="alert-dialog-title">DELETE ACCOUNT</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            TODO: asd
+            All of your data(email address, youtube subscriptions) in server will be deleted immediately.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -142,13 +143,17 @@ function Profile (): ReactElement {
 
   useEffect(() => {
     (async () => {
-      const regions = await regionsApi.get(navigator.language)
-      setRegions(regions)
+      if (user === undefined || user === null) {
+        setLocation('/')
+      } else {
+        const regions = await regionsApi.get(navigator.language)
+        setRegions(regions)
+      }
     })().catch(e => setError(e.toString()))
-  }, [])
+  }, [user])
 
   if (regions === undefined) {
-    return <div>TODO: loading</div>
+    return <Loading/>
   }
 
   if (user === undefined || user === null) {

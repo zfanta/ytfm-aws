@@ -1,7 +1,6 @@
 import 'source-map-support/register'
 
 import type { DeleteRequest } from '@aws-sdk/client-dynamodb'
-// TODO: replace ScanCommand -> QueryCommand
 import {
   BatchGetItemCommand,
   BatchWriteItemCommand,
@@ -19,7 +18,6 @@ import dayjs from 'dayjs'
 import { sendToPubsubhubbub } from '@libs/youtube'
 import sodium from 'libsodium-wrappers'
 
-// TODO: region
 const client = new DynamoDBClient({ region: 'us-east-1' })
 
 interface Subscription {
