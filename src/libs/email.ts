@@ -150,9 +150,10 @@ async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to:
     summary: video.snippet.title
   })
 
+  const address = process.env.STAGE === 'dev' ? 'dev@ytfm.app' : 'noreply@ytfm.app'
   const mail = new MailComposer({
     from: {
-      address: 'noreply@ytfm.app',
+      address,
       name: video.snippet.channelTitle
     },
     to,
