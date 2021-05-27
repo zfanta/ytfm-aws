@@ -1,15 +1,5 @@
 import type { ChannelInSubscriptionResponse, ProfileGetResponse, SubscriptionsGetResponse } from './api'
 
-function setUser (user: ProfileGetResponse): void {
-  localStorage.setItem('user', JSON.stringify(user))
-}
-
-function getUser (): ProfileGetResponse|undefined {
-  const user = localStorage.getItem('user')
-  if (user === null) return undefined
-  return JSON.parse(user)
-}
-
 function setSubscriptions (user: ProfileGetResponse, subscriptions: SubscriptionsGetResponse): void {
   const allSubscriptions = localStorage.getItem('subscriptions')
   if (allSubscriptions === null) {
@@ -22,10 +12,6 @@ function setSubscriptions (user: ProfileGetResponse, subscriptions: Subscription
       [user.email]: subscriptions
     })))
   }
-
-  setUser(Object.assign({}, user, {
-    updatedAt: subscriptions.updatedAt
-  }))
 }
 
 function updateSubscriptions (user: ProfileGetResponse, channel: ChannelInSubscriptionResponse, updatedAt: number): void {
@@ -58,29 +44,18 @@ function getSubscriptions (user: ProfileGetResponse): SubscriptionsGetResponse|u
   return allSubscriptionsParsed[user.email] ?? undefined
 }
 
-function clear (keys: Array<'user'|'subscriptions'>): void {
-  const user = getUser()
-
-  if (keys.includes('user')) {
-    localStorage.removeItem('user')
-  }
-
-  if (keys.includes('subscriptions')) {
-    if (user === undefined) return
-    const allSubscriptions = localStorage.getItem('subscriptions')
-    if (allSubscriptions === null) return undefined
-    const allSubscriptionsParsed = JSON.parse(allSubscriptions)
-    const result = Object.keys(allSubscriptionsParsed).filter(email => email !== user.email).reduce<any>((obj, key) => {
-      obj[key] = allSubscriptionsParsed[key]
-      return obj
-    }, {})
-    localStorage.setItem('subscriptions', JSON.stringify(result))
-  }
+function clear (emailAddress: string): void {
+  const allSubscriptions = localStorage.getItem('subscriptions')
+  if (allSubscriptions === null) return undefined
+  const allSubscriptionsParsed = JSON.parse(allSubscriptions)
+  const result = Object.keys(allSubscriptionsParsed).filter(email => email !== emailAddress).reduce<any>((obj, key) => {
+    obj[key] = allSubscriptionsParsed[key]
+    return obj
+  }, {})
+  localStorage.setItem('subscriptions', JSON.stringify(result))
 }
 
 export {
-  getUser,
-  setUser,
   getSubscriptions,
   setSubscriptions,
   updateSubscriptions,

@@ -2,7 +2,7 @@ import { atom, atomFamily, DefaultValue, selector } from 'recoil'
 import cookie from 'cookie'
 import type { ProfileGetResponse, SubscriptionsGetResponse } from './api'
 import { profile, signOut as signOutApi, subscriptions } from './api'
-import { clear, getSubscriptions, setSubscriptions, setUser, updateSubscriptions } from './storage'
+import { clear, getSubscriptions, setSubscriptions, updateSubscriptions } from './storage'
 
 const userState = atom<ProfileGetResponse|undefined|null>({
   key: 'userState',
@@ -19,9 +19,6 @@ const userState = atom<ProfileGetResponse|undefined|null>({
       profile.get(token, action === 'unsubscribe' ? 'unsubscribe' : undefined)
         .then(user => {
           setSelf(user)
-          if (user !== null) {
-            setUser(user)
-          }
         }).catch(e => {
           setSelf(null)
           console.error(e)
@@ -33,13 +30,16 @@ const userState = atom<ProfileGetResponse|undefined|null>({
 const signOutSelector = selector<null>({
   key: 'signOutSelector',
   get: () => { throw new Error('Do not use `signOutSelector.get`') },
-  set: ({ set }) => {
+  set: ({ set, get }) => {
     // TODO: Error: Recoil: Async selector sets are not currently supported.
     signOutApi.get()
       .catch(e => {
         set(errorState, e.toString())
       })
-    clear(['user', 'subscriptions'])
+    const email = get(userState)?.email
+    if (email !== undefined) {
+      clear(email)
+    }
     set(userState, null)
   }
 })
@@ -51,7 +51,6 @@ const switchAccountSelector = selector<null>({
     // TODO: Error: Recoil: Async selector sets are not currently supported.
     signOutApi.get()
       .catch(e => set(errorState, e.toString()))
-    clear(['user'])
     set(userState, null)
   }
 })
