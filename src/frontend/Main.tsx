@@ -7,7 +7,7 @@ function Main (): ReactElement {
   const user = useRecoilValue(userState)
   const [, setLocation] = useLocation()
 
-  if (user !== null) {
+  if (user !== null && user !== undefined) {
     setLocation('/subscriptions')
     return <></>
   }
