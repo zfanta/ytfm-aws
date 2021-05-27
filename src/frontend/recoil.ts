@@ -34,14 +34,13 @@ const signOutSelector = selector<null>({
   key: 'signOutSelector',
   get: () => { throw new Error('Do not use `signOutSelector.get`') },
   set: ({ set }) => {
+    // TODO: Error: Recoil: Async selector sets are not currently supported.
     signOutApi.get()
-      .then(() => {
-        clear(['user', 'subscriptions'])
-        set(userState, null)
-      })
       .catch(e => {
         set(errorState, e.toString())
       })
+    clear(['user', 'subscriptions'])
+    set(userState, null)
   }
 })
 
@@ -49,12 +48,11 @@ const switchAccountSelector = selector<null>({
   key: 'switchAccountSelector',
   get: () => { throw new Error('Do not use `switchAccountSelector.get`') },
   set: ({ set }) => {
+    // TODO: Error: Recoil: Async selector sets are not currently supported.
     signOutApi.get()
-      .then(() => {
-        clear(['user'])
-        set(userState, null)
-      })
       .catch(e => set(errorState, e.toString()))
+    clear(['user'])
+    set(userState, null)
   }
 })
 
