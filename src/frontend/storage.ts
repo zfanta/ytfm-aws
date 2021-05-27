@@ -29,7 +29,10 @@ function setSubscriptions (user: ProfileGetResponse, subscriptions: Subscription
 }
 
 function updateSubscriptions (user: ProfileGetResponse, channel: ChannelInSubscriptionResponse, updatedAt: number): void {
-  const subscriptions = getSubscriptions(user) as SubscriptionsGetResponse
+  const subscriptions = getSubscriptions(user)
+
+  if (subscriptions === undefined) return
+
   const targetIndex = subscriptions.channels.findIndex(_channel => _channel.id === channel.id)
   const channels = [
     ...subscriptions.channels.slice(0, targetIndex),
