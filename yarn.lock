@@ -3029,10 +3029,10 @@
     ramda "^0.26.1"
     traverse "^0.6.6"
 
-"@serverless/typescript@^2.43.0":
-  version "2.43.0"
-  resolved "https://registry.yarnpkg.com/@serverless/typescript/-/typescript-2.43.0.tgz#21ad533e443edd8119dd2aedda883010096016fb"
-  integrity sha512-+oD0+6ZwAqtVxGQ9edzbEW1ewvTgboWSMk/Pgwe0ijBVOizIp0zoa2gPa/EkSJ9fTEVaEVaMGHmBgi5jNoPmBw==
+"@serverless/typescript@^2.43.1":
+  version "2.43.1"
+  resolved "https://registry.yarnpkg.com/@serverless/typescript/-/typescript-2.43.1.tgz#845ddc7e4b6fd7521190694dd0f3df173d237478"
+  integrity sha512-+fZN+YbLxioBDFhhpSke6aNMN1KILwb8cv9Ra6JLMsycAhf5KcEjN52a8zUfuL/MQQUrrMjg2GFd8jrS7FEIqA==
 
 "@serverless/utils-china@^1.0.14":
   version "1.0.14"

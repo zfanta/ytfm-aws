@@ -43,7 +43,7 @@
     "xml2js": "^0.4.23"
   },
   "devDependencies": {
-    "@serverless/typescript": "^2.43.0",
+    "@serverless/typescript": "^2.43.1",
     "@types/aws-lambda": "^8.10.76",
     "@types/js-yaml": "^4.0.1",
     "@types/libsodium-wrappers": "^0.7.9",
