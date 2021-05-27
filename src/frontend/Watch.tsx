@@ -10,6 +10,7 @@ interface WatchProps {
 }
 function Watch ({ videoId }: WatchProps): ReactElement {
   const [embedHtml, setEmbedHtml] = useState<string>()
+  const [title, setTitle] = useState<string>()
   const [style, setStyle] = useState<CSSProperties>()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm')) // 960
@@ -19,6 +20,7 @@ function Watch ({ videoId }: WatchProps): ReactElement {
     video.get(videoId)
       .then(videoInformation => {
         setEmbedHtml(videoInformation.player.embedHtml)
+        setTitle(videoInformation.snippet.title)
       })
       .catch(e => setError(e.toString()))
   }, [])
@@ -55,6 +57,10 @@ function Watch ({ videoId }: WatchProps): ReactElement {
 
   if (style === undefined) {
     return <Loading/>
+  }
+
+  if (title !== undefined) {
+    document.title = title
   }
 
   return (
