@@ -382,10 +382,11 @@ async function updateGoogleTokenAndPhotos (email: string, oldToken: Token|undefi
 
   let tokenToInsert = newToken
 
+  const user = await getUser(email)
   if (oldToken === undefined) {
-    const user = await getUser(email)
     oldToken = user?.token ?? newToken
   }
+  const notification = user?.notification ?? true
 
   tokenToInsert = Object.assign({}, oldToken, newToken)
 
@@ -403,7 +404,7 @@ async function updateGoogleTokenAndPhotos (email: string, oldToken: Token|undefi
       : { '#token': 'token', '#expiresAt': 'expiresAt', '#photos': 'photos', '#notification': 'notification' },
     ExpressionAttributeValues: marshall(photos === undefined
       ? { ':token': tokenToInsert, ':expiresAt': expiresAt, ':notification': true }
-      : { ':token': tokenToInsert, ':expiresAt': expiresAt, ':photos': photos, ':notification': true }
+      : { ':token': tokenToInsert, ':expiresAt': expiresAt, ':photos': photos, ':notification': notification }
     )
   })
 
