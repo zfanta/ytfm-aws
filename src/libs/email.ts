@@ -75,13 +75,13 @@ function getIcalEvent ({ start, duration, summary, url }: Ical): IcalAttachment|
   }
 }
 
-async function sendNotificationEmail (notifications: Notification[], channelThumbnail: string, xml: string /* debug */): Promise<Array<PromiseSettledResult<any>>> {
+async function sendNotificationEmail (notifications: Notification[], channelThumbnail: string, debug: string): Promise<Array<PromiseSettledResult<any>>> {
   console.log('sendNotificationEmail =>')
   const promises = notifications.map(async notification => {
     const command = new SendEmailCommand({
       Content: {
         Raw: {
-          Data: await getRaw(notification.video, channelThumbnail, notification.subscriber, xml)
+          Data: await getRaw(notification.video, channelThumbnail, notification.subscriber, debug)
         }
       }
     })
@@ -121,9 +121,8 @@ interface MailData {
   channelThumbnail: string
   description: string
   unsubscribeLink: string
-  debug: string
 }
-async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to: string, xml: string /* debug */): Promise<Buffer> {
+async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to: string, debug: string /* debug */): Promise<Buffer> {
   if (process.env.STAGE === undefined) throw new Error('STAGE is undefined')
 
   const largestThumbnail = Object.keys(video.snippet.thumbnails).sort((a, b) => {
@@ -158,7 +157,8 @@ async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to:
     },
     to,
     headers: {
-      'List-Unsubscribe': `<${unsubscribeLink}>`
+      'List-Unsubscribe': `<${unsubscribeLink}>`,
+      'x-debug': debug
     },
     subject: video.snippet.title,
     text: `[${duration}] ${video.snippet.title}`,
@@ -173,8 +173,7 @@ async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to:
       description: video.snippet.description
         .replace(/#([^\s^#]+)/g, '<a href="https://www.youtube.com/hashtag/$1">#$1</a>')
         .replace(/\n/g, '<br/>'),
-      unsubscribeLink,
-      debug: JSON.stringify({ video, xml })
+      unsubscribeLink
     }),
     icalEvent
   })
@@ -182,9 +181,5 @@ async function getRaw (video: VideoFromGoogleApis, channelThumbnail: string, to:
 }
 
 function getHtml (data: MailData): string {
-  if (process.env.STAGE === undefined) throw new Error('STAGE is undefined')
-
-  const markup = renderToStaticMarkup(data)
-
-  return `<html><body>${markup}</body></html>`
+  return renderToStaticMarkup(data)
 }

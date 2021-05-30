@@ -8,8 +8,20 @@ import { sendNotificationEmail } from '@libs/email'
 import createLogger from '@libs/createLogger'
 import dayjs from 'dayjs'
 import { getVideoInformation } from '@libs/youtube'
+import { deflateRaw } from 'zlib'
+import { VideoFromGoogleApis } from '@libs/types'
 
 const logger = createLogger('/api/pubsubhubbub/http.post.ts')
+
+async function makeDebugData (video: VideoFromGoogleApis, pubsubhubbubBody: string): Promise<string> {
+  return await new Promise((resolve, reject) => {
+    const input = JSON.stringify({ video, xml: pubsubhubbubBody })
+    deflateRaw(input, { level: 9 }, (error, result) => {
+      if (error != null) reject(error)
+      resolve(result.toString('base64'))
+    })
+  })
+}
 
 const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   logger.debug('=>')
@@ -40,6 +52,7 @@ const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
     if (videoFromGoogleApi === undefined) return response(400)
 
     if (videoFromGoogleApi.snippet.channelId !== video.channelId) throw new Error('Invalid video')
+    const debug = await makeDebugData(videoFromGoogleApi, event.body)
 
     // Double check if video is updated
     if (dayjs(videoFromGoogleApi.snippet.publishedAt).add(1, 'day').valueOf() < dayjs().valueOf()) {
@@ -72,7 +85,7 @@ const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
     await sendNotificationEmail(
       notifications,
       channel.information.thumbnails.default?.url ?? 'https://yt3.ggpht.com/ytc/AAUvwnjkjfwolT7enHlIsv2kSn17Ei6Vte8cKIuvVIUtug=s88-c-k-c0x00ffffff-no-rj',
-      event.body
+      debug
     )
   }
 

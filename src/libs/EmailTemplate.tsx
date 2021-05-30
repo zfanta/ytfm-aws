@@ -17,7 +17,6 @@ interface EmailTemplateProps {
   channelThumbnail: string
   description: string
   unsubscribeLink: string
-  debug: string
 }
 function EmailTemplate (props: EmailTemplateProps): ReactElement {
   const thumbnailHeight = 640 * (props.thumbnail.height / props.thumbnail.width)
@@ -91,12 +90,6 @@ function EmailTemplate (props: EmailTemplateProps): ReactElement {
       {props.unsubscribeLink !== undefined &&
         <div style={{ margin: '1rem 0' }}>
           <a href={props.unsubscribeLink}>Unsubscribe channel notification</a>
-        </div>
-      }
-
-      {props.debug !== undefined &&
-        <div style={{ display: 'none' }} >
-          <pre dangerouslySetInnerHTML={{ __html: props.debug }}/>
         </div>
       }
     </div>
