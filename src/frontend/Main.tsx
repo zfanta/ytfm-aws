@@ -2,6 +2,7 @@ import React, { ReactElement } from 'react'
 import { useLocation } from 'wouter'
 import { useRecoilValue } from 'recoil'
 import { userState } from './recoil'
+import logo from 'url:./logo.png'
 
 function Main (): ReactElement {
   const user = useRecoilValue(userState)
@@ -25,6 +26,7 @@ function Main (): ReactElement {
         YTFM sends you an email notification for new video uploads from your subscriptions.
         YTFM supports this via <a href="https://developers.goog`le.com/youtube/v3/guides/push_notifications">PubSubHubbub</a>.<br/>
         If you want to be notified from YTFM, click <a style={{ cursor: 'pointer' }} onClick={handleClickSignInButton}>SIGN IN</a> button.
+        <img src={logo} alt="YTFM"/>
       </p>
       <p>
         See also:<br/>
