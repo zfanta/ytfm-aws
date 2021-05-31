@@ -1,7 +1,8 @@
 import { EventBridgeHandler } from 'aws-lambda'
 import { getImpendingPubsubhubbub } from '@libs/dynamodb'
-import { sendToPubsubhubbub } from '@libs/youtube'
 import createLogger from '@libs/createLogger'
+import { pubsubhubbub as pubsubhubbubQueue } from '@libs/sqs'
+import { invokeLambdaAsync } from '@libs/lambda'
 
 const logger = createLogger('/api/pubsubhubbub/resubscribe.ts')
 
@@ -14,7 +15,8 @@ const handler: EventBridgeHandler<any, any, any> = async () => {
   if (channelIds.length > 0) {
     logger.info(`Resubscribe ${channelIds.length} channels`)
     logger.info(channelIds)
-    await sendToPubsubhubbub(channelIds, 'subscribe')
+    await pubsubhubbubQueue.send(channelIds)
+    await invokeLambdaAsync('sendToPubsubhubbub')
   }
   logger.info('<=')
 }

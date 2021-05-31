@@ -1,9 +1,10 @@
 import 'source-map-support/register'
 
 import type { ValidatedEventAPIGatewayProxyEventWithUser } from '@libs/apiGateway'
-import { middyfy, response, injectUser } from '@libs/lambda'
+import { middyfy, response, injectUser, invokeLambdaAsync } from '@libs/lambda'
 import { getSubscriptions } from '@libs/youtube'
 import { syncChannels, updateUserSyncTime } from '@libs/dynamodb'
+import { pubsubhubbub as pubsubhubbubQueue } from '@libs/sqs'
 
 // Sync subscriptions from youtube
 const post: ValidatedEventAPIGatewayProxyEventWithUser<any> = async (event) => {
@@ -21,12 +22,15 @@ const post: ValidatedEventAPIGatewayProxyEventWithUser<any> = async (event) => {
   }))
 
   const syncedAt = (await updateUserSyncTime(user.email)).valueOf()
-  const channels = await syncChannels(user.email, subscriptions)
+  const { channels, strangeChannels } = await syncChannels(user.email, subscriptions)
   const result = {
     syncedAt,
     updatedAt: syncedAt,
     channels
   }
+
+  await pubsubhubbubQueue.send(strangeChannels.map(a => a.id))
+  await invokeLambdaAsync('sendToPubsubhubbub')
 
   return response(200, JSON.stringify(result))
 }

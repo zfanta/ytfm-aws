@@ -5,7 +5,10 @@ import { getSession, getUser, User } from '@libs/dynamodb'
 import { createSession } from '@libs/cookie'
 import { decryptUnsubscribeToken } from '@libs/crypto'
 import type { ValidatedAPIGatewayProxyEvent, ValidatedEventAPIGatewayProxyEventWithUser } from '@libs/apiGateway'
+import { InvocationType, InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda'
 import Middy = middy.Middy
+
+const client = new LambdaClient({ region: 'us-east-1' })
 
 function response (statusCode: number, body: string = '', headers?: Headers): {statusCode: number, body: string, headers?: Headers} {
   return { statusCode, body, headers }
@@ -103,11 +106,24 @@ function injectUser (handler): ValidatedEventAPIGatewayProxyEventWithUser<any> {
   }
 }
 
+async function invokeLambdaAsync (functionName: 'sendToPubsubhubbub'): Promise<void> {
+  const stage = process.env.STAGE
+
+  if (stage === undefined) throw new Error('STAGE in undefined')
+
+  const command = new InvokeCommand({
+    FunctionName: `ytfm-${stage}-${functionName}`,
+    InvocationType: InvocationType.Event
+  })
+  await client.send(command)
+}
+
 export {
   middyfy,
   response,
   responseProfile,
-  injectUser
+  injectUser,
+  invokeLambdaAsync
 }
 
 interface Headers {

@@ -15,7 +15,6 @@ import {
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb'
 import { Token, VideoFromGoogleApis } from '@libs/types'
 import dayjs from 'dayjs'
-import { sendToPubsubhubbub } from '@libs/youtube'
 import sodium from 'libsodium-wrappers'
 
 const client = new DynamoDBClient({ region: 'us-east-1' })
@@ -236,20 +235,26 @@ async function subscribeChannels (email: string, channelIds: string[]): Promise<
   await Promise.all(promiseSubscriptions)
 }
 
-async function syncChannels (email: string, channelsFromYoutube: Channel[]): Promise<Array<{id: string, title: string, notification: boolean, thumbnail: string|undefined}>> {
-  const channelIdsFromYoutube = channelsFromYoutube.map(channel => channel.id)
-  const channelsFromDB = await getChannels(channelIdsFromYoutube)
+async function syncChannels (email: string, channelsFromYoutube: Channel[]): Promise<{
+  channels: Array<{id: string, title: string, notification: boolean, thumbnail: string | undefined}>
+  strangeChannels: Channel[]
+}> {
+  const channelIdsFromYoutube = new Set(channelsFromYoutube.map(channel => channel.id))
+  const channelsFromDB = await getChannels(Array.from(channelIdsFromYoutube))
+  const channelIdsFromDB = new Set(channelsFromDB.map(channel => channel.id))
 
   const subscriptionsFromDB = await getSubscriptions(email)
   const subscriptionChannelIdsFromDB = subscriptionsFromDB.map(subscriptionFromDB => subscriptionFromDB.channel)
 
-  const intersection = subscriptionChannelIdsFromDB.filter(id => channelIdsFromYoutube.includes(id))
+  const intersection = new Set(subscriptionChannelIdsFromDB.filter(id => channelIdsFromYoutube.has(id)))
 
   // unsubscribe(subscriptionsFromDB - channelsFromYoutube)
-  const unsubscribes = subscriptionChannelIdsFromDB.filter(id => !intersection.includes(id))
+  const unsubscribes = subscriptionChannelIdsFromDB.filter(id => !intersection.has(id))
 
   // subscribe(channelsFromYoutube - subscriptionsFromDB)
-  const subscribe = channelsFromYoutube.filter(channel => !intersection.includes(channel.id))
+  const subscribe = channelsFromYoutube.filter(channel => !intersection.has(channel.id))
+
+  const strangeChannels = channelsFromYoutube.filter(channel => !channelIdsFromDB.has(channel.id))
 
   await Promise.all([
     updateChannels(channelsFromDB, channelsFromYoutube),
@@ -257,20 +262,23 @@ async function syncChannels (email: string, channelsFromYoutube: Channel[]): Pro
     subscribeChannels(email, subscribe.map(a => a.id))
   ])
 
-  await sendToPubsubhubbub(subscribe.map(a => a.id), 'subscribe')
-
   // return result
   const subscriptionsFromDBObject: {[key: string]: Subscription} = {}
   subscriptionsFromDB.forEach(subscriptionFromDB => {
     subscriptionsFromDBObject[subscriptionFromDB.channel] = subscriptionFromDB
   })
 
-  return channelsFromYoutube.map(channel => ({
+  const channels = channelsFromYoutube.map(channel => ({
     id: channel.id,
     title: channel.information.title,
     notification: subscriptionsFromDBObject[channel.id]?.notification ?? true,
     thumbnail: channel.information.thumbnails.default?.url
   }))
+
+  return {
+    channels,
+    strangeChannels
+  }
 }
 
 async function updateChannelExpiry (id: string, expiresAt: number): Promise<void> {

@@ -1,7 +1,7 @@
 import 'source-map-support/register'
 
 import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/apiGateway'
-import { middyfy, response } from '@libs/lambda'
+import { invokeLambdaAsync, middyfy, response } from '@libs/lambda'
 import isInt from 'validator/lib/isInt'
 import { updateChannelExpiry } from '@libs/dynamodb'
 
@@ -23,6 +23,8 @@ function verifyRequest (event): Query {
 }
 
 const get: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
+  await invokeLambdaAsync('sendToPubsubhubbub')
+
   let query
   try {
     query = verifyRequest(event)

@@ -50,7 +50,8 @@ const serverlessConfiguration: AWS = {
       GOOGLE_CLIENT_ID: '${env:GOOGLE_CLIENT_ID}',
       GOOGLE_CLIENT_SECRET: '${env:GOOGLE_CLIENT_SECRET}',
       GOOGLE_API_KEY: '${env:GOOGLE_API_KEY}',
-      STAGE: "${opt:stage, 'dev'}"
+      STAGE: "${opt:stage, 'dev'}",
+      PUBSUBHUBBUB_QUEUE_NAME: 'ytfm-${opt:stage, self:provider.stage}-pubsubhubbub'
     },
     lambdaHashingVersion: '20201221',
     iam: {
@@ -77,6 +78,16 @@ const serverlessConfiguration: AWS = {
           Effect: 'Allow',
           Action: ['ses:SendTemplatedEmail', 'ses:SendRawEmail'],
           Resource: "arn:aws:ses:${opt:region, 'us-east-1'}:*:identity/*"
+        }, {
+          Effect: 'Allow',
+          Action: ['sqs:SendMessage', 'sqs:GetQueueUrl', 'sqs:ReceiveMessage', 'sqs:DeleteMessage'],
+          Resource: [{
+            'Fn::GetAtt': ['pubsubhubbubQueue', 'Arn']
+          }]
+        }, {
+          Effect: 'Allow',
+          Action: ['lambda:InvokeFunction'],
+          Resource: "arn:aws:lambda:${opt:region, 'us-east-1'}:*:function:*"
         }]
       }
     }
@@ -262,6 +273,12 @@ const serverlessConfiguration: AWS = {
             AttributeName: 'language',
             KeyType: 'HASH'
           }]
+        }
+      },
+      pubsubhubbubQueue: {
+        Type: 'AWS::SQS::Queue',
+        Properties: {
+          QueueName: '${self:provider.environment.PUBSUBHUBBUB_QUEUE_NAME}'
         }
       }
     }
