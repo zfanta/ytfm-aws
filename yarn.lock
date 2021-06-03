@@ -2035,10 +2035,10 @@
     prop-types "^15.7.2"
     react-is "^16.8.0 || ^17.0.0"
 
-"@middy/core@^2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@middy/core/-/core-2.2.0.tgz#39145c194ee4984962594048e75b232ebfc1e9a4"
-  integrity sha512-IbeUDpBGxLww5Ts+JaxAE3Kr1kVNGMnTpPAjEL+ReHylXvlzEUO/2VOqhPDHrMxZAgJ89CJ1RwF30CyFBQpyPA==
+"@middy/core@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@middy/core/-/core-2.3.0.tgz#1569ab816074468c4a508f418788c765fb5ac69e"
+  integrity sha512-gQdaa//ndXUoZP0pagKAHAJ8zOx873porktNS/rXybAX39n5kLtqqlPLPT7LfPqyCqlqJYXerYWNEgTMmm86LA==
 
 "@middy/http-json-body-parser@^2.2.0":
   version "2.2.0"
