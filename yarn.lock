@@ -2040,10 +2040,10 @@
   resolved "https://registry.yarnpkg.com/@middy/core/-/core-2.2.0.tgz#39145c194ee4984962594048e75b232ebfc1e9a4"
   integrity sha512-IbeUDpBGxLww5Ts+JaxAE3Kr1kVNGMnTpPAjEL+ReHylXvlzEUO/2VOqhPDHrMxZAgJ89CJ1RwF30CyFBQpyPA==
 
-"@middy/http-json-body-parser@^2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@middy/http-json-body-parser/-/http-json-body-parser-2.2.0.tgz#b9043618f880c5ad6babf6b0545f1222ca1ab639"
-  integrity sha512-T1MSjjg8HxD0zvE8Uwh3/5ncKSUtqgHFJ55neBUBiNzo+5xipcwQDvMFOrxpTqabEpbgdcVKnIfrYxyGnungdg==
+"@middy/http-json-body-parser@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@middy/http-json-body-parser/-/http-json-body-parser-2.3.0.tgz#dfba90b5066a13130240ceb0d5b867831a6bb241"
+  integrity sha512-T8LrBQL85mMMZ50ZndVzHKFpMNXv39l4wo/EzJUIMls82TITrQC1AZmDlLlGMz6ONKHqQvs1yyW9AumqktXE1w==
   dependencies:
     http-errors "1.8.0"
 
