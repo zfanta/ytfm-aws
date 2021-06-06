@@ -3,7 +3,10 @@ import { Link } from 'wouter'
 
 function Footer (): ReactElement {
   return (
-    <Link href="/policy">Policy</Link>
+    <>
+      <Link href="/about" style={{ marginRight: '1rem' }}>About</Link>
+      <Link href="/policy">Policy</Link>
+    </>
   )
 }
 

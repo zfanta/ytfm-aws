@@ -7,6 +7,7 @@ const Policy = React.lazy(async () => await import('./Policy'))
 const Watch = React.lazy(async () => await import('./Watch'))
 const Main = React.lazy(async () => await import('./Main'))
 const Tools = React.lazy(async () => await import('./Tools'))
+const About = React.lazy(async () => await import('./About'))
 
 function SuspenseWithLoading ({ children }: {children: ReactNode}): ReactElement {
   return (
@@ -44,6 +45,11 @@ function Body (): ReactElement {
       <Route path="/policy">
         <SuspenseWithLoading>
           <Policy />
+        </SuspenseWithLoading>
+      </Route>
+      <Route path="/about">
+        <SuspenseWithLoading>
+          <About />
         </SuspenseWithLoading>
       </Route>
       <Route path="/watch/:videoId">

@@ -6,11 +6,11 @@ function Policy (): ReactElement {
     <>
       <h1>Privacy and Data Policy</h1>
 
-      <h2>Personal data our website collects</h2>
+      <h2>Personal google account data our website collects</h2>
 
       <p>
-        Our websites collects your personal data. All your personal data is deleted when you delete account on
-        our website.
+        Our websites collects your personal google account data. All your personal google account data is deleted when
+        you delete account on our website.
       </p>
       <ol>
         <li>
@@ -45,7 +45,7 @@ function Policy (): ReactElement {
         Our website uses browser cookies to remember your account.
       </p>
 
-      <h2>Local Storage</h2>
+      <h2>Browser Local Storage</h2>
 
       <p>
         Web storage, sometimes known as DOM storage (Document Object Model storage), provides web apps with methods and
@@ -56,7 +56,7 @@ function Policy (): ReactElement {
         support it.
       </p>
       <p>
-        Our website uses local storage to cache user profile and user's youtube subscription data.
+        Our website uses browser local storage to cache users' youtube subscription data.
       </p>
 
       <Divider/>
@@ -69,7 +69,7 @@ function Policy (): ReactElement {
 
       <Divider/>
 
-      <p>Last updated 1 May 2021, effective 1 May 2021.</p>
+      <p>Last updated 6 June 2021, effective 6 June 2021.</p>
     </>
   )
 }
