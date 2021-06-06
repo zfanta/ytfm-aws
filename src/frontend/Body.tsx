@@ -8,6 +8,7 @@ const Watch = React.lazy(async () => await import('./Watch'))
 const Main = React.lazy(async () => await import('./Main'))
 const Tools = React.lazy(async () => await import('./Tools'))
 const About = React.lazy(async () => await import('./About'))
+const NotFound = React.lazy(async () => await import('./NotFound'))
 
 function SuspenseWithLoading ({ children }: {children: ReactNode}): ReactElement {
   return (
@@ -62,6 +63,11 @@ function Body (): ReactElement {
       <Route path="/tools">
         <SuspenseWithLoading>
           <Tools />
+        </SuspenseWithLoading>
+      </Route>
+      <Route>
+        <SuspenseWithLoading>
+          <NotFound/>
         </SuspenseWithLoading>
       </Route>
     </Switch>
