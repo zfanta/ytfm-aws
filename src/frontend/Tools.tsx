@@ -22,7 +22,9 @@ function QP (): ReactElement {
     setEncoded(encoded)
 
     try {
-      const decoded = decodeURIComponent(encoded.replace(/=\n/g, '').replace(/=/g, '%'))
+      const decoded = encoded.split('%')
+        .map(encoded => decodeURIComponent(encoded.replace(/=\n/g, '').replace(/=/g, '%')))
+        .join('%')
 
       setDecoded(decoded)
     } catch (e) {
