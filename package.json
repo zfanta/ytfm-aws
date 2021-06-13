@@ -24,7 +24,7 @@
     "@material-ui/core": "^4.11.4",
     "@material-ui/icons": "^4.11.2",
     "@middy/core": "^2.4.1",
-    "@middy/http-json-body-parser": "^2.2.0",
+    "@middy/http-json-body-parser": "^2.4.1",
     "cookie": "^0.4.1",
     "dayjs": "^1.10.5",
     "ical-generator": "^2.2.0",
