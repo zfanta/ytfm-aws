@@ -117,7 +117,8 @@ async function getChannels (channelIds: string[]): Promise<Channel[]> {
   return result
 }
 
-function informationEquals (o1: ChannelInformation, o2: ChannelInformation): boolean {
+function informationEquals (o1: ChannelInformation|undefined, o2: ChannelInformation|undefined): boolean {
+  if (o1 === undefined || o2 === undefined) return false
   if (o1.publishedAt !== o2.publishedAt) return false
   if (o1.description !== o2.description) return false
   if (o1.title !== o2.title) return false
