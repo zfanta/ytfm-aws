@@ -92,14 +92,14 @@ function Subscription ({ channel, toggle, unsubscribe }: {channel: ChannelInSubs
   return (
     <>
       <Grid item xs={2}>
-        <a href={`https://www.youtube.com/channel/${channel.id}`} target="_blank" style={{ color: 'black', textDecoration: 'none' }} title={channel.title}>
+        <a href={`https://www.youtube.com/channel/${channel.id}`} target="_blank" style={{ color: 'black', textDecoration: 'none' }} title={channel.title} rel="noopener">
           <Avatar alt={channel.title} style={{ width: '50px', height: '50px' }}>
             <LazyLoadImage alt={channel.title} src={channel.thumbnail} width="50px" height="50px"/>
           </Avatar>
         </a>
       </Grid>
       <Grid item xs={8}>
-        <Box component="span"><a href={`https://www.youtube.com/channel/${channel.id}`} target="_blank"><label htmlFor={channel.id}>{channel.title}</label></a></Box>
+        <Box component="span"><a href={`https://www.youtube.com/channel/${channel.id}`} target="_blank" rel="noopener"><label htmlFor={channel.id}>{channel.title}</label></a></Box>
       </Grid>
       <Grid item xs={2} onClick={onClickToggle} style={{ textAlign: 'right' }}>
         {patching ? <CircularProgress size="1rem" /> : <Checkbox id={channel.id} checked={channel.notification} color="primary" />}
