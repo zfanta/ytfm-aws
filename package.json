@@ -17,9 +17,9 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.18.0",
-    "@aws-sdk/client-lambda": "^3.17.0",
+    "@aws-sdk/client-lambda": "^3.18.0",
     "@aws-sdk/client-sesv2": "^3.18.0",
-    "@aws-sdk/client-sqs": "^3.17.0",
+    "@aws-sdk/client-sqs": "^3.18.0",
     "@aws-sdk/util-dynamodb": "^3.18.0",
     "@material-ui/core": "^4.11.4",
     "@material-ui/icons": "^4.11.2",
@@ -45,7 +45,7 @@
     "xml2js": "^0.4.23"
   },
   "devDependencies": {
-    "@serverless/typescript": "^2.43.0",
+    "@serverless/typescript": "^2.46.0",
     "@types/aws-lambda": "^8.10.77",
     "@types/js-yaml": "^4.0.1",
     "@types/libsodium-wrappers": "^0.7.9",
@@ -78,7 +78,7 @@
     "ts-node": "^10.0.0",
     "tsconfig-paths-webpack-plugin": "^3.5.1",
     "typescript": "^4.3.2",
-    "webpack": "^5.38.1",
+    "webpack": "^5.39.1",
     "webpack-node-externals": "^3.0.0"
   },
   "author": "The serverless webpack authors (https://github.com/elastic-coders/serverless-webpack)",
