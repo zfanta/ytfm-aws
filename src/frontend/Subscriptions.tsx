@@ -1,8 +1,10 @@
-import React, { ReactElement, useMemo, useState } from 'react'
+import React, { ReactElement, useEffect, useMemo, useState } from 'react'
 import { Avatar, Grid, Box, Checkbox, CircularProgress, NativeSelect } from '@material-ui/core'
 import { RefreshSharp } from '@material-ui/icons'
 import { useLocation } from 'wouter'
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
+import { useInView } from 'react-intersection-observer'
+import { LazyLoadImage } from 'react-lazy-load-image-component'
 import { userState, subscriptionsState, errorState } from './recoil'
 import * as api from './api'
 import type { SubscriptionsGetResponse, ChannelInSubscriptionResponse } from './api'
@@ -91,7 +93,9 @@ function Subscription ({ channel, toggle, unsubscribe }: {channel: ChannelInSubs
     <>
       <Grid item xs={2}>
         <a href={`https://www.youtube.com/channel/${channel.id}`} target="_blank" style={{ color: 'black', textDecoration: 'none' }}>
-          <Avatar alt={channel.title} src={channel.thumbnail} style={{ width: '50px', height: '50px' }} />
+          <Avatar alt={channel.title} style={{ width: '50px', height: '50px' }}>
+            <LazyLoadImage alt={channel.title} src={channel.thumbnail} width="50px" height="50px"/>
+          </Avatar>
         </a>
       </Grid>
       <Grid item xs={8}>
@@ -138,12 +142,21 @@ function Subscriptions ({ channelId }: SubscriptionsProps): ReactElement {
     token,
     action: action === 'unsubscribe' ? 'unsubscribe' : undefined
   }))
+  const [subscriptionsCount, setSubscriptionsCount] = useState(20)
+  const { ref, inView } = useInView()
+
   const [syncing, setSyncing] = useState(false)
 
   const [filter, setFilter] = useState<'all'|'enabled'|'disabled'>('all')
 
   const [done, setDone] = useState(false)
   const unsubscribe = useMemo(() => done ? false : useUnsubscribe(subscriptions, channelId), [subscriptions, done])
+
+  useEffect(() => {
+    if (inView && subscriptions !== undefined && subscriptionsCount < subscriptions.channels.length) {
+      setSubscriptionsCount(subscriptionsCount + 20)
+    }
+  }, [inView])
 
   function handleFilterChange ({ target: { value } }: React.ChangeEvent<{ value: string }>): void {
     if (value === 'all' || value === 'enabled' || value === 'disabled') {
@@ -223,12 +236,13 @@ function Subscriptions ({ channelId }: SubscriptionsProps): ReactElement {
             if (filter === 'all') return true
             if (filter === 'enabled') return channel.notification
             return !channel.notification
-          }).map(channel => (
+          }).slice(0, subscriptionsCount).map(channel => (
             <Subscription key={channel.id} channel={channel} toggle={toggle} unsubscribe={unsubscribe} />
           ))
         }
         {action === 'unsubscribe' && token !== undefined ? <UnsubscribeYtfm token={token} /> : null}
       </Grid>
+      <div ref={ref}/>
     </>
   )
 }
