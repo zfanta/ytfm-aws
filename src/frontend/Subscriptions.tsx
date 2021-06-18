@@ -93,8 +93,8 @@ function Subscription ({ channel, toggle, unsubscribe }: {channel: ChannelInSubs
     <>
       <Grid item xs={2}>
         <a href={`https://www.youtube.com/channel/${channel.id}`} target="_blank" style={{ color: 'black', textDecoration: 'none' }} title={channel.title} rel="noopener">
-          <Avatar alt={channel.title} style={{ width: '50px', height: '50px' }}>
-            <LazyLoadImage alt={channel.title} src={channel.thumbnail} width="50px" height="50px"/>
+          <Avatar alt={channel.title} style={{ width: '44px', height: '44px' }}>
+            <LazyLoadImage alt={channel.title} src={channel.thumbnail} width="44px" height="44px"/>
           </Avatar>
         </a>
       </Grid>
@@ -212,7 +212,7 @@ function Subscriptions ({ channelId }: SubscriptionsProps): ReactElement {
         {subscriptions.channels.length === 1 && token !== undefined
           ? null
           : <>
-              <Grid item xs={10}>Synced at: {subscriptions.syncedAt === undefined ? 'N/A' : new Date(subscriptions.syncedAt).toLocaleString()}</Grid>
+              <Grid item xs={10}>Synced at11: {subscriptions.syncedAt === undefined ? 'N/A' : new Date(subscriptions.syncedAt).toLocaleString()}</Grid>
               <Grid item xs={2} style={{ textAlign: 'right' }}>{syncing ? <CircularProgress size="1rem" /> : <RefreshSharp onClick={onClickSync} />}</Grid>
             </>
         }

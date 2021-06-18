@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react'
 import { Collapse } from '@material-ui/core'
-import { inflateRaw } from 'zlib'
+import { inflateRaw } from 'browserify-zlib'
 
 function QP (): ReactElement {
   const [visible, setVisible] = useState(false)

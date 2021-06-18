@@ -2,7 +2,7 @@ import React, { ReactElement } from 'react'
 import { useLocation } from 'wouter'
 import { useRecoilValue } from 'recoil'
 import { userState } from './recoil'
-import logo from 'url:./logo.png'
+import logo from './logo.png'
 
 function Main (): ReactElement {
   const user = useRecoilValue(userState)
