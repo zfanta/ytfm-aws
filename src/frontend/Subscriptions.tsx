@@ -212,7 +212,7 @@ function Subscriptions ({ channelId }: SubscriptionsProps): ReactElement {
         {subscriptions.channels.length === 1 && token !== undefined
           ? null
           : <>
-              <Grid item xs={10}>Synced at11: {subscriptions.syncedAt === undefined ? 'N/A' : new Date(subscriptions.syncedAt).toLocaleString()}</Grid>
+              <Grid item xs={10}>Synced at: {subscriptions.syncedAt === undefined ? 'N/A' : new Date(subscriptions.syncedAt).toLocaleString()}</Grid>
               <Grid item xs={2} style={{ textAlign: 'right' }}>{syncing ? <CircularProgress size="1rem" /> : <RefreshSharp onClick={onClickSync} />}</Grid>
             </>
         }
