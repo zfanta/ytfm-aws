@@ -25,7 +25,7 @@ const serverlessConfiguration: AWS = {
       singlePageApp: true,
       compressWebContent: true,
       apiPath: 'api',
-      clientCommand: 'yarn parcel:build',
+      clientCommand: 'yarn webpack:build',
       minimumProtocolVersion: 'TLSv1.2_2018',
       priceClass: 'PriceClass_100'
     }

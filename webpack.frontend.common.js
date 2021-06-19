@@ -17,7 +17,8 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, 'dist/frontend/serve'),
-    filename: '[name].js'
+    filename: '[name].js',
+    publicPath: '/'
   },
   module: {
     rules: [{

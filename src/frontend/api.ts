@@ -49,7 +49,7 @@ const cookie = {
   }
 }
 
-interface VideoFromGoogleApis {
+export interface VideoFromGoogleApis {
   'kind': string
   'etag': string
   'id': string
