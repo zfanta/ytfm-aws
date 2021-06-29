@@ -2137,10 +2137,10 @@
     prop-types "^15.7.2"
     react-is "^16.8.0 || ^17.0.0"
 
-"@middy/core@^2.4.1":
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/@middy/core/-/core-2.4.1.tgz#feb430866b51947266f18bf5996fb3313d092010"
-  integrity sha512-W2MUsc6n+TM27zlauwX0icFaEqgtQoDsKUwFJne2JtvZH29k/cQbjKNauLls06t4ZMVVr9h4O/wjY0cXD/JTdg==
+"@middy/core@^2.4.2":
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/@middy/core/-/core-2.4.2.tgz#058344943de6d404116b0a929cfd2a0767af3dfe"
+  integrity sha512-ZP1BoVOWiYRptXdJHuqn0W4kJXajR9fdUtP29w+9XUD6snh4sKpw9OuF3P8TnzpSy9TIBVpJ/SuAC2Ilh1OWGQ==
 
 "@middy/http-json-body-parser@^2.4.1":
   version "2.4.1"
