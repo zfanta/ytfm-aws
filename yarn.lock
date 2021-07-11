@@ -1201,10 +1201,10 @@
     "@aws-sdk/is-array-buffer" "3.20.0"
     tslib "^2.0.0"
 
-"@aws-sdk/util-dynamodb@^3.18.0":
-  version "3.18.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/util-dynamodb/-/util-dynamodb-3.18.0.tgz#634c68e57c57de02de22f089b77932dc8dc6929f"
-  integrity sha512-UoBImpz/3q/wUG/8IF9BGOHgCAhq1RpfXz7sYFXGHRTJy6UdOMBJyE4odey7kmoqxLHC+pRE712tE6s9z1EHgg==
+"@aws-sdk/util-dynamodb@^3.21.0":
+  version "3.21.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/util-dynamodb/-/util-dynamodb-3.21.0.tgz#d00910213ba15e0883a53854417dc289bb4fc100"
+  integrity sha512-JPRgtH7ZRkyXWSV3Q2rqshGZU2aY2nwD/tQFWSXmoxmd9MJBqKE1lMz+a1TTqXMoDc9ReZym1BtKOKptUG/o9A==
   dependencies:
     tslib "^2.0.0"
 
@@ -6767,7 +6767,7 @@ data-urls@^1.1.0:
     whatwg-mimetype "^2.2.0"
     whatwg-url "^7.0.0"
 
-dayjs@^1.10.4, dayjs@^1.10.5, dayjs@^1.10.6:
+dayjs@^1.10.4, dayjs@^1.10.6:
   version "1.10.6"
   resolved "https://registry.yarnpkg.com/dayjs/-/dayjs-1.10.6.tgz#288b2aa82f2d8418a6c9d4df5898c0737ad02a63"
   integrity sha512-AztC/IOW4L1Q41A86phW5Thhcrco3xuAA+YX/BLpLWWjRcTj5TOt/QImBLmCKlrF7u7k47arTnOyL6GnbG8Hvw==
