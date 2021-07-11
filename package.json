@@ -58,7 +58,7 @@
     "@types/aws-lambda": "^8.10.77",
     "@types/js-yaml": "^4.0.1",
     "@types/libsodium-wrappers": "^0.7.9",
-    "@types/node": "^15.12.4",
+    "@types/node": "^16.3.1",
     "@types/node-fetch": "^2.5.11",
     "@types/nodemailer": "^6.4.2",
     "@types/query-string": "^6.3.0",
