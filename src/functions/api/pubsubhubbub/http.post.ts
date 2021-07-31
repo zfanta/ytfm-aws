@@ -10,6 +10,7 @@ import dayjs from 'dayjs'
 import { getVideoInformation } from '@libs/youtube'
 import { deflateRaw } from 'zlib'
 import { VideoFromGoogleApis } from '@libs/types'
+import { putVideoLog } from '@libs/cloudwatch'
 
 const logger = createLogger('/api/pubsubhubbub/http.post.ts')
 
@@ -47,6 +48,8 @@ const post: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   // Ignore if mail is sent
   if (await getVideo(video.id) === undefined) {
     logger.info('new video:', video.id)
+
+    await putVideoLog(video.id)
 
     const videoFromGoogleApi = await getVideoInformation(video.id)
     if (videoFromGoogleApi === undefined) return response(400)
