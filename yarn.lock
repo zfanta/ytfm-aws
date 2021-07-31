@@ -62,44 +62,44 @@
     "@aws-sdk/types" "3.22.0"
     tslib "^2.3.0"
 
-"@aws-sdk/client-dynamodb@^3.21.0":
-  version "3.21.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.21.0.tgz#51d452baefd722e2b7afed24ca6f37b9b0ed40aa"
-  integrity sha512-fIc62Hxe9BMLlFzInKDs0z1sF4EuRlBTdlOo3hfbFh/h8lRNosQgGmi1dmKj0KKXTai5mjWBkSeUv80khBIMsQ==
+"@aws-sdk/client-dynamodb@^3.24.0":
+  version "3.24.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.24.0.tgz#bedc8c48f1dccc5eea16fcea96832e2abb5044d4"
+  integrity sha512-OQAK939GYRJmUAuENFPnumXyUQs2o+rQuCm2SJMuY2ZNa4DzDv0vMqmMIKdRPjC7jdNfRQmNIr5iubog+MYe8A==
   dependencies:
     "@aws-crypto/sha256-browser" "^1.0.0"
     "@aws-crypto/sha256-js" "^1.0.0"
-    "@aws-sdk/client-sts" "3.21.0"
-    "@aws-sdk/config-resolver" "3.20.0"
-    "@aws-sdk/credential-provider-node" "3.21.0"
-    "@aws-sdk/fetch-http-handler" "3.20.0"
-    "@aws-sdk/hash-node" "3.20.0"
-    "@aws-sdk/invalid-dependency" "3.20.0"
-    "@aws-sdk/middleware-content-length" "3.20.0"
-    "@aws-sdk/middleware-endpoint-discovery" "3.20.0"
-    "@aws-sdk/middleware-host-header" "3.20.0"
-    "@aws-sdk/middleware-logger" "3.20.0"
-    "@aws-sdk/middleware-retry" "3.20.0"
-    "@aws-sdk/middleware-serde" "3.20.0"
-    "@aws-sdk/middleware-signing" "3.20.0"
-    "@aws-sdk/middleware-stack" "3.20.0"
-    "@aws-sdk/middleware-user-agent" "3.20.0"
-    "@aws-sdk/node-config-provider" "3.20.0"
-    "@aws-sdk/node-http-handler" "3.21.0"
-    "@aws-sdk/protocol-http" "3.20.0"
-    "@aws-sdk/smithy-client" "3.20.0"
-    "@aws-sdk/types" "3.20.0"
-    "@aws-sdk/url-parser" "3.20.0"
-    "@aws-sdk/util-base64-browser" "3.20.0"
-    "@aws-sdk/util-base64-node" "3.20.0"
-    "@aws-sdk/util-body-length-browser" "3.20.0"
-    "@aws-sdk/util-body-length-node" "3.20.0"
-    "@aws-sdk/util-user-agent-browser" "3.20.0"
-    "@aws-sdk/util-user-agent-node" "3.20.0"
-    "@aws-sdk/util-utf8-browser" "3.20.0"
-    "@aws-sdk/util-utf8-node" "3.20.0"
-    "@aws-sdk/util-waiter" "3.20.0"
-    tslib "^2.0.0"
+    "@aws-sdk/client-sts" "3.24.0"
+    "@aws-sdk/config-resolver" "3.23.0"
+    "@aws-sdk/credential-provider-node" "3.24.0"
+    "@aws-sdk/fetch-http-handler" "3.23.0"
+    "@aws-sdk/hash-node" "3.23.0"
+    "@aws-sdk/invalid-dependency" "3.23.0"
+    "@aws-sdk/middleware-content-length" "3.23.0"
+    "@aws-sdk/middleware-endpoint-discovery" "3.23.0"
+    "@aws-sdk/middleware-host-header" "3.23.0"
+    "@aws-sdk/middleware-logger" "3.23.0"
+    "@aws-sdk/middleware-retry" "3.23.0"
+    "@aws-sdk/middleware-serde" "3.23.0"
+    "@aws-sdk/middleware-signing" "3.23.0"
+    "@aws-sdk/middleware-stack" "3.23.0"
+    "@aws-sdk/middleware-user-agent" "3.23.0"
+    "@aws-sdk/node-config-provider" "3.23.0"
+    "@aws-sdk/node-http-handler" "3.23.0"
+    "@aws-sdk/protocol-http" "3.23.0"
+    "@aws-sdk/smithy-client" "3.24.0"
+    "@aws-sdk/types" "3.22.0"
+    "@aws-sdk/url-parser" "3.23.0"
+    "@aws-sdk/util-base64-browser" "3.23.0"
+    "@aws-sdk/util-base64-node" "3.23.0"
+    "@aws-sdk/util-body-length-browser" "3.23.0"
+    "@aws-sdk/util-body-length-node" "3.23.0"
+    "@aws-sdk/util-user-agent-browser" "3.23.0"
+    "@aws-sdk/util-user-agent-node" "3.23.0"
+    "@aws-sdk/util-utf8-browser" "3.23.0"
+    "@aws-sdk/util-utf8-node" "3.23.0"
+    "@aws-sdk/util-waiter" "3.23.0"
+    tslib "^2.3.0"
     uuid "^8.3.2"
 
 "@aws-sdk/client-lambda@^3.24.0":
@@ -543,13 +543,13 @@
     "@aws-sdk/types" "3.22.0"
     tslib "^2.3.0"
 
-"@aws-sdk/endpoint-cache@3.20.0":
-  version "3.20.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/endpoint-cache/-/endpoint-cache-3.20.0.tgz#ac211aab51db963545d827c4f06b6c80fcbf9bce"
-  integrity sha512-4JOHusfsNANXoRTxSl+WkoYjNDg3kXTExNSL8VLCwT5lDe1WRioBAxaxeO3QSi10DtkhB3/maaPlVk+I3m51Pw==
+"@aws-sdk/endpoint-cache@3.23.0":
+  version "3.23.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/endpoint-cache/-/endpoint-cache-3.23.0.tgz#c20a057b432db91951fdb53c92fb0f680f917213"
+  integrity sha512-Yhe1JvrTEA+BQuT/wfwvYDMqozB4GKXVRA4ZzU5VhkvMwbWd7/xGzDLQ0JG7jtYX3TwRYsBLI1XdQ1oYG3bmrQ==
   dependencies:
     mnemonist "0.38.3"
-    tslib "^2.0.0"
+    tslib "^2.3.0"
 
 "@aws-sdk/fetch-http-handler@3.20.0":
   version "3.20.0"
@@ -648,16 +648,16 @@
     "@aws-sdk/types" "3.22.0"
     tslib "^2.3.0"
 
-"@aws-sdk/middleware-endpoint-discovery@3.20.0":
-  version "3.20.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/middleware-endpoint-discovery/-/middleware-endpoint-discovery-3.20.0.tgz#4a4af266ee4c249738a7fa95557a4f6fba34e712"
-  integrity sha512-Wn791oAGCqCQZf7O9GFHoV3+xZlsnpVTudICv5JeiF5+CqtjNTWpHbGbIqcIyZvDjb8YMjjIjoKkHAOpTE5VzQ==
+"@aws-sdk/middleware-endpoint-discovery@3.23.0":
+  version "3.23.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/middleware-endpoint-discovery/-/middleware-endpoint-discovery-3.23.0.tgz#166ff3632148eb2d924f77e1c1e2730968045384"
+  integrity sha512-HNb3IkST42h+Z6z0Jf6/7lXMM/c7cMaHnHPP3lIeRzo/mzz1shxQ8okoGTUU38Gtr3UGZ1KOsLtA6+6a7LitjA==
   dependencies:
-    "@aws-sdk/config-resolver" "3.20.0"
-    "@aws-sdk/endpoint-cache" "3.20.0"
-    "@aws-sdk/protocol-http" "3.20.0"
-    "@aws-sdk/types" "3.20.0"
-    tslib "^2.0.0"
+    "@aws-sdk/config-resolver" "3.23.0"
+    "@aws-sdk/endpoint-cache" "3.23.0"
+    "@aws-sdk/protocol-http" "3.23.0"
+    "@aws-sdk/types" "3.22.0"
+    tslib "^2.3.0"
 
 "@aws-sdk/middleware-host-header@3.20.0":
   version "3.20.0"
@@ -1207,15 +1207,6 @@
   dependencies:
     "@aws-sdk/util-buffer-from" "3.23.0"
     tslib "^2.3.0"
-
-"@aws-sdk/util-waiter@3.20.0":
-  version "3.20.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/util-waiter/-/util-waiter-3.20.0.tgz#68a72d92362240b9214f3cd0e688d8edba85fcff"
-  integrity sha512-LwRVZ7mlFkrMaPdmYl4XxJqv2d0M/Knygwmd8glYn03UU26Zjli5ZI1t0Jr6du71FChxAG/X4ko4TWh2zDD1hw==
-  dependencies:
-    "@aws-sdk/abort-controller" "3.20.0"
-    "@aws-sdk/types" "3.20.0"
-    tslib "^2.0.0"
 
 "@aws-sdk/util-waiter@3.23.0":
   version "3.23.0"
