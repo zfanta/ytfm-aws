@@ -55,7 +55,7 @@
   },
   "devDependencies": {
     "@serverless/typescript": "^2.52.1",
-    "@types/aws-lambda": "^8.10.78",
+    "@types/aws-lambda": "^8.10.81",
     "@types/js-yaml": "^4.0.2",
     "@types/libsodium-wrappers": "^0.7.9",
     "@types/node": "^16.3.1",
