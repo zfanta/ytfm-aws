@@ -82,7 +82,7 @@
     "fullstack-serverless": "^0.8.0",
     "html-webpack-plugin": "^5.3.2",
     "json-schema-to-ts": "^1.6.4",
-    "mini-css-extract-plugin": "^2.1.0",
+    "mini-css-extract-plugin": "^2.2.0",
     "parcel": "2.0.0-beta.1",
     "pre-commit": "^1.2.2",
     "serverless": "^2.52.1",
