@@ -87,7 +87,7 @@
     "pre-commit": "^1.2.2",
     "serverless": "^2.52.1",
     "serverless-offline": "^7.0.0",
-    "serverless-webpack": "^5.5.0",
+    "serverless-webpack": "^5.5.3",
     "style-loader": "^3.2.1",
     "swagger-ui-react": "^3.51.2",
     "ts-loader": "^9.2.4",
