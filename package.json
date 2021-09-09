@@ -46,7 +46,7 @@
     "react-lazy-load-image-component": "^1.5.1",
     "recoil": "^0.4.0",
     "serverless-dynamodb-local": "^0.2.40",
-    "source-map-support": "^0.5.19",
+    "source-map-support": "^0.5.20",
     "stream-browserify": "^3.0.0",
     "validator": "^13.6.0",
     "winston": "^3.3.3",
