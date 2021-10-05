@@ -3166,10 +3166,10 @@
     ramda "^0.26.1"
     traverse "^0.6.6"
 
-"@serverless/typescript@^2.52.1":
-  version "2.52.1"
-  resolved "https://registry.yarnpkg.com/@serverless/typescript/-/typescript-2.52.1.tgz#a3ffd0c910340a60d4c80e3e9c4bc71f5e46ab7d"
-  integrity sha512-aq+P7CKnDMp6Hvfmn1YYWJ6VfHlMDTySCc2ysEmDj0PuYgO59sHl39Wthk45wCYlh9vgnVMhV36XOphpsMtwrQ==
+"@serverless/typescript@^2.61.0":
+  version "2.61.0"
+  resolved "https://registry.yarnpkg.com/@serverless/typescript/-/typescript-2.61.0.tgz#f89a2dd98d23dcfab3975ae87988ca65131af77c"
+  integrity sha512-2HTFoSreS0044LccY8tjBTbBuVYNW7OMTCG4M76dW9O9+NRamEPuIPHya5FML2qZRW98uDVbYJy3XCYzZ23Z0w==
 
 "@serverless/utils-china@^1.1.4":
   version "1.1.4"
