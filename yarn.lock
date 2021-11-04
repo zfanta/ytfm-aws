@@ -12840,10 +12840,10 @@ rechoir@^0.7.0:
   dependencies:
     resolve "^1.9.0"
 
-recoil@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/recoil/-/recoil-0.4.0.tgz#2a933ba7c043cbf6f50f52da0828a879c7cd7d69"
-  integrity sha512-FZ2ljI4ldZU820V0APbKOtS4bPwPJHvpDBQEl+Cf47DMaM35wuLXl2u37E0TSgdvKAZBOUsIwcBnzE+ncODRxQ==
+recoil@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/recoil/-/recoil-0.5.0.tgz#d8e3bdefc70aa0f0e74554c90ecda1b3f3718b23"
+  integrity sha512-xXGV0bpmi7NV2r6twNaZ35lP5lLeE0r+zR6tnZ3b4hD/sQS39S982Gq5xfrlIS0dvIiNlp2jkubmuUm1hvTaPQ==
   dependencies:
     hamt_plus "1.0.2"
 
