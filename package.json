@@ -77,7 +77,7 @@
     "eslint-plugin-import": "2",
     "eslint-plugin-node": "11",
     "eslint-plugin-promise": "5",
-    "eslint-plugin-react": "^7.24.0",
+    "eslint-plugin-react": "^7.27.1",
     "fork-ts-checker-webpack-plugin": "^6.2.13",
     "fullstack-serverless": "^0.8.0",
     "html-webpack-plugin": "^5.3.2",
