@@ -76,7 +76,7 @@
     "eslint-config-standard-with-typescript": "^20.0.0",
     "eslint-plugin-import": "2",
     "eslint-plugin-node": "11",
-    "eslint-plugin-promise": "5",
+    "eslint-plugin-promise": "6",
     "eslint-plugin-react": "^7.24.0",
     "fork-ts-checker-webpack-plugin": "^6.2.13",
     "fullstack-serverless": "^0.8.0",
