@@ -72,7 +72,7 @@
     "@typescript-eslint/eslint-plugin": "4",
     "browserslist": "^4.16.6",
     "copyfiles": "^2.4.1",
-    "css-loader": "^5.2.6",
+    "css-loader": "^6.7.1",
     "esbuild-loader": "^2.13.1",
     "eslint": "7",
     "eslint-config-standard-with-typescript": "^20.0.0",
