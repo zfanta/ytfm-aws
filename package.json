@@ -52,7 +52,7 @@
     "stream-browserify": "^3.0.0",
     "validator": "^13.6.0",
     "winston": "^3.3.3",
-    "wouter": "^2.7.4",
+    "wouter": "^2.7.5",
     "xml2js": "^0.4.23"
   },
   "devDependencies": {
