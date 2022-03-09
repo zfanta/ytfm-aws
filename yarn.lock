@@ -3036,10 +3036,10 @@
     prop-types "^15.7.2"
     react-is "^16.8.0 || ^17.0.0"
 
-"@middy/core@^2.4.1":
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/@middy/core/-/core-2.4.1.tgz#feb430866b51947266f18bf5996fb3313d092010"
-  integrity sha512-W2MUsc6n+TM27zlauwX0icFaEqgtQoDsKUwFJne2JtvZH29k/cQbjKNauLls06t4ZMVVr9h4O/wjY0cXD/JTdg==
+"@middy/core@^2.5.7":
+  version "2.5.7"
+  resolved "https://registry.yarnpkg.com/@middy/core/-/core-2.5.7.tgz#a1b3eff68881ff66b14b5051255791f7cbd3b471"
+  integrity sha512-KX5Ud0SP+pol6PGkYtMCH4goHobs1XJo3OvEUwdiZUIjZgo56Q08nLu5N7Bs6P+FwGTQHA+hlQ3I5SZbfpO/jg==
 
 "@middy/http-json-body-parser@^2.4.1":
   version "2.4.1"
