@@ -50,7 +50,7 @@
     "serverless-dynamodb-local": "^0.2.39",
     "source-map-support": "^0.5.19",
     "stream-browserify": "^3.0.0",
-    "validator": "^13.6.0",
+    "validator": "^13.7.0",
     "winston": "^3.3.3",
     "wouter": "^2.7.4",
     "xml2js": "^0.4.23"
