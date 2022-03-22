@@ -4061,10 +4061,10 @@
     ramda "^0.26.1"
     traverse "^0.6.6"
 
-"@serverless/typescript@^2.46.0":
-  version "2.46.0"
-  resolved "https://registry.yarnpkg.com/@serverless/typescript/-/typescript-2.46.0.tgz#f69ffbb5df84658153afb03e8ce853a65d425531"
-  integrity sha512-lEnENSqehVIaeoE3y0vgp6G4+IyS1Rmb/QfrgFEF/pINa3thSFR7igUcpr9lXZ/3v2WRyxiCoAq+lBi8zpkBYg==
+"@serverless/typescript@^3.8.0":
+  version "3.8.0"
+  resolved "https://registry.yarnpkg.com/@serverless/typescript/-/typescript-3.8.0.tgz#89ac06bd6ba6e78877ef1d208c6569678afb45df"
+  integrity sha512-Ldri/R285cdCbwvOBmTB2tPWUmT0mbG050TikXpr1W05bBsY3GFjKpvgurCZVL8CYKRZZ2Og3ysKRk73bTAZgA==
 
 "@serverless/utils-china@^1.0.14":
   version "1.0.14"
