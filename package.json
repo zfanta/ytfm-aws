@@ -30,7 +30,7 @@
     "@middy/http-json-body-parser": "^2.4.1",
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
-    "cookie": "^0.4.1",
+    "cookie": "^0.5.0",
     "dayjs": "^1.10.5",
     "firebase": "^9.6.7",
     "ical-generator": "^2.2.0",
