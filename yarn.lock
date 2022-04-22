@@ -4223,10 +4223,10 @@
   resolved "https://registry.yarnpkg.com/@tsconfig/node16/-/node16-1.0.1.tgz#a6ca6a9a0ff366af433f42f5f0e124794ff6b8f1"
   integrity sha512-FTgBI767POY/lKNDNbIzgAX6miIDBs6NTCbdlDb8TrWovHsSvaVIZDlTqym29C6UqhzwcJx4CYr+AlrMywA0cA==
 
-"@types/aws-lambda@^8.10.77":
-  version "8.10.77"
-  resolved "https://registry.yarnpkg.com/@types/aws-lambda/-/aws-lambda-8.10.77.tgz#04c4e3a06ab5552f2fa80816f8adca54b6bb9671"
-  integrity sha512-n0EMFJU/7u3KvHrR83l/zrKOVURXl5pUJPNED/Bzjah89QKCHwCiKCBoVUXRwTGRfCYGIDdinJaAlKDHZdp/Ng==
+"@types/aws-lambda@^8.10.95":
+  version "8.10.95"
+  resolved "https://registry.yarnpkg.com/@types/aws-lambda/-/aws-lambda-8.10.95.tgz#7ba7b22b5967f40ceaf293082bbc3863a06e33f7"
+  integrity sha512-wGtzLbd04EmqhFjTZmXgLzvmhDdyVU7AMo/JkiPmA2VUdBFQfUBQFCEzaVVK+f1PP5aWx1ejnb7K/8MXYI/frQ==
 
 "@types/cacheable-request@^6.0.1":
   version "6.0.1"
